@@ -6,14 +6,19 @@ import {
 } from "discord.js";
 import { Command } from "../../structures/Command";
 
-const players = [];
+export type PlayersType = {
+  playersId: string;
+  channelId: string;
+};
+
+export const players = [];
 
 export default new Command({
   name: "queue",
   description: "Player enter in queue",
-  userPermissions: ["MANAGE_MESSAGES"],
   run: async ({ interaction }) => {
     const user = interaction.user.id;
+    const channelId = interaction.channelId;
 
     const button1 = new MessageActionRow().addComponents(
       new MessageButton()
@@ -36,7 +41,7 @@ export default new Command({
       .setTitle("🎮 Fila de Jogos")
       .setDescription(`${players.length} jogadores na fila`);
 
-    if (!players.includes(user)) {
+    if (!players.find((player) => player.playerId === user)) {
       interaction.editReply({
         components: [button1],
       });
@@ -44,6 +49,7 @@ export default new Command({
       interaction.editReply({
         content: "Você já está na fila",
         components: [button2],
+        embeds: [embed],
       });
     }
 
@@ -54,35 +60,37 @@ export default new Command({
     const collector = interaction.channel.createMessageComponentCollector({
       filter,
       max: 1,
-      time: 1000 * 15,
     });
 
     collector.on("end", async (collection) => {
-      collection.forEach((click) => {
-        console.log(click.user.id, click.customId);
-      });
-
       if (
         collection.first()?.customId === "enter_queue" &&
-        !players.includes(user)
+        !players.find((player) => player.playerId === user)
       ) {
-        players.push(user);
+        players.push({
+          playerId: user,
+          channelId: channelId,
+        });
         interaction.editReply({
           content: "Você está na fila!! 🏃🏼‍♀️",
           components: [],
         });
       } else if (
         collection.first()?.customId === "leave_queue" &&
-        players.includes(user)
+        players.find((player) => player.playerId === user)
       ) {
-        players.splice(players.indexOf(user), 1);
+        players.splice(
+          players.indexOf({
+            playerId: user,
+          }),
+          1
+        );
         interaction.editReply({
           content: "Você saiu da fila!! ❌",
           components: [],
+          embeds: [],
         });
       }
     });
-
-    console.log("🎮");
   },
 });
