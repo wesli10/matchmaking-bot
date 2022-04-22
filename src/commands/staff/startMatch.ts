@@ -8,33 +8,52 @@ export default new Command({
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
     const channel = interaction.channelId;
-    const lobby1 = "966105846704644237";
-    const lobby2 = "966105588771729438";
+    const lobby1 = interaction.guild.channels.cache.find(
+      (c) => c.name === "lobby-1"
+    ).id;
+    const lobby2 = interaction.guild.channels.cache.find(
+      (c) => c.name === "lobby-2"
+    ).id;
 
     const embed = new MessageEmbed()
       .setColor("#0099ff")
       .setTitle("Insuficient Permissions!")
       .setDescription(
-        " ❌❌ You don't have the permissions to use this command! ❌❌"
+        "❌❌ You don't have the permissions to use this command! ❌❌"
       );
 
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       players.map((player) => {
-        if (player.channelId === channel && channel === lobby2) {
+        if (
+          player.channelId === channel &&
+          channel === lobby2 &&
+          players.filter((p) => p.channelId === lobby1).length != 0
+        ) {
           const member = interaction.guild.members.cache.get(player.playerId);
-          member.roles.add("966102139107704832");
+          member.roles.add(process.env.Lobby2Role);
+          member.voice
+            .setChannel(process.env.LOBBY2)
+            .catch((err) => console.log(err));
           interaction.editReply({
-            content: "Boa partida!",
+            content: "Boa sorte na Partida!",
           });
-        } else if (player.channelId === channel && channel === lobby1) {
+        } else if (
+          player.channelId === channel &&
+          channel === lobby1 &&
+          players.filter((p) => p.channelId === lobby1).length != 0
+        ) {
           const member = interaction.guild.members.cache.get(player.playerId);
-          member.roles.add("966101988045623357");
+          member.roles.add(process.env.Lobby1Role);
+          member.voice
+            .setChannel(process.env.LOBBY1)
+            .catch((err) => console.log(err));
           interaction.editReply({
-            content: "Boa partida!",
+            content: "Boa sorte na Partida!",
           });
         } else {
-          interaction.editReply({
+          interaction.followUp({
             content: "Não há jogadores na fila",
+            ephemeral: true,
           });
         }
       });

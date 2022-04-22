@@ -7,7 +7,7 @@ export default new Event("interactionCreate", async (interaction) => {
   // Chat input Commands
   if (interaction.isCommand()) {
     await interaction.deferReply({
-      ephemeral: true,
+      ephemeral: false,
     });
     const command = client.commands.get(interaction.commandName);
     if (!command)
