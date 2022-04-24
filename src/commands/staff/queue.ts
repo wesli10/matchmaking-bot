@@ -13,6 +13,7 @@ import {
   verifyUserExist,
   clearQueue,
 } from "../../utils/db";
+import { clear } from "../../utils/utils";
 
 export default new Command({
   name: "openqueue",
@@ -116,16 +117,17 @@ export default new Command({
             });
             break;
           case "stop_queue":
+            btnInt.update({
+              content: "Fila Parada",
+              components: [],
+              embeds: [],
+            });
             collector.stop();
             break;
         }
       });
       collector.on("end", async (collected) => {
-        interaction.editReply({
-          content: "@here Fila Encerrada!",
-          embeds: [],
-          components: [],
-        });
+        clear(interaction);
         await clearQueue();
       });
     } else {
