@@ -1,5 +1,5 @@
 import { Command } from "../../structures/Command";
-import { MessageEmbed } from "discord.js";
+import { DiscordAPIError, MessageEmbed } from "discord.js";
 
 export let WAITINGROOM = "";
 
@@ -27,14 +27,14 @@ export default new Command({
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       if (channel.type === "GUILD_VOICE") {
         WAITINGROOM = channel.id;
-        interaction.followUp({
+        await interaction.followUp({
           content: `${channel.name} set as waiting room!`,
           embeds: [],
           components: [],
           ephemeral: true,
         });
       } else {
-        interaction.followUp({
+        await interaction.followUp({
           content: "Channel Invalid!",
           embeds: [],
           components: [],
@@ -42,7 +42,7 @@ export default new Command({
         });
       }
     } else {
-      interaction.editReply({
+      await interaction.editReply({
         embeds: [embed],
       });
     }

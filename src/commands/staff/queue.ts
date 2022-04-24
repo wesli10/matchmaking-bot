@@ -9,21 +9,16 @@ import {
   createUser,
   verifyUserState,
   removeUser,
-  fetchUsers,
-  verifyUserInMatch,
+  fetchUsersInQueue,
   verifyUserExist,
+  clearQueue,
 } from "../../utils/db";
-
-export const players = [];
 
 export default new Command({
   name: "openqueue",
   description: "Open queue to players",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const channelId = interaction.channelId;
-    const channelName = interaction.guild.channels.cache.get(channelId).name;
-
     const buttons = new MessageActionRow().addComponents(
       new MessageButton()
         .setCustomId("enter_queue")
@@ -56,10 +51,6 @@ export default new Command({
       .setDescription(
         "❌❌ You don't have the permissions to use this command! ❌❌"
       );
-    const embed = new MessageEmbed()
-      .setColor("#0099ff")
-      .setTitle(`Fila de ${channelName}`)
-      .setDescription("🎮 **Entre na fila** para jogar!");
 
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       await interaction.followUp({
@@ -78,28 +69,23 @@ export default new Command({
 
       collector.on("collect", async (btnInt: ButtonInteraction) => {
         const player = await verifyUserState(btnInt.user.id, false);
-        const playersCount = await fetchUsers();
+        let playersCount = await fetchUsersInQueue();
+
         const userExist = await verifyUserExist(btnInt.user.id);
         switch (btnInt.customId) {
           case "enter_queue":
             if (userExist.length === 0 && player.length === 0) {
               await createUser(btnInt.user.id, btnInt.user.tag);
-              await btnInt.deferReply({
-                ephemeral: true,
-                fetchReply: true,
-              });
-              await btnInt.editReply({
+              await btnInt.reply({
                 content: "🎇 VOCÊ ENTROU NA FILA 🎇",
                 components: [],
+                ephemeral: true,
               });
             } else {
-              await btnInt.deferReply({
-                ephemeral: true,
-                fetchReply: true,
-              });
-              await btnInt.editReply({
+              await btnInt.reply({
                 content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
                 components: [],
+                ephemeral: true,
               });
             }
             await interaction.editReply({
@@ -110,28 +96,17 @@ export default new Command({
             break;
           case "leave_queue":
             if (userExist.length === 1 && player.length === 1) {
-              const userInMatch = await verifyUserInMatch(btnInt.user.id);
               await removeUser(btnInt.user.id);
-              await btnInt.deferReply({
-                ephemeral: true,
-                fetchReply: true,
-              });
-              await btnInt.deferReply({
-                ephemeral: true,
-                fetchReply: true,
-              });
-              await btnInt.followUp({
+              await btnInt.reply({
                 content: "❌ VOCÊ SAIU DA FILA ❌",
                 components: [],
+                ephemeral: true,
               });
             } else {
-              await btnInt.deferReply({
-                ephemeral: true,
-                fetchReply: true,
-              });
-              await btnInt.editReply({
+              await btnInt.reply({
                 content: " ❌ VOCÊ NÃO ESTÁ NA FILA ❌",
                 components: [],
+                ephemeral: true,
               });
             }
             await interaction.editReply({
@@ -145,7 +120,14 @@ export default new Command({
             break;
         }
       });
-      collector.on("end", async (collected) => {});
+      collector.on("end", async (collected) => {
+        interaction.editReply({
+          content: "@here Fila Encerrada!",
+          embeds: [],
+          components: [],
+        });
+        await clearQueue();
+      });
     } else {
       interaction.editReply({
         embeds: [embedPermission],

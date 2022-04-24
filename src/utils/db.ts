@@ -4,8 +4,11 @@ const client = new ExtendedClient();
 
 export const db = client.connectToDataBase();
 
-export async function fetchUsers() {
-  const { data } = await await db.from("users").select("*");
+export async function fetchUsersInQueue() {
+  const { data } = await await db
+    .from("users")
+    .select("*")
+    .eq("in_match", false);
   return data;
 }
 
@@ -109,6 +112,12 @@ export async function verifyUserExist(user_id) {
 
 export async function fetchQueues() {
   const { data } = await db.from("queues").select("*");
+
+  return data;
+}
+
+export async function clearQueue() {
+  const { data } = await db.from("users").delete().eq("in_match", false);
 
   return data;
 }

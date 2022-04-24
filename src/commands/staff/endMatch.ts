@@ -27,33 +27,32 @@ export default new Command({
 
     const embedEndMatch = new MessageEmbed()
       .setColor("RANDOM")
-      .setTitle(`${channel.name}`)
-      .setDescription("Thanks for playing!");
+      .setTitle(`${channel.name.toLowerCase()}`)
+      .setDescription("Thanks for playing!".toUpperCase());
 
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       if (channel.type === "GUILD_VOICE") {
         await fetchUserInMatch(channel.id).then((data) => {
           data.map((p) => {
             const member = interaction.guild.members.cache.get(p.user_id);
-            updateInMatch(p.user_id, false);
             removeUser(p.user_id);
             member.voice
               .setChannel(WAITINGROOM)
               .catch((err) => console.error(err));
           });
         });
-        interaction.editReply({
+        await interaction.followUp({
           embeds: [embedEndMatch],
         });
       } else {
-        interaction.editReply({
+        await interaction.editReply({
           content: "Channel Invalid!",
           embeds: [],
           components: [],
         });
       }
     } else {
-      interaction.editReply({
+      await interaction.editReply({
         embeds: [embed],
       });
     }

@@ -1,6 +1,6 @@
 import { Command } from "../../structures/Command";
 import {
-  fetchUsers,
+  fetchUsersInQueue,
   updateInMatch,
   createQueue,
   fetchUsersQtd,
@@ -30,8 +30,9 @@ export default new Command({
   run: async ({ interaction }) => {
     const channel = interaction.options.getChannel("channel");
     const qtdPlayers = interaction.options.getNumber("jogadores");
-    const qtdQueue = await fetchUsers();
+    const qtdQueue = await fetchUsersInQueue();
     await createQueue(channel.id, interaction.guildId);
+    interaction.ephemeral = true;
 
     const embed = new MessageEmbed()
       .setColor("#0099ff")
@@ -53,32 +54,28 @@ export default new Command({
                 .catch((err) => console.error(err));
             });
           });
-          interaction.followUp({
-            content: `${channel.name} Started!`,
-            embeds: [],
+          await interaction.followUp({
+            content: "Match started!",
             components: [],
             ephemeral: true,
           });
         } else {
-          interaction.followUp({
+          await interaction.followUp({
             content: "Enough players in queue!",
             ephemeral: true,
           });
         }
       } else {
-        interaction.editReply({
-          content: "Not enough players in queue!",
+        await interaction.followUp({
+          content: "Channel Invalid!",
           embeds: [],
           components: [],
+          ephemeral: true,
         });
       }
     } else {
-      interaction.editReply({
+      await interaction.reply({
         embeds: [embed],
-      });
-      interaction.deferReply({
-        ephemeral: true,
-        fetchReply: true,
       });
     }
   },
