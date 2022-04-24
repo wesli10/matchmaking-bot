@@ -1,5 +1,18 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import {
+  ButtonInteraction,
+  MessageActionRow,
+  MessageButton,
+  MessageEmbed,
+} from "discord.js";
 import { Command } from "../../structures/Command";
+import {
+  createUser,
+  verifyUserState,
+  removeUser,
+  fetchUsers,
+  verifyUserInMatch,
+  verifyUserExist,
+} from "../../utils/db";
 
 export const players = [];
 
@@ -24,6 +37,12 @@ export default new Command({
         .setStyle("DANGER")
     );
 
+    const embedLobby = new MessageEmbed().setColor("RANDOM").setDescription(
+      `Seja bem-vindo à fila de X1 dos Crias na SNACKCLUB.\n 
+        Aqui você poderá aguardar na fila para participar de um dos nossos lobbies. \n 
+        Clique em 🎮 Entrar para entrar na fila, e em ❌ Sair para sair da fila. \n `
+    );
+
     const buttonQueue = new MessageActionRow().addComponents(
       new MessageButton()
         .setCustomId("stop_queue")
@@ -46,7 +65,7 @@ export default new Command({
       await interaction.followUp({
         content: "@here Fila Aberta!",
         components: [buttons],
-        embeds: [embed],
+        embeds: [embedLobby],
       });
       await interaction.followUp({
         content: "Quando quiser Pare a fila",
@@ -57,15 +76,14 @@ export default new Command({
 
       const collector = interaction.channel.createMessageComponentCollector({});
 
-      collector.on("collect", async (btnInt) => {
-        const channelId = interaction.channelId;
+      collector.on("collect", async (btnInt: ButtonInteraction) => {
+        const player = await verifyUserState(btnInt.user.id, false);
+        const playersCount = await fetchUsers();
+        const userExist = await verifyUserExist(btnInt.user.id);
         switch (btnInt.customId) {
           case "enter_queue":
-            if (!players.find((player) => player.playerId === btnInt.user.id)) {
-              players.push({
-                playerId: btnInt.user.id,
-                channelId: channelId,
-              });
+            if (userExist.length === 0 && player.length === 0) {
+              await createUser(btnInt.user.id, btnInt.user.tag);
               await btnInt.deferReply({
                 ephemeral: true,
                 fetchReply: true,
@@ -80,28 +98,24 @@ export default new Command({
                 fetchReply: true,
               });
               await btnInt.editReply({
-                content: " ❌ VOCÊ JA ESTÁ NA FILA ❌",
+                content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
                 components: [],
               });
             }
             await interaction.editReply({
-              content: `Jogadores na Fila: ${
-                players.filter(
-                  (player) => player.channelId === btnInt.channelId
-                ).length
-              }`,
+              content: `@here JOGADORES NA FILA: ${playersCount.length}`,
+              embeds: [embedLobby],
               components: [buttons],
-              embeds: [embed],
             });
             break;
           case "leave_queue":
-            if (players.find((player) => player.playerId === btnInt.user.id)) {
-              players.splice(
-                players.findIndex(
-                  (player) => player.playerId === btnInt.user.id
-                ),
-                1
-              );
+            if (userExist.length === 1 && player.length === 1) {
+              const userInMatch = await verifyUserInMatch(btnInt.user.id);
+              await removeUser(btnInt.user.id);
+              await btnInt.deferReply({
+                ephemeral: true,
+                fetchReply: true,
+              });
               await btnInt.deferReply({
                 ephemeral: true,
                 fetchReply: true,
@@ -121,39 +135,17 @@ export default new Command({
               });
             }
             await interaction.editReply({
-              content: `Jogadores na Fila: ${
-                players.filter(
-                  (player) => player.channelId === btnInt.channelId
-                ).length
-              }`,
+              content: `@here JOGADORES NA FILA: ${playersCount.length}`,
+              embeds: [embedLobby],
               components: [buttons],
-              embeds: [embed],
             });
             break;
           case "stop_queue":
-            await interaction.editReply({
-              content:
-                "@here 🎇 \n\n FILA FECHADA!!! 🎇 \n\n A PARTIDA JA VAI COMEÇAR!!!",
-              components: [],
-              embeds: [],
-            });
-            await btnInt.deferUpdate({
-              fetchReply: true,
-            });
-            await btnInt.editReply({
-              content: "Digite /startmatch para iniciar a partida",
-              components: [],
-              embeds: [],
-            });
             collector.stop();
             break;
         }
       });
-      collector.on("end", async (collected) => {
-        players.forEach((player) => {
-          console.log(player);
-        });
-      });
+      collector.on("end", async (collected) => {});
     } else {
       interaction.editReply({
         embeds: [embedPermission],

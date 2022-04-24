@@ -9,6 +9,7 @@ import glob from "glob";
 import { promisify } from "util";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
+import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -66,5 +67,22 @@ export class ExtendedClient extends Client {
       const event: Event<keyof ClientEvents> = await this.importFile(filePath);
       this.on(event.event, event.run);
     });
+  }
+
+  // Connection to Supabase
+  connectToDataBase() {
+    const options = {
+      schema: "public",
+      headers: { "x-my-custom-header": "my-app-name" },
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    };
+    const supabase = createClient(
+      "https://nymuufxfhoscijpaadnr.supabase.co",
+      process.env.db_url,
+      options
+    );
+    return supabase;
   }
 }

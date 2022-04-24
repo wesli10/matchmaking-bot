@@ -1,19 +1,37 @@
 import { Command } from "../../structures/Command";
-import { players } from "../staff/queue";
+import {
+  fetchUsers,
+  updateInMatch,
+  createQueue,
+  fetchUsersQtd,
+  createUserQueue,
+  updateUserChannel,
+} from "../../utils/db";
 import { MessageEmbed } from "discord.js";
 
 export default new Command({
   name: "startmatch",
   description: "Give role to each player in queue and start the match",
   userPermissions: ["ADMINISTRATOR"],
+  options: [
+    {
+      name: "jogadores",
+      description: "Number of players in the match",
+      type: "NUMBER",
+      required: true,
+    },
+    {
+      name: "channel",
+      description: "The channel to startmach",
+      type: "CHANNEL",
+      required: true,
+    },
+  ],
   run: async ({ interaction }) => {
-    const channel = interaction.channelId;
-    const lobby1 = interaction.guild.channels.cache.find(
-      (c) => c.name === "lobby-1"
-    ).id;
-    const lobby2 = interaction.guild.channels.cache.find(
-      (c) => c.name === "lobby-2"
-    ).id;
+    const channel = interaction.options.getChannel("channel");
+    const qtdPlayers = interaction.options.getNumber("jogadores");
+    const qtdQueue = await fetchUsers();
+    await createQueue(channel.id, interaction.guildId);
 
     const embed = new MessageEmbed()
       .setColor("#0099ff")
@@ -21,45 +39,46 @@ export default new Command({
       .setDescription(
         "❌❌ You don't have the permissions to use this command! ❌❌"
       );
-
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
-      players.map((player) => {
-        if (
-          player.channelId === channel &&
-          channel === lobby2 &&
-          players.filter((p) => p.channelId === lobby1).length != 0
-        ) {
-          const member = interaction.guild.members.cache.get(player.playerId);
-          member.roles.add(process.env.Lobby2Role);
-          member.voice
-            .setChannel(process.env.LOBBY2)
-            .catch((err) => console.log(err));
-          interaction.editReply({
-            content: "Boa sorte na Partida!",
+      if (channel.type === "GUILD_VOICE") {
+        if (qtdQueue.length >= qtdPlayers) {
+          await fetchUsersQtd(qtdPlayers).then((data) => {
+            data.map((p) => {
+              const member = interaction.guild.members.cache.get(p.user_id);
+              updateInMatch(p.user_id, true);
+              updateUserChannel(p.user_id, channel.id);
+              createUserQueue(p.user_id, channel.id, channel.name);
+              member.voice
+                .setChannel(channel.id)
+                .catch((err) => console.error(err));
+            });
           });
-        } else if (
-          player.channelId === channel &&
-          channel === lobby1 &&
-          players.filter((p) => p.channelId === lobby1).length != 0
-        ) {
-          const member = interaction.guild.members.cache.get(player.playerId);
-          member.roles.add(process.env.Lobby1Role);
-          member.voice
-            .setChannel(process.env.LOBBY1)
-            .catch((err) => console.log(err));
-          interaction.editReply({
-            content: "Boa sorte na Partida!",
+          interaction.followUp({
+            content: `${channel.name} Started!`,
+            embeds: [],
+            components: [],
+            ephemeral: true,
           });
         } else {
           interaction.followUp({
-            content: "Não há jogadores na fila",
+            content: "Enough players in queue!",
             ephemeral: true,
           });
         }
-      });
+      } else {
+        interaction.editReply({
+          content: "Not enough players in queue!",
+          embeds: [],
+          components: [],
+        });
+      }
     } else {
       interaction.editReply({
         embeds: [embed],
+      });
+      interaction.deferReply({
+        ephemeral: true,
+        fetchReply: true,
       });
     }
   },

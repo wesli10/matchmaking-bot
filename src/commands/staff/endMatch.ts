@@ -1,77 +1,61 @@
 import { Command } from "../../structures/Command";
-import { players } from "../staff/queue";
+import { clear } from "../../utils/utils";
 import { MessageEmbed } from "discord.js";
+import { fetchUserInMatch, removeUser, updateInMatch } from "../../utils/db";
+import { WAITINGROOM } from "../config/setWaitingRoom";
 
 export default new Command({
   name: "endmatch",
   description: "Remove tags and move out user from lobby room",
   userPermissions: ["ADMINISTRATOR"],
+  options: [
+    {
+      name: "lobby",
+      description: "The channel to endmatch",
+      type: "CHANNEL",
+      required: true,
+    },
+  ],
   run: async ({ interaction }) => {
-    const channelId = interaction.channelId;
-    const lobby1 = interaction.guild.channels.cache.find(
-      (c) => c.name === "lobby-1"
-    ).id;
-    const lobby2 = interaction.guild.channels.cache.find(
-      (c) => c.name === "lobby-2"
-    ).id;
-
-    async function clear() {
-      const fetched = await interaction.channel.messages.fetch({
-        limit: 100,
-      });
-      if (interaction.channel.type === "DM") return;
-      interaction.channel.bulkDelete(fetched);
-    }
-
+    const channel = interaction.options.getChannel("lobby");
     const embed = new MessageEmbed()
       .setColor("#0099ff")
       .setTitle("Insuficient Permissions!")
       .setDescription(
-        " ❌❌ You don't have the permissions to use this command! ❌❌"
+        "❌❌ You don't have the permissions to use this command! ❌❌"
       );
 
+    const embedEndMatch = new MessageEmbed()
+      .setColor("RANDOM")
+      .setTitle(`${channel.name}`)
+      .setDescription("Thanks for playing!");
+
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
-      players.map((player) => {
-        if (player.channelId === channelId && channelId === lobby2) {
-          const member = interaction.guild.members.cache.get(player.playerId);
-          member.roles.remove(process.env.Lobby2Role);
-          member.voice
-            .setChannel(process.env.WaitingRoom)
-            .catch((err) => console.error(err));
-          interaction
-            .followUp({
-              content: "Obrigado por participar!",
-              ephemeral: true,
-            })
-            .then((player) => {
-              players.splice(players.indexOf(player), 1);
-            });
-        } else if (player.channelId === channelId && channelId === lobby1) {
-          const member = interaction.guild.members.cache.get(player.playerId);
-          member.roles.remove(process.env.Lobby1Role);
-          member.voice
-            .setChannel(process.env.WaitingRoom)
-            .catch((err) => console.error(err));
-          interaction
-            .followUp({
-              content: "Obrigado por participar",
-              ephemeral: true,
-            })
-            .then((player) => {
-              players.splice(players.indexOf(player), 1);
-            });
-        } else {
-          interaction.followUp({
-            content: "Não tem lobby rolando agora!",
-            ephemeral: true,
+      if (channel.type === "GUILD_VOICE") {
+        await fetchUserInMatch(channel.id).then((data) => {
+          data.map((p) => {
+            const member = interaction.guild.members.cache.get(p.user_id);
+            updateInMatch(p.user_id, false);
+            removeUser(p.user_id);
+            member.voice
+              .setChannel(WAITINGROOM)
+              .catch((err) => console.error(err));
           });
-        }
-      });
+        });
+        interaction.editReply({
+          embeds: [embedEndMatch],
+        });
+      } else {
+        interaction.editReply({
+          content: "Channel Invalid!",
+          embeds: [],
+          components: [],
+        });
+      }
     } else {
       interaction.editReply({
         embeds: [embed],
       });
     }
-    clear();
   },
 });
