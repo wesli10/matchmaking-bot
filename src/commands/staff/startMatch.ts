@@ -6,8 +6,10 @@ import {
   fetchUsersQtd,
   createUserQueue,
   updateUserChannel,
+  createUser,
 } from "../../utils/db";
 import { MessageEmbed } from "discord.js";
+import { players } from "./queue";
 
 export default new Command({
   name: "startmatch",
@@ -30,7 +32,8 @@ export default new Command({
   run: async ({ interaction }) => {
     const channel = interaction.options.getChannel("channel");
     const qtdPlayers = interaction.options.getNumber("jogadores");
-    const qtdQueue = await fetchUsersInQueue();
+    // const qtdQueue = await fetchUsersInQueue();
+    const qtdQueue = players.length;
     await createQueue(channel.id, interaction.guildId);
     interaction.ephemeral = true;
 
@@ -42,7 +45,7 @@ export default new Command({
       );
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       if (channel.type === "GUILD_VOICE") {
-        if (qtdQueue.length >= qtdPlayers) {
+        if (qtdQueue >= qtdPlayers) {
           await fetchUsersQtd(qtdPlayers).then((data) => {
             data.map((p) => {
               const member = interaction.guild.members.cache.get(p.user_id);

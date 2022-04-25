@@ -25,6 +25,7 @@ export async function createUser(user_id, name) {
   const { data } = await db.from("users").insert({
     user_id: user_id,
     name: name,
+    in_match: false,
   });
   return data;
 }
@@ -33,6 +34,15 @@ export async function createQueue(channel_id, guild_id) {
   const { data } = await db.from("queues").insert({
     channel_id: channel_id,
     guild_id: guild_id,
+  });
+  return data;
+}
+
+export async function setwaitingRoomConfig(guild_id, channel_id) {
+  const { data } = await db.from("channels_config").insert({
+    guild_id: guild_id,
+    channel_id: channel_id,
+    channel_type: "waiting_room",
   });
   return data;
 }
