@@ -103,7 +103,6 @@ export default new Command({
                 ephemeral: true,
               });
             }
-            console.log(playersCount.length);
             await interaction.editReply({
               content: `@here JOGADORES NA FILA: ${players.length}`,
               embeds: [embedLobby],
@@ -145,7 +144,7 @@ export default new Command({
               embeds: [embedQueueClosed],
               components: [],
             });
-            btnInt.editReply({
+            btnInt.followUp({
               content: "fila fechada",
               components: [],
             });

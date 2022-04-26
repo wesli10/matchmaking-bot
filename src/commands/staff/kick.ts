@@ -19,7 +19,6 @@ export default new Command({
     if (interaction.memberPermissions.has("KICK_MEMBERS")) {
       const member = interaction.guild.members.cache.get(user.id);
       const player = await fetchUser(user.id);
-      console.log(player);
 
       member.roles.remove(player[0].role_id).catch((err) => console.log(err));
       member.voice

@@ -37,6 +37,16 @@ export default new Command({
     const lobby = await fetchChannels(channel.id);
     await createQueue(channel.id, interaction.guildId);
 
+    const embedStart = new MessageEmbed()
+      .setColor("RANDOM")
+      .setTitle("🎮 Match Started!")
+      .setDescription(`${channel.name.toUpperCase()}`);
+
+    const embedChannelInvalid = new MessageEmbed()
+      .setColor("RANDOM")
+      .setTitle("Channel Invalid!")
+      .setDescription(`${channel.name} is not a lobby channel!`);
+
     const embed = new MessageEmbed()
       .setColor("#0099ff")
       .setTitle("Insuficient Permissions!")
@@ -64,8 +74,9 @@ export default new Command({
           });
           await interaction
             .followUp({
-              content: "Match started!",
+              content: `⠀`,
               components: [],
+              embeds: [embedStart],
             })
             .catch((err) => console.error(err));
         } else {
@@ -77,8 +88,8 @@ export default new Command({
         }
       } else {
         await interaction.editReply({
-          content: "Channel Invalid!",
-          embeds: [],
+          content: "⠀",
+          embeds: [embedChannelInvalid],
           components: [],
         });
       }
