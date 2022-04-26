@@ -1,4 +1,5 @@
 import { Command } from "../../structures/Command";
+import { fetchUser, removeUser } from "../../utils/db";
 
 export default new Command({
   name: "ffkick",
@@ -17,16 +18,20 @@ export default new Command({
 
     if (interaction.memberPermissions.has("KICK_MEMBERS")) {
       const member = interaction.guild.members.cache.get(user.id);
+      const player = await fetchUser(user.id);
+      console.log(player);
 
-      member.roles.remove("966101988045623357");
+      member.roles.remove(player[0].role_id).catch((err) => console.log(err));
       member.voice
         .disconnect()
         .then(() => {
           interaction.editReply({
-            content: `${user.username} was kicked from lobby!`,
+            content: `${user.username.toUpperCase} was kicked from lobby!`,
             embeds: [],
             components: [],
           });
+          removeUser(user.id);
+          setTimeout(() => interaction.deleteReply(), 7000);
         })
         .catch((err) => {
           console.error(err);

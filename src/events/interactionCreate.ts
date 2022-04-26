@@ -1,4 +1,4 @@
-import { CommandInteractionOptionResolver } from "discord.js";
+import { CommandInteractionOptionResolver, Message } from "discord.js";
 import { client } from "..";
 import { Event } from "../structures/Event";
 import { ExtendedInteraction } from "../typings/Command";

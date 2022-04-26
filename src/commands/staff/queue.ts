@@ -13,7 +13,6 @@ import {
   verifyUserExist,
   clearQueue,
 } from "../../utils/db";
-import { clear } from "../../utils/utils";
 
 export const players = [];
 
@@ -48,6 +47,12 @@ export default new Command({
         .setLabel("Parar Fila")
         .setStyle("SECONDARY")
     );
+
+    const embedQueueClosed = new MessageEmbed()
+      .setColor("RANDOM")
+      .setTitle("Fila Fechada!")
+      .setDescription(" 🛑 Filas Temporariamente Fechadas! 🛑");
+
     const embedPermission = new MessageEmbed()
       .setColor("#0099ff")
       .setTitle("Insuficient Permissions!")
@@ -89,8 +94,8 @@ export default new Command({
                   components: [],
                   ephemeral: true,
                 })
-                .catch((err) => interaction.reply({ content: "..." }));
-              await createUser(btnInt.user.id, btnInt.user.tag);
+                .then(() => createUser(btnInt.user.id, btnInt.user.tag))
+                .catch((err) => console.log(err));
             } else {
               await btnInt.reply({
                 content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
@@ -100,13 +105,14 @@ export default new Command({
             }
             console.log(playersCount.length);
             await interaction.editReply({
-              content: `@here JOGADORES NA FILA: ${playersCount.length}`,
+              content: `@here JOGADORES NA FILA: ${players.length}`,
               embeds: [embedLobby],
               components: [buttons],
             });
             break;
           case "leave_queue":
             if (userExist.length === 1 && player.length === 1) {
+              players.splice(players.indexOf(btnInt.user.id), 1);
               await btnInt.deferReply({
                 ephemeral: true,
                 fetchReply: false,
@@ -121,38 +127,41 @@ export default new Command({
                 console.log(err);
               }
             } else {
-              console.log(players);
               await btnInt.reply({
                 content: " ❌ VOCÊ NÃO ESTÁ NA FILA ❌",
                 components: [],
                 ephemeral: true,
               });
             }
-            console.log(playersCount.length);
             await interaction.editReply({
-              content: `@here JOGADORES NA FILA: ${playersCount.length}`,
+              content: `@here JOGADORES NA FILA: ${players.length}`,
               embeds: [embedLobby],
               components: [buttons],
             });
             break;
           case "stop_queue":
-            btnInt.update({
-              content: "Fila Parada",
+            interaction.editReply({
+              content: "...",
+              embeds: [embedQueueClosed],
               components: [],
-              embeds: [],
+            });
+            btnInt.editReply({
+              content: "fila fechada",
+              components: [],
             });
             collector.stop();
             break;
         }
       });
       collector.on("end", async (collected) => {
-        clear(interaction);
         await clearQueue();
       });
     } else {
-      interaction.editReply({
-        embeds: [embedPermission],
-      });
+      interaction
+        .editReply({
+          embeds: [embedPermission],
+        })
+        .then(() => setTimeout(() => interaction.deleteReply(), 5000));
     }
   },
 });

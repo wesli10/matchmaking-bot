@@ -6,7 +6,8 @@ import {
   fetchUsersQtd,
   createUserQueue,
   updateUserChannel,
-  createUser,
+  fetchChannels,
+  updateUserRole,
 } from "../../utils/db";
 import { MessageEmbed } from "discord.js";
 import { players } from "./queue";
@@ -32,10 +33,9 @@ export default new Command({
   run: async ({ interaction }) => {
     const channel = interaction.options.getChannel("channel");
     const qtdPlayers = interaction.options.getNumber("jogadores");
-    // const qtdQueue = await fetchUsersInQueue();
-    const qtdQueue = players.length;
+    const qtdQueue = await fetchUsersInQueue();
+    const lobby = await fetchChannels(channel.id);
     await createQueue(channel.id, interaction.guildId);
-    interaction.ephemeral = true;
 
     const embed = new MessageEmbed()
       .setColor("#0099ff")
@@ -44,36 +44,42 @@ export default new Command({
         "❌❌ You don't have the permissions to use this command! ❌❌"
       );
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
-      if (channel.type === "GUILD_VOICE") {
-        if (qtdQueue >= qtdPlayers) {
+      if (channel.type === "GUILD_VOICE" && lobby.length != 0) {
+        if (qtdQueue.length >= qtdPlayers) {
+          players.splice(0, qtdPlayers);
           await fetchUsersQtd(qtdPlayers).then((data) => {
             data.map((p) => {
               const member = interaction.guild.members.cache.get(p.user_id);
-              updateInMatch(p.user_id, true);
-              updateUserChannel(p.user_id, channel.id);
-              createUserQueue(p.user_id, channel.id, channel.name);
+              member.roles
+                .add(lobby[0].role_id)
+                .catch((err) => console.log(err));
               member.voice
                 .setChannel(channel.id)
                 .catch((err) => console.error(err));
+              updateInMatch(p.user_id, true);
+              updateUserChannel(p.user_id, channel.id);
+              updateUserRole(p.user_id, lobby[0].role_id);
+              createUserQueue(p.user_id, channel.id, channel.name);
             });
           });
-          await interaction.followUp({
-            content: "Match started!",
-            components: [],
-            ephemeral: true,
-          });
+          await interaction
+            .followUp({
+              content: "Match started!",
+              components: [],
+            })
+            .catch((err) => console.error(err));
         } else {
-          await interaction.followUp({
-            content: "Enough players in queue!",
-            ephemeral: true,
-          });
+          await interaction
+            .followUp({
+              content: " ❌ ENOUGH PLAYERS IN QUEUE! ❌",
+            })
+            .catch((err) => console.error(err));
         }
       } else {
-        await interaction.followUp({
+        await interaction.editReply({
           content: "Channel Invalid!",
           embeds: [],
           components: [],
-          ephemeral: true,
         });
       }
     } else {

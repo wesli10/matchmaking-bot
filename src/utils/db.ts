@@ -12,6 +12,11 @@ export async function fetchUsersInQueue() {
   return data;
 }
 
+export async function fetchUser(user_id) {
+  const { data } = await db.from("users").select("*").eq("user_id", user_id);
+  return data;
+}
+
 export async function fetchUsersQtd(qtd) {
   const { data } = await await db
     .from("users")
@@ -95,6 +100,17 @@ export async function updateInMatch(user_id, state) {
   return data;
 }
 
+export async function updateUserRole(user_id, role_id) {
+  const { data } = await db
+    .from("users")
+    .update({
+      role_id: role_id,
+    })
+    .match({ user_id: user_id });
+
+  return data;
+}
+
 export async function updateUserChannel(user_id, channel_id) {
   const { data } = await db
     .from("users")
@@ -111,6 +127,15 @@ export async function fetchUserInMatch(channel_id) {
     .from("users")
     .select("*")
     .eq("channel_id", channel_id);
+  return data;
+}
+
+export async function fetchChannels(channel_id) {
+  const { data } = await db
+    .from("channels_config")
+    .select("*")
+    .eq("channel_id", channel_id);
+
   return data;
 }
 
