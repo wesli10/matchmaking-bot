@@ -139,12 +139,12 @@ export default new Command({
             });
             break;
           case "stop_queue":
-            interaction.followUp({
+            interaction.editReply({
               content: "...",
               embeds: [embedQueueClosed],
               components: [],
             });
-            btnInt.followUp({
+            btnInt.editReply({
               content: "fila fechada",
               components: [],
             });
