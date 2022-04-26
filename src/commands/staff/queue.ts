@@ -76,74 +76,78 @@ export default new Command({
       const collector = interaction.channel.createMessageComponentCollector({});
 
       collector.on("collect", async (btnInt: ButtonInteraction) => {
-        const player = await verifyUserState(btnInt.user.id, false);
-        let playersCount = await fetchUsersInQueue();
-        const userExist = await verifyUserExist(btnInt.user.id);
+        try {
+          const player = await verifyUserState(btnInt.user.id, false);
+          let playersCount = await fetchUsersInQueue();
+          const userExist = await verifyUserExist(btnInt.user.id);
 
-        switch (btnInt.customId) {
-          case "enter_queue":
-            if (userExist.length === 0 && player.length === 0) {
-              players.push({
-                user_id: btnInt.user.id,
-                name: btnInt.user.tag,
-                in_match: false,
-              });
-              await btnInt
-                .reply({
-                  content: "🎇 VOCÊ ENTROU NA FILA 🎇",
+          switch (btnInt.customId) {
+            case "enter_queue":
+              if (userExist.length === 0 && player.length === 0) {
+                players.push({
+                  user_id: btnInt.user.id,
+                  name: btnInt.user.tag,
+                  in_match: false,
+                });
+                await btnInt
+                  .reply({
+                    content: "🎇 VOCÊ ENTROU NA FILA 🎇",
+                    components: [],
+                    ephemeral: true,
+                  })
+                  .then(() => createUser(btnInt.user.id, btnInt.user.tag))
+                  .catch((err) => console.log(err));
+              } else {
+                await btnInt.reply({
+                  content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
                   components: [],
                   ephemeral: true,
-                })
-                .then(() => createUser(btnInt.user.id, btnInt.user.tag))
-                .catch((err) => console.log(err));
-            } else {
-              await btnInt.reply({
-                content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
-                components: [],
-                ephemeral: true,
-              });
-            }
-            await interaction.editReply({
-              content: `@here JOGADORES NA FILA: ${players.length}`,
-              embeds: [embedLobby],
-              components: [buttons],
-            });
-            break;
-          case "leave_queue":
-            if (userExist.length === 1 && player.length === 1) {
-              players.splice(players.indexOf(btnInt.user.id), 1);
-              await btnInt.deferReply({
-                ephemeral: true,
-                fetchReply: false,
-              });
-              try {
-                await btnInt.editReply({
-                  content: "🎉 VOCÊ SAIU DA FILA 🎉",
-                  components: [],
                 });
-                await removeUser(btnInt.user.id);
-              } catch (err) {
-                console.log(err);
               }
-            } else {
-              await btnInt.reply({
-                content: " ❌ VOCÊ NÃO ESTÁ NA FILA ❌",
-                components: [],
-                ephemeral: true,
+              await interaction.editReply({
+                content: `@here JOGADORES NA FILA: ${players.length}`,
+                embeds: [embedLobby],
+                components: [buttons],
               });
-            }
-            await interaction.editReply({
-              content: `@here JOGADORES NA FILA: ${players.length}`,
-              embeds: [embedLobby],
-              components: [buttons],
-            });
-            break;
-          case "stop_queue":
-            interaction.editReply({
-              content: "...",
-              embeds: [embedQueueClosed],
-              components: [],
-            });
+              break;
+            case "leave_queue":
+              if (userExist.length === 1 && player.length === 1) {
+                players.splice(players.indexOf(btnInt.user.id), 1);
+                await btnInt.deferReply({
+                  ephemeral: true,
+                  fetchReply: false,
+                });
+                try {
+                  await btnInt.editReply({
+                    content: "🎉 VOCÊ SAIU DA FILA 🎉",
+                    components: [],
+                  });
+                  await removeUser(btnInt.user.id);
+                } catch (err) {
+                  console.log(err);
+                }
+              } else {
+                await btnInt.reply({
+                  content: " ❌ VOCÊ NÃO ESTÁ NA FILA ❌",
+                  components: [],
+                  ephemeral: true,
+                });
+              }
+              await interaction.editReply({
+                content: `@here JOGADORES NA FILA: ${players.length}`,
+                embeds: [embedLobby],
+                components: [buttons],
+              });
+              break;
+            case "stop_queue":
+              interaction.editReply({
+                content: "...",
+                embeds: [embedQueueClosed],
+                components: [],
+              });
+          }
+        } catch (error) {
+          console.log(error);
         }
       });
       collector.on("end", async (collected) => {
