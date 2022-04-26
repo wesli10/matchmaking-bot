@@ -23,8 +23,12 @@ export class ExtendedClient extends Client {
   }
 
   start() {
-    this.registerModules();
-    this.login(process.env.BOT_TOKEN);
+    try {
+      this.registerModules();
+      this.login(process.env.BOT_TOKEN);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async importFile(filePath: string) {
