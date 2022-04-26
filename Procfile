@@ -1,0 +1,1 @@
+service: node dist/index.js
