@@ -144,12 +144,6 @@ export default new Command({
               embeds: [embedQueueClosed],
               components: [],
             });
-            btnInt.editReply({
-              content: "fila fechada",
-              components: [],
-            });
-            collector.stop();
-            break;
         }
       });
       collector.on("end", async (collected) => {
