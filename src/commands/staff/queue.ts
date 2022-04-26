@@ -139,7 +139,7 @@ export default new Command({
             });
             break;
           case "stop_queue":
-            interaction.editReply({
+            interaction.followUp({
               content: "...",
               embeds: [embedQueueClosed],
               components: [],
