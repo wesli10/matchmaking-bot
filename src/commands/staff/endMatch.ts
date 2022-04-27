@@ -1,7 +1,6 @@
 import { Command } from "../../structures/Command";
 import { MessageEmbed } from "discord.js";
 import { fetchUserInMatch, removeUser } from "../../utils/db";
-import { WAITINGROOM } from "../config/setWaitingRoom";
 import { embedPermission } from "../../utils/embeds";
 
 export default new Command({
@@ -53,7 +52,7 @@ export default new Command({
             setTimeout(
               () =>
                 member.voice
-                  .setChannel(WAITINGROOM)
+                  .setChannel("968933862606503986")
                   .catch((err) => console.error(err)),
               1000
             );
