@@ -1,6 +1,6 @@
 import { Command } from "../../structures/Command";
 import { MessageEmbed } from "discord.js";
-import { fetchUserInMatch, removeUser } from "../../utils/db";
+import { createUserQueue, fetchUserInMatch, removeUser } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 
 export default new Command({
@@ -49,6 +49,12 @@ export default new Command({
         await fetchUserInMatch(channel.id).then((data) => {
           data.map((p) => {
             const member = interaction.guild.members.cache.get(p.user_id);
+            createUserQueue(
+              p.user_id,
+              channel.id,
+              channel.name,
+              interaction.user.id
+            );
             removeUser(p.user_id);
 
             // MOVE DE SALA

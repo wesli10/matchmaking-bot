@@ -82,12 +82,6 @@ export default new Command({
               updateInMatch(p.user_id, true);
               updateUserChannel(p.user_id, channel.id);
               updateUserRole(p.user_id, lobby[0].role_id);
-              createUserQueue(
-                p.user_id,
-                channel.id,
-                channel.name,
-                interaction.user.id
-              );
             });
           });
           await interaction
