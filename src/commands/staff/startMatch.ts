@@ -60,7 +60,7 @@ export default new Command({
       admin.includes(role3) ||
       admin.includes(roleTeste)
     ) {
-      if (channel.type === "GUILD_VOICE" && lobby.length != 0) {
+      if (channel.type === "GUILD_STAGE_VOICE" && lobby.length != 0) {
         if (qtdQueue.length >= qtdPlayers) {
           await fetchUsersQtd(qtdPlayers).then((data) => {
             data.map((p) => {

@@ -42,7 +42,10 @@ export default new Command({
       admin.includes(role3) ||
       admin.includes(roleTeste)
     ) {
-      if (channel.type === "GUILD_VOICE") {
+      if (
+        channel.type === "GUILD_VOICE" ||
+        channel.type === "GUILD_STAGE_VOICE"
+      ) {
         await fetchUserInMatch(channel.id).then((data) => {
           data.map((p) => {
             const member = interaction.guild.members.cache.get(p.user_id);
