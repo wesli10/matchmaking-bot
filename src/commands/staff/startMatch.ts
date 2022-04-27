@@ -10,7 +10,7 @@ import {
   updateUserRole,
 } from "../../utils/db";
 import { MessageEmbed } from "discord.js";
-import { players } from "./queue";
+import { embedEnoughPlayers, embedPermission } from "../../utils/embeds";
 
 export default new Command({
   name: "startmatch",
@@ -47,25 +47,26 @@ export default new Command({
       .setTitle("Channel Invalid!")
       .setDescription(`${channel.name} is not a lobby channel!`);
 
-    const embed = new MessageEmbed()
-      .setColor("#0099ff")
-      .setTitle("Insuficient Permissions!")
-      .setDescription(
-        "❌❌ You don't have the permissions to use this command! ❌❌"
-      );
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       if (channel.type === "GUILD_VOICE" && lobby.length != 0) {
         if (qtdQueue.length >= qtdPlayers) {
-          players.splice(0, qtdPlayers);
           await fetchUsersQtd(qtdPlayers).then((data) => {
             data.map((p) => {
               const member = interaction.guild.members.cache.get(p.user_id);
-              member.roles
-                .add(lobby[0].role_id)
-                .catch((err) => console.log(err));
-              member.voice
-                .setChannel(channel.id)
-                .catch((err) => console.error(err));
+              setTimeout(
+                () =>
+                  member.roles
+                    .add(lobby[0].role_id)
+                    .catch((err) => console.log("não tem role pra tirar")),
+                1000
+              );
+              setTimeout(
+                () =>
+                  member.voice
+                    .setChannel(channel.id)
+                    .catch((err) => console.log("usuario não está no canal")),
+                1000
+              );
               updateInMatch(p.user_id, true);
               updateUserChannel(p.user_id, channel.id);
               updateUserRole(p.user_id, lobby[0].role_id);
@@ -79,24 +80,33 @@ export default new Command({
               embeds: [embedStart],
             })
             .catch((err) => console.error(err));
+          setTimeout(() => interaction.deleteReply(), 3000);
         } else {
           await interaction
             .followUp({
-              content: " ❌ ENOUGH PLAYERS IN QUEUE! ❌",
+              content: " ",
+              embeds: [embedEnoughPlayers],
             })
             .catch((err) => console.error(err));
+          setTimeout(() => interaction.deleteReply(), 3000);
         }
       } else {
-        await interaction.editReply({
-          content: "⠀",
-          embeds: [embedChannelInvalid],
-          components: [],
-        });
+        await interaction
+          .editReply({
+            content: "⠀",
+            embeds: [embedChannelInvalid],
+            components: [],
+          })
+          .catch((err) => console.error(err));
+        setTimeout(() => interaction.deleteReply(), 3000);
       }
     } else {
-      await interaction.reply({
-        embeds: [embed],
-      });
+      await interaction
+        .reply({
+          embeds: [embedPermission],
+        })
+        .catch((err) => console.error(err));
+      setTimeout(() => interaction.deleteReply(), 3000);
     }
   },
 });

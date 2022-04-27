@@ -104,11 +104,6 @@ export default new Command({
                   ephemeral: true,
                 });
               }
-              await interaction.editReply({
-                content: `@here JOGADORES NA FILA: ${players.length}`,
-                embeds: [embedLobby],
-                components: [buttons],
-              });
               break;
             case "leave_queue":
               if (userExist.length === 1 && player.length === 1) {
@@ -133,11 +128,6 @@ export default new Command({
                   ephemeral: true,
                 });
               }
-              await interaction.editReply({
-                content: `@here JOGADORES NA FILA: ${players.length}`,
-                embeds: [embedLobby],
-                components: [buttons],
-              });
               break;
             case "stop_queue":
               interaction.editReply({
