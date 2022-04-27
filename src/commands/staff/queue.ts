@@ -135,6 +135,7 @@ export default new Command({
                 embeds: [embedQueueClosed],
                 components: [],
               });
+              collector.stop();
               await clearQueue();
           }
         } catch (error) {
