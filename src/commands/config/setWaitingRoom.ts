@@ -1,5 +1,6 @@
 import { Command } from "../../structures/Command";
 import { DiscordAPIError, MessageEmbed } from "discord.js";
+import { embedPermission } from "../../utils/embeds";
 
 export let WAITINGROOM = "";
 
@@ -17,14 +18,18 @@ export default new Command({
   ],
   run: async ({ interaction }) => {
     const channel = interaction.options.getChannel("channel");
-    const embed = new MessageEmbed()
-      .setColor("#0099ff")
-      .setTitle("Insuficient Permissions!")
-      .setDescription(
-        "❌❌ You don't have the permissions to use this command! ❌❌"
-      );
+    const role1 = "945293155866148914";
+    const role2 = "958065673156841612";
+    const role3 = "968697582706651188";
+    const roleTeste = "965501155016835085";
+    const admin = JSON.stringify(interaction.member.roles.valueOf());
 
-    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
+    if (
+      admin.includes(role1) ||
+      admin.includes(role2) ||
+      admin.includes(role3) ||
+      admin.includes(roleTeste)
+    ) {
       if (channel.type === "GUILD_VOICE") {
         WAITINGROOM = channel.id;
         await interaction.followUp({
@@ -43,7 +48,7 @@ export default new Command({
       }
     } else {
       await interaction.editReply({
-        embeds: [embed],
+        embeds: [embedPermission],
       });
     }
   },

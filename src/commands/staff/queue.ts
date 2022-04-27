@@ -14,13 +14,18 @@ import {
   clearQueue,
 } from "../../utils/db";
 
-export const players = [];
-
 export default new Command({
   name: "openqueue",
   description: "Open queue to players",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
+    const role1 = "945293155866148914";
+    const role2 = "958065673156841612";
+    const role3 = "968697582706651188";
+    const roleTeste = "965501155016835085";
+
+    const admin = JSON.stringify(interaction.member.roles.valueOf());
+
     const buttons = new MessageActionRow().addComponents(
       new MessageButton()
         .setCustomId("enter_queue")
@@ -49,18 +54,25 @@ export default new Command({
     );
 
     const embedQueueClosed = new MessageEmbed()
-      .setColor("RANDOM")
+      .setColor("#fd4a5f")
       .setTitle("Fila Fechada!")
-      .setDescription(" 🛑 Filas Temporariamente Fechadas! 🛑");
-
-    const embedPermission = new MessageEmbed()
-      .setColor("#0099ff")
-      .setTitle("Insuficient Permissions!")
       .setDescription(
-        "❌❌ You don't have the permissions to use this command! ❌❌"
+        "As filas estão fechadas no momento, tente novamente em outro horário!"
       );
 
-    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
+    const embedPermission = new MessageEmbed()
+      .setColor("#fd4a5f")
+      .setTitle("Negativo")
+      .setDescription(
+        "❌❌ Você não tem permissão para usar esse comando! ❌❌"
+      );
+
+    if (
+      admin.includes(role1) ||
+      admin.includes(role2) ||
+      admin.includes(role3) ||
+      admin.includes(roleTeste)
+    ) {
       await interaction.followUp({
         content: "@here Fila Aberta!",
         components: [buttons],
@@ -84,11 +96,6 @@ export default new Command({
           switch (btnInt.customId) {
             case "enter_queue":
               if (userExist.length === 0 && player.length === 0) {
-                players.push({
-                  user_id: btnInt.user.id,
-                  name: btnInt.user.tag,
-                  in_match: false,
-                });
                 await btnInt
                   .reply({
                     content: "🎇 VOCÊ ENTROU NA FILA 🎇",
@@ -107,7 +114,6 @@ export default new Command({
               break;
             case "leave_queue":
               if (userExist.length === 1 && player.length === 1) {
-                players.splice(players.indexOf(btnInt.user.id), 1);
                 await btnInt.deferReply({
                   ephemeral: true,
                   fetchReply: false,

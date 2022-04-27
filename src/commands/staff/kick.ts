@@ -15,12 +15,21 @@ export default new Command({
   ],
   run: async ({ interaction }) => {
     const user = interaction.options.getUser("user");
+    const role1 = "945293155866148914";
+    const role2 = "958065673156841612";
+    const role3 = "968697582706651188";
+    const roleTeste = "965501155016835085";
+    const admin = JSON.stringify(interaction.member.roles.valueOf());
 
-    if (interaction.memberPermissions.has("KICK_MEMBERS")) {
+    if (
+      admin.includes(role1) ||
+      admin.includes(role2) ||
+      admin.includes(role3) ||
+      admin.includes(roleTeste)
+    ) {
       const member = interaction.guild.members.cache.get(user.id);
       const player = await fetchUser(user.id);
 
-      member.roles.remove(player[0].role_id).catch((err) => console.log(err));
       member.voice
         .disconnect()
         .then(() => {
@@ -35,6 +44,11 @@ export default new Command({
         .catch((err) => {
           console.error(err);
         });
+      try {
+        member.roles.remove(player[0].role_id);
+      } catch (err) {
+        console.error(err);
+      }
     }
   },
 });

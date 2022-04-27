@@ -35,6 +35,11 @@ export default new Command({
     const qtdPlayers = interaction.options.getNumber("jogadores");
     const qtdQueue = await fetchUsersInQueue();
     const lobby = await fetchChannels(channel.id);
+    const role1 = "945293155866148914";
+    const role2 = "958065673156841612";
+    const role3 = "968697582706651188";
+    const roleTeste = "965501155016835085";
+    const admin = JSON.stringify(interaction.member.roles.valueOf());
     await createQueue(channel.id, interaction.guildId);
 
     const embedStart = new MessageEmbed()
@@ -49,7 +54,12 @@ export default new Command({
       .setDescription(`Você está tentando iniciar a partida em uma sala que não está registrada como Lobby.\n
       Vá para um Lobby e tente novamente.`);
 
-    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
+    if (
+      admin.includes(role1) ||
+      admin.includes(role2) ||
+      admin.includes(role3) ||
+      admin.includes(roleTeste)
+    ) {
       if (channel.type === "GUILD_VOICE" && lobby.length != 0) {
         if (qtdQueue.length >= qtdPlayers) {
           await fetchUsersQtd(qtdPlayers).then((data) => {
