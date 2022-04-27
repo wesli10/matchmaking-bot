@@ -38,14 +38,16 @@ export default new Command({
     await createQueue(channel.id, interaction.guildId);
 
     const embedStart = new MessageEmbed()
-      .setColor("RANDOM")
-      .setTitle("🎮 Match Started!")
-      .setDescription(`${channel.name.toUpperCase()}`);
+      .setColor("#fd4a5f")
+      .setTitle("Partida Iniciada!")
+      .setDescription(`Para kickar um jogador, utilize /ffkick \n
+      Para finalizar a partida, utilize /endmatch`);
 
     const embedChannelInvalid = new MessageEmbed()
-      .setColor("RANDOM")
-      .setTitle("Channel Invalid!")
-      .setDescription(`${channel.name} is not a lobby channel!`);
+      .setColor("#fd4a5f")
+      .setTitle("Canal Invalido!")
+      .setDescription(`Você está tentando iniciar a partida em uma sala que não está registrada como Lobby.\n
+      Vá para um Lobby e tente novamente.`);
 
     if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       if (channel.type === "GUILD_VOICE" && lobby.length != 0) {

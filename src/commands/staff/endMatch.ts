@@ -1,7 +1,6 @@
 import { Command } from "../../structures/Command";
-import { clear } from "../../utils/utils";
 import { MessageEmbed } from "discord.js";
-import { fetchUserInMatch, removeUser, updateInMatch } from "../../utils/db";
+import { fetchUserInMatch, removeUser } from "../../utils/db";
 import { WAITINGROOM } from "../config/setWaitingRoom";
 import { embedPermission } from "../../utils/embeds";
 
@@ -21,12 +20,15 @@ export default new Command({
     const channel = interaction.options.getChannel("lobby");
 
     const embedEndMatch = new MessageEmbed()
-      .setColor("RANDOM")
-      .setTitle(`${channel.name.toLowerCase()}`)
-      .setDescription("Thanks for playing!".toUpperCase());
+      .setColor("#fd4a5f")
+      .setTitle(`${channel.name} - Partida Encerrada`)
+      .setDescription(
+        `Essa partida foi encerrada. Todos os jogadores foram registrados em meu banco de dados, e removidos da call.\n\n
+        Para chamar mais jogadores na fila, digite /startmatch `
+      );
 
     const embedChannelInvalid = new MessageEmbed()
-      .setColor("RANDOM")
+      .setColor("#fd4a5f")
       .setTitle("Channel Invalid!")
       .setDescription(`${channel.name} is not a lobby channel!`);
 

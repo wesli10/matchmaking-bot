@@ -114,7 +114,7 @@ export default new Command({
                 });
                 try {
                   await btnInt.editReply({
-                    content: "🎉 VOCÊ SAIU DA FILA 🎉",
+                    content: "❌ VOCÊ SAIU DA FILA ❌",
                     components: [],
                   });
                   await removeUser(btnInt.user.id);
