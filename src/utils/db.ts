@@ -52,11 +52,17 @@ export async function setwaitingRoomConfig(guild_id, channel_id) {
   return data;
 }
 
-export async function createUserQueue(user_id, channel_id, channel_name) {
+export async function createUserQueue(
+  user_id,
+  channel_id,
+  channel_name,
+  moderator_id
+) {
   const { data } = await db.from("users_queue").insert({
     user_id: user_id,
     channel_id: channel_id,
     channel_name: channel_name,
+    moderator_id: moderator_id,
   });
   return data;
 }
