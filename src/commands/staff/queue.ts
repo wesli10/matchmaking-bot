@@ -135,14 +135,13 @@ export default new Command({
                 embeds: [embedQueueClosed],
                 components: [],
               });
+              await clearQueue();
           }
         } catch (error) {
           console.log(error);
         }
       });
-      collector.on("end", async (collected) => {
-        await clearQueue();
-      });
+      collector.on("end", async (collected) => {});
     } else {
       interaction
         .editReply({
