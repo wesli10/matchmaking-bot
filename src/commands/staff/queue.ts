@@ -24,7 +24,7 @@ export default new Command({
     const role1 = "945293155866148914";
     const role2 = "958065673156841612";
     const role3 = "968697582706651188";
-    const queueRoom_id = "969348028416819220";
+    const queueRoom_id = "968922689190371328";
     const roleTeste = "965501155016835085";
 
     const admin = JSON.stringify(interaction.member.roles.valueOf());
