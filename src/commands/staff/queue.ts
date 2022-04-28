@@ -72,7 +72,7 @@ export default new Command({
       ) as TextChannel;
 
       channel.send({
-        content: "@here Fila Aberta!",
+        content: "Fila Aberta!",
         embeds: [embedLobby],
         components: [buttons],
       });
