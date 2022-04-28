@@ -43,7 +43,7 @@ export default new Command({
     );
 
     const embedLobby = new MessageEmbed().setColor("#fd4a5f").setDescription(
-      `Seja bem-vindo à fila de X1 dos Crias na SNACKCLUB.\n 
+      `Seja bem-vindo à fila de Sala Premiada na SNACKCLUB.\n 
         Aqui você poderá aguardar na fila para participar de um dos nossos lobbies. \n 
         Clique em 🎮 Entrar para entrar na fila, e em ❌ Sair para sair da fila. \n `
     );
