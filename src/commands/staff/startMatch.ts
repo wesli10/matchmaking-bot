@@ -2,9 +2,7 @@ import { Command } from "../../structures/Command";
 import {
   fetchUsersInQueue,
   updateInMatch,
-  createQueue,
   fetchUsersQtd,
-  createUserQueue,
   updateUserChannel,
   fetchChannels,
   updateUserRole,
@@ -33,6 +31,7 @@ export default new Command({
   run: async ({ interaction }) => {
     const channel = interaction.options.getChannel("channel");
     const qtdPlayers = interaction.options.getNumber("jogadores");
+    const channelMod = interaction.channelId;
     const qtdQueue = await fetchUsersInQueue();
     const lobby = await fetchChannels(channel.id);
     const role1 = "945293155866148914";
@@ -40,7 +39,6 @@ export default new Command({
     const role3 = "968697582706651188";
     const roleTeste = "965501155016835085";
     const admin = JSON.stringify(interaction.member.roles.valueOf());
-    await createQueue(channel.id, interaction.guildId);
 
     const embedStart = new MessageEmbed()
       .setColor("#fd4a5f")
@@ -60,46 +58,66 @@ export default new Command({
       admin.includes(role3) ||
       admin.includes(roleTeste)
     ) {
-      if (channel.type === "GUILD_STAGE_VOICE" && lobby.length != 0) {
-        if (qtdQueue.length >= qtdPlayers) {
-          await fetchUsersQtd(qtdPlayers).then((data) => {
-            data.map((p) => {
-              const member = interaction.guild.members.cache.get(p.user_id);
-              setTimeout(
-                () =>
-                  member.roles
-                    .add(lobby[0].role_id)
-                    .catch((err) => console.log("não tem role pra tirar")),
-                1000
-              );
-              setTimeout(
-                () =>
-                  member.voice
-                    .setChannel(channel.id)
-                    .catch((err) => console.log("usuario não está no canal")),
-                1000
-              );
-              updateInMatch(p.user_id, true);
-              updateUserChannel(p.user_id, channel.id);
-              updateUserRole(p.user_id, lobby[0].role_id);
+      if (
+        channel.type === "GUILD_STAGE_VOICE" ||
+        channel.type === "GUILD_VOICE"
+      ) {
+        if (lobby.length != 0 && lobby[0].text_channel_id == channelMod) {
+          if (qtdQueue.length >= qtdPlayers) {
+            await fetchUsersQtd(qtdPlayers).then((data) => {
+              data.map((p) => {
+                const member = interaction.guild.members.cache.get(p.user_id);
+
+                // REMOVE CARGO
+                setTimeout(
+                  () =>
+                    member.roles
+                      .add(lobby[0].role_id)
+                      .catch((err) =>
+                        console.log("não tem role pra adicionar")
+                      ),
+                  1000
+                );
+
+                // MOVE DE SALA
+                setTimeout(
+                  () =>
+                    member.voice
+                      .setChannel(channel.id)
+                      .catch((err) => console.log("usuario não está no canal")),
+                  1000
+                );
+                updateInMatch(p.user_id, true);
+                updateUserChannel(p.user_id, channel.id);
+                updateUserRole(p.user_id, lobby[0].role_id);
+              });
             });
-          });
-          await interaction
-            .followUp({
-              content: `⠀`,
-              components: [],
-              embeds: [embedStart],
-            })
-            .catch((err) => console.error(err));
-          setTimeout(() => interaction.deleteReply(), 3000);
+            await interaction
+              .followUp({
+                content: `⠀`,
+                components: [],
+                embeds: [embedStart],
+              })
+              .catch((err) => console.error(err));
+            setTimeout(() => interaction.deleteReply(), 2000);
+          } else {
+            await interaction
+              .followUp({
+                content: " ",
+                embeds: [embedEnoughPlayers],
+              })
+              .catch((err) => console.error(err));
+            setTimeout(() => interaction.deleteReply(), 2000);
+          }
         } else {
           await interaction
-            .followUp({
-              content: " ",
-              embeds: [embedEnoughPlayers],
+            .editReply({
+              content: "⠀",
+              embeds: [embedChannelInvalid],
+              components: [],
             })
             .catch((err) => console.error(err));
-          setTimeout(() => interaction.deleteReply(), 3000);
+          setTimeout(() => interaction.deleteReply(), 2000);
         }
       } else {
         await interaction
@@ -109,7 +127,7 @@ export default new Command({
             components: [],
           })
           .catch((err) => console.error(err));
-        setTimeout(() => interaction.deleteReply(), 3000);
+        setTimeout(() => interaction.deleteReply(), 2000);
       }
     } else {
       await interaction

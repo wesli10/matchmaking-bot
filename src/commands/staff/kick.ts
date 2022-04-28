@@ -1,5 +1,6 @@
 import { Command } from "../../structures/Command";
 import { fetchUser, removeUser } from "../../utils/db";
+import { MessageEmbed } from "discord.js";
 
 export default new Command({
   name: "ffkick",
@@ -21,6 +22,10 @@ export default new Command({
     const roleTeste = "965501155016835085";
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
+    const embedKick = new MessageEmbed()
+      .setColor("#fd4a5f")
+      .setTitle(`${user.username.toUpperCase()} foi kickado!`);
+
     if (
       admin.includes(role1) ||
       admin.includes(role2) ||
@@ -34,8 +39,8 @@ export default new Command({
         .disconnect()
         .then(() => {
           interaction.editReply({
-            content: `${user.username.toUpperCase} was kicked from lobby!`,
-            embeds: [],
+            content: `⠀`,
+            embeds: [embedKick],
             components: [],
           });
           removeUser(user.id);
