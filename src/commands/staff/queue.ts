@@ -1,8 +1,10 @@
 import {
   ButtonInteraction,
+  Client,
   MessageActionRow,
   MessageButton,
   MessageEmbed,
+  TextChannel,
 } from "discord.js";
 import { Command } from "../../structures/Command";
 import {
@@ -22,6 +24,7 @@ export default new Command({
     const role1 = "945293155866148914";
     const role2 = "958065673156841612";
     const role3 = "968697582706651188";
+    const queueRoom_id = "964294426543390791";
     const roleTeste = "965501155016835085";
 
     const admin = JSON.stringify(interaction.member.roles.valueOf());
@@ -39,26 +42,11 @@ export default new Command({
         .setStyle("DANGER")
     );
 
-    const embedLobby = new MessageEmbed().setColor("RANDOM").setDescription(
+    const embedLobby = new MessageEmbed().setColor("#fd4a5f").setDescription(
       `Seja bem-vindo à fila de X1 dos Crias na SNACKCLUB.\n 
         Aqui você poderá aguardar na fila para participar de um dos nossos lobbies. \n 
         Clique em 🎮 Entrar para entrar na fila, e em ❌ Sair para sair da fila. \n `
     );
-
-    const buttonQueue = new MessageActionRow().addComponents(
-      new MessageButton()
-        .setCustomId("stop_queue")
-        .setEmoji("🛑")
-        .setLabel("Parar Fila")
-        .setStyle("SECONDARY")
-    );
-
-    const embedQueueClosed = new MessageEmbed()
-      .setColor("#fd4a5f")
-      .setTitle("Fila Fechada!")
-      .setDescription(
-        "As filas estão fechadas no momento, tente novamente em outro horário!"
-      );
 
     const embedPermission = new MessageEmbed()
       .setColor("#fd4a5f")
@@ -73,20 +61,23 @@ export default new Command({
       admin.includes(role3) ||
       admin.includes(roleTeste)
     ) {
-      await interaction.followUp({
+      interaction
+        .followUp({
+          content: "⠀",
+        })
+        .then(() => interaction.deleteReply());
+
+      const channel = interaction.guild.channels.cache.get(
+        queueRoom_id
+      ) as TextChannel;
+
+      channel.send({
         content: "@here Fila Aberta!",
-        components: [buttons],
         embeds: [embedLobby],
-      });
-      await interaction.followUp({
-        content: "Quando quiser Pare a fila",
-        components: [buttonQueue],
-        embeds: [],
-        ephemeral: true,
+        components: [buttons],
       });
 
       const collector = interaction.channel.createMessageComponentCollector({});
-
       collector.on("collect", async (btnInt: ButtonInteraction) => {
         try {
           const player = await verifyUserState(btnInt.user.id, false);
@@ -135,26 +126,17 @@ export default new Command({
                 });
               }
               break;
-            case "stop_queue":
-              interaction.editReply({
-                content: "...",
-                embeds: [embedQueueClosed],
-                components: [],
-              });
-              collector.stop();
-              await clearQueue();
           }
         } catch (error) {
           console.log(error);
         }
       });
-      collector.on("end", async (collected) => {});
     } else {
       interaction
         .editReply({
           embeds: [embedPermission],
         })
-        .then(() => setTimeout(() => interaction.deleteReply(), 5000));
+        .then(() => setTimeout(() => interaction.deleteReply(), 3000));
     }
   },
 });

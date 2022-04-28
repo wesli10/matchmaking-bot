@@ -1,6 +1,6 @@
-export async function clear(interaction, qtd) {
+export async function clear(interaction) {
   const fetched = await interaction.channel.messages.fetch({
-    limit: qtd,
+    limit: 100,
   });
   if (interaction.channel.type === "DM") return;
   interaction.channel.bulkDelete(fetched);

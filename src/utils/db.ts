@@ -35,14 +35,6 @@ export async function createUser(user_id, name) {
   return data;
 }
 
-export async function createQueue(channel_id, guild_id) {
-  const { data } = await db.from("queues").insert({
-    channel_id: channel_id,
-    guild_id: guild_id,
-  });
-  return data;
-}
-
 export async function setwaitingRoomConfig(guild_id, channel_id) {
   const { data } = await db.from("channels_config").insert({
     guild_id: guild_id,
@@ -147,12 +139,6 @@ export async function fetchChannels(channel_id) {
 
 export async function verifyUserExist(user_id) {
   const { data } = await db.from("users").select("*").eq("user_id", user_id);
-
-  return data;
-}
-
-export async function fetchQueues() {
-  const { data } = await db.from("queues").select("*");
 
   return data;
 }
