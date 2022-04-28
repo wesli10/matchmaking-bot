@@ -11,7 +11,7 @@ import { MessageEmbed } from "discord.js";
 import { embedEnoughPlayers, embedPermission } from "../../utils/embeds";
 
 export default new Command({
-  name: "startmatch",
+  name: "start",
   description: "Give role to each player in queue and start the match",
   userPermissions: ["ADMINISTRATOR"],
   options: [

@@ -9,7 +9,7 @@ import {
 import { embedPermission } from "../../utils/embeds";
 
 export default new Command({
-  name: "endmatch",
+  name: "end",
   description: "Remove tags and move out user from lobby room",
   userPermissions: ["ADMINISTRATOR"],
   options: [

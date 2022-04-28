@@ -5,7 +5,7 @@ import { clearQueue } from "../../utils/db";
 import { clear } from "../../utils/utils";
 
 export default new Command({
-  name: "closequeue",
+  name: "fecharfila",
   description: "Close queue to players",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
