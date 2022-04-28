@@ -4,6 +4,7 @@ import {
   updateInMatch,
   fetchUsersQtd,
   updateUserChannel,
+  createUserQueue,
   fetchChannels,
   updateUserRole,
 } from "../../utils/db";
@@ -21,19 +22,16 @@ export default new Command({
       type: "NUMBER",
       required: true,
     },
-    {
-      name: "channel",
-      description: "The channel to startmach",
-      type: "CHANNEL",
-      required: true,
-    },
   ],
   run: async ({ interaction }) => {
-    const channel = interaction.options.getChannel("channel");
     const qtdPlayers = interaction.options.getNumber("jogadores");
-    const channelMod = interaction.channelId;
+    const channelMod_id = interaction.channelId;
+    const channelmod = interaction.guild.channels.cache.get(channelMod_id);
     const qtdQueue = await fetchUsersInQueue();
-    const lobby = await fetchChannels(channel.id);
+    const lobby = await fetchChannels(channelMod_id);
+    const lobbyChannel = interaction.guild.channels.cache.get(
+      lobby[0].channel_id
+    );
     const role1 = "945293155866148914";
     const role2 = "958065673156841612";
     const role3 = "968697582706651188";
@@ -59,14 +57,20 @@ export default new Command({
       admin.includes(roleTeste)
     ) {
       if (
-        channel.type === "GUILD_STAGE_VOICE" ||
-        channel.type === "GUILD_VOICE"
+        lobbyChannel.type === "GUILD_STAGE_VOICE" ||
+        lobbyChannel.type === "GUILD_VOICE"
       ) {
-        if (lobby.length != 0 && lobby[0].text_channel_id == channelMod) {
+        if (lobby.length != 0 && lobby[0].text_channel_id == channelMod_id) {
           if (qtdQueue.length >= qtdPlayers) {
             await fetchUsersQtd(qtdPlayers).then((data) => {
               data.map((p) => {
                 const member = interaction.guild.members.cache.get(p.user_id);
+                createUserQueue(
+                  p.user_id,
+                  lobbyChannel.id,
+                  lobbyChannel.name,
+                  interaction.user.id
+                );
 
                 // REMOVE CARGO
                 setTimeout(
@@ -83,12 +87,12 @@ export default new Command({
                 setTimeout(
                   () =>
                     member.voice
-                      .setChannel(channel.id)
+                      .setChannel(lobbyChannel.id)
                       .catch((err) => console.log("usuario não está no canal")),
                   1000
                 );
                 updateInMatch(p.user_id, true);
-                updateUserChannel(p.user_id, channel.id);
+                updateUserChannel(p.user_id, lobbyChannel.id);
                 updateUserRole(p.user_id, lobby[0].role_id);
               });
             });
@@ -99,7 +103,7 @@ export default new Command({
                 embeds: [embedStart],
               })
               .catch((err) => console.error(err));
-            setTimeout(() => interaction.deleteReply(), 2000);
+            setTimeout(() => interaction.deleteReply(), 5000);
           } else {
             await interaction
               .followUp({
@@ -107,7 +111,7 @@ export default new Command({
                 embeds: [embedEnoughPlayers],
               })
               .catch((err) => console.error(err));
-            setTimeout(() => interaction.deleteReply(), 2000);
+            setTimeout(() => interaction.deleteReply(), 5000);
           }
         } else {
           await interaction
@@ -117,7 +121,7 @@ export default new Command({
               components: [],
             })
             .catch((err) => console.error(err));
-          setTimeout(() => interaction.deleteReply(), 2000);
+          setTimeout(() => interaction.deleteReply(), 5000);
         }
       } else {
         await interaction
@@ -127,7 +131,7 @@ export default new Command({
             components: [],
           })
           .catch((err) => console.error(err));
-        setTimeout(() => interaction.deleteReply(), 2000);
+        setTimeout(() => interaction.deleteReply(), 5000);
       }
     } else {
       await interaction
@@ -135,7 +139,7 @@ export default new Command({
           embeds: [embedPermission],
         })
         .catch((err) => console.error(err));
-      setTimeout(() => interaction.deleteReply(), 3000);
+      setTimeout(() => interaction.deleteReply(), 5000);
     }
   },
 });

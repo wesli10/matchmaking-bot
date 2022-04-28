@@ -132,7 +132,7 @@ export async function fetchChannels(channel_id) {
   const { data } = await db
     .from("channels_config")
     .select("*")
-    .eq("channel_id", channel_id);
+    .eq("text_channel_id", channel_id);
 
   return data;
 }
