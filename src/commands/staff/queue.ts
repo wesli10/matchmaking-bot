@@ -24,7 +24,7 @@ export default new Command({
     const role1 = "945293155866148914";
     const role2 = "958065673156841612";
     const role3 = "968697582706651188";
-    const queueRoom_id = "968922689190371328";
+    const queueRoom_id = "969348028416819220";
     const roleTeste = "965501155016835085";
 
     const admin = JSON.stringify(interaction.member.roles.valueOf());
@@ -80,21 +80,31 @@ export default new Command({
       const collector = interaction.channel.createMessageComponentCollector({});
       collector.on("collect", async (btnInt: ButtonInteraction) => {
         try {
+          console.log(`[${btnInt.user.id}]`, "getting userState");
           const player = await verifyUserState(btnInt.user.id, false);
-          let playersCount = await fetchUsersInQueue();
+
+          console.log(`[${btnInt.user.id}]`, "done!", player);
+
+          console.log(`[${btnInt.user.id}]`, "verifying user exist");
           const userExist = await verifyUserExist(btnInt.user.id);
+          console.log(`[${btnInt.user.id}]`, "done!", userExist);
 
           switch (btnInt.customId) {
             case "enter_queue":
+              console.log(`[${btnInt.user.id}]`, "entering queue");
               if (userExist.length === 0 && player.length === 0) {
-                await btnInt
-                  .reply({
-                    content: "🎇 VOCÊ ENTROU NA FILA 🎇",
-                    components: [],
-                    ephemeral: true,
-                  })
-                  .then(() => createUser(btnInt.user.id, btnInt.user.tag))
-                  .catch((err) => console.log(err));
+                console.log(`[${btnInt.user.id}]`, "creating user!");
+                await createUser(btnInt.user.id, btnInt.user.tag);
+
+                console.log(`[${btnInt.user.id}]`, "created user!");
+
+                console.log(`[${btnInt.user.id}]`, "replying");
+                await btnInt.reply({
+                  content: "🎇 VOCÊ ENTROU NA FILA 🎇",
+                  components: [],
+                  ephemeral: true,
+                });
+                console.log(`[${btnInt.user.id}]`, "replied!");
               } else {
                 await btnInt.reply({
                   content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
