@@ -35,9 +35,8 @@ export default new Command({
       const member = interaction.guild.members.cache.get(user.id);
       const player = await fetchUser(user.id);
       if (!player[0]) {
-        await interaction.reply({
+        await interaction.editReply({
           content: "Não encontramos o usuário",
-          ephemeral: true,
         });
 
         return;
