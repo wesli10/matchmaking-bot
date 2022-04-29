@@ -76,42 +76,32 @@ export default new Command({
       ) {
         if (lobby.length != 0 && lobby[0].text_channel_id == channelMod_id) {
           if (qtdQueue.length >= qtdPlayers) {
-            await fetchUsersQtd(qtdPlayers).then((data) => {
-              data.map((p) => {
-                const member = interaction.guild.members.cache.get(p.user_id);
-                createUserQueue(
-                  p.user_id,
-                  lobbyChannel.id,
-                  lobbyChannel.name,
-                  interaction.user.id
-                )
-                  .then(() => console.log("Criando"))
-                  .catch((err) => console.log(err));
+            const users = await fetchUsersQtd(qtdPlayers);
+            for (const user of users) {
+              const member = await interaction.guild.members.fetch(
+                user.user_id
+              );
+              await createUserQueue(
+                user.user_id,
+                lobbyChannel.id,
+                lobbyChannel.name,
+                interaction.user.id
+              )
+                .then(() => console.log("Criando"))
+                .catch((err) => console.log(err));
 
-                // ADICIONA CARGO
-                setTimeout(
-                  () =>
-                    member.roles
-                      .add(lobby[0].role_id)
-                      .catch((err) =>
-                        console.log("não tem role pra adicionar")
-                      ),
-                  1000
-                );
-
+              // ADICIONA CARGO
+              await member.roles
+                .add(lobby[0].role_id)
+                .catch((err) => console.log("não tem role pra adicionar")),
                 // MOVE DE SALA
-                setTimeout(
-                  () =>
-                    member.voice
-                      .setChannel(lobbyChannel.id)
-                      .catch((err) => console.log("usuario não está no canal")),
-                  1000
-                );
-                updateInMatch(p.user_id, true);
-                updateUserChannel(p.user_id, lobbyChannel.id);
-                updateUserRole(p.user_id, lobby[0].role_id);
-              });
-            });
+                await member.voice
+                  .setChannel(lobbyChannel.id)
+                  .catch((err) => console.log("usuario não está no canal")),
+                await updateInMatch(user.user_id, true);
+              await updateUserChannel(user.user_id, lobbyChannel.id);
+              await updateUserRole(user.user_id, lobby[0].role_id);
+            }
             await interaction
               .followUp({
                 content: `⠀`,

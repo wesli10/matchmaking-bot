@@ -53,35 +53,20 @@ export default new Command({
         lobbyChannel.type === "GUILD_STAGE_VOICE"
       ) {
         if (lobby.length != 0 && lobby[0].text_channel_id == channelMod_id) {
-          await fetchUserInMatch(lobbyChannel.id).then((data) => {
-            data.map((p) => {
-              const member = interaction.guild.members.cache.get(p.user_id);
+          const users = await fetchUserInMatch(lobbyChannel.id);
+          for (const user of users) {
+            const member = await interaction.guild.members.fetch(user.user_id);
 
-              try {
-                // MOVE DE SALA
-                setTimeout(
-                  () =>
-                    member.voice
-                      .setChannel(waiting_room_id)
-                      .catch((err) => "usuario não está na sala"),
-                  1000
-                );
-
-                // REMOVE CARGO
-                setTimeout(
-                  () =>
-                    member.roles
-                      .remove(p.role_id)
-                      .catch((err) => "Não conseguiu remover o cargo"),
-                  1000
-                );
-              } catch (error) {
-                console.log(error);
-              }
-
-              removeUser(p.user_id);
-            });
-          });
+            // MOVE DE SALA
+            await member.voice
+              .setChannel(waiting_room_id)
+              .catch((err) => "usuario não está na sala"),
+              // REMOVE CARGO
+              await member.roles
+                .remove(user.role_id)
+                .catch((err) => "Não conseguiu remover o cargo"),
+              await removeUser(user.user_id);
+          }
           await interaction
             .followUp({
               embeds: [embedEndMatch],
