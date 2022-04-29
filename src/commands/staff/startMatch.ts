@@ -78,29 +78,33 @@ export default new Command({
           if (qtdQueue.length >= qtdPlayers) {
             const users = await fetchUsersQtd(qtdPlayers);
             for (const user of users) {
-              const member = await interaction.guild.members.fetch(
-                user.user_id
-              );
-              await createUserQueue(
-                user.user_id,
-                lobbyChannel.id,
-                lobbyChannel.name,
-                interaction.user.id
-              )
-                .then(() => console.log("Criando"))
-                .catch((err) => console.log(err));
+              try {
+                const member = await interaction.guild.members.fetch(
+                  user.user_id
+                );
+                await createUserQueue(
+                  user.user_id,
+                  lobbyChannel.id,
+                  lobbyChannel.name,
+                  interaction.user.id
+                )
+                  .then(() => console.log("Criando"))
+                  .catch((err) => console.log(err));
 
-              // ADICIONA CARGO
-              await member.roles
-                .add(lobby[0].role_id)
-                .catch((err) => console.log("não tem role pra adicionar")),
-                // MOVE DE SALA
-                await member.voice
-                  .setChannel(lobbyChannel.id)
-                  .catch((err) => console.log("usuario não está no canal")),
-                await updateInMatch(user.user_id, true);
-              await updateUserChannel(user.user_id, lobbyChannel.id);
-              await updateUserRole(user.user_id, lobby[0].role_id);
+                // ADICIONA CARGO
+                await member.roles
+                  .add(lobby[0].role_id)
+                  .catch((err) => console.log("não tem role pra adicionar")),
+                  // MOVE DE SALA
+                  await member.voice
+                    .setChannel(lobbyChannel.id)
+                    .catch((err) => console.log("usuario não está no canal")),
+                  await updateInMatch(user.user_id, true);
+                await updateUserChannel(user.user_id, lobbyChannel.id);
+                await updateUserRole(user.user_id, lobby[0].role_id);
+              } catch (error) {
+                console.log(error);
+              }
             }
             await interaction
               .followUp({
