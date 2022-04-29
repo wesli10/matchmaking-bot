@@ -23,12 +23,7 @@ export default new Command({
         "As filas estão fechada no momento, tente novamente em outro horário!"
       );
 
-    if (
-      admin.includes(role1) ||
-      admin.includes(role2) ||
-      admin.includes(role3) ||
-      admin.includes(roleTeste)
-    ) {
+    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       clear(interaction);
       interaction
         .followUp({
