@@ -69,7 +69,7 @@ export class ExtendedClient extends Client {
     });
   }
 
-  // Connection to Supabase
+  // DB PRODUÇÃO
   connectToDataBase() {
     const options = {
       schema: "public",
@@ -85,4 +85,21 @@ export class ExtendedClient extends Client {
     );
     return supabase;
   }
+
+  // // DB DEV
+  // connectToDataBase() {
+  //   const options = {
+  //     schema: "public",
+  //     headers: { "x-my-custom-header": "my-app-name" },
+  //     autoRefreshToken: true,
+  //     persistSession: true,
+  //     detectSessionInUrl: true,
+  //   };
+  //   const supabase = createClient(
+  //     "https://avgtipfdidvibjzwjavr.supabase.co",
+  //     process.env.db_dev_url,
+  //     options
+  //   );
+  //   return supabase;
+  // }
 }

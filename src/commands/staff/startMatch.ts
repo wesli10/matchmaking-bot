@@ -24,11 +24,25 @@ export default new Command({
     },
   ],
   run: async ({ interaction }) => {
+    const embedWrongChannel = new MessageEmbed()
+      .setTitle("Negativo!")
+      .setColor("#fd4a5f")
+      .setDescription("Este Canal não pode receber comandos!");
+
     const qtdPlayers = interaction.options.getNumber("jogadores");
     const channelMod_id = interaction.channelId;
     const channelmod = interaction.guild.channels.cache.get(channelMod_id);
     const qtdQueue = await fetchUsersInQueue();
     const lobby = await fetchChannels(channelMod_id);
+    if (!lobby[0]) {
+      await interaction.editReply({
+        content: "⠀",
+        embeds: [embedWrongChannel],
+      });
+      setTimeout(() => interaction.deleteReply(), 3000);
+
+      return;
+    }
     const lobbyChannel = interaction.guild.channels.cache.get(
       lobby[0].channel_id
     );
@@ -40,9 +54,9 @@ export default new Command({
 
     const embedStart = new MessageEmbed()
       .setColor("#fd4a5f")
-      .setTitle("Partida Iniciada!")
+      .setTitle(`Partida Iniciada com ${qtdPlayers} jogadores!`)
       .setDescription(`Para kickar um jogador, utilize /ffkick \n
-      Para finalizar a partida, utilize /endmatch`);
+      Para finalizar a partida, utilize /end`);
 
     const embedChannelInvalid = new MessageEmbed()
       .setColor("#fd4a5f")
@@ -70,9 +84,11 @@ export default new Command({
                   lobbyChannel.id,
                   lobbyChannel.name,
                   interaction.user.id
-                );
+                )
+                  .then(() => console.log("Criando"))
+                  .catch((err) => console.log(err));
 
-                // REMOVE CARGO
+                // ADICIONA CARGO
                 setTimeout(
                   () =>
                     member.roles
@@ -103,7 +119,6 @@ export default new Command({
                 embeds: [embedStart],
               })
               .catch((err) => console.error(err));
-            setTimeout(() => interaction.deleteReply(), 5000);
           } else {
             await interaction
               .followUp({
@@ -125,7 +140,7 @@ export default new Command({
         }
       } else {
         await interaction
-          .editReply({
+          .reply({
             content: "⠀",
             embeds: [embedChannelInvalid],
             components: [],
@@ -137,6 +152,7 @@ export default new Command({
       await interaction
         .reply({
           embeds: [embedPermission],
+          ephemeral: true,
         })
         .catch((err) => console.error(err));
       setTimeout(() => interaction.deleteReply(), 5000);

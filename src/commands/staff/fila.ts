@@ -23,7 +23,6 @@ export default new Command({
         content: `A fila está com ${queue.length} jogadores!`,
         components: [],
         embeds: [],
-        ephemeral: true,
       });
     }
   },

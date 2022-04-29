@@ -11,9 +11,7 @@ import {
   createUser,
   verifyUserState,
   removeUser,
-  fetchUsersInQueue,
   verifyUserExist,
-  clearQueue,
 } from "../../utils/db";
 
 export default new Command({
@@ -21,11 +19,7 @@ export default new Command({
   description: "Open queue to players",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const role1 = "945293155866148914";
-    const role2 = "958065673156841612";
-    const role3 = "968697582706651188";
     const queueRoom_id = "968922689190371328";
-    const roleTeste = "965501155016835085";
 
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
@@ -55,12 +49,7 @@ export default new Command({
         "❌❌ Você não tem permissão para usar esse comando! ❌❌"
       );
 
-    if (
-      admin.includes(role1) ||
-      admin.includes(role2) ||
-      admin.includes(role3) ||
-      admin.includes(roleTeste)
-    ) {
+    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
       interaction
         .followUp({
           content: "⠀",
@@ -77,7 +66,9 @@ export default new Command({
         components: [buttons],
       });
 
-      const collector = interaction.channel.createMessageComponentCollector({});
+      const collector = interaction.channel.createMessageComponentCollector({
+        componentType: "BUTTON",
+      });
       collector.on("collect", async (btnInt: ButtonInteraction) => {
         try {
           console.log(`[${btnInt.user.id}]`, "getting userState");
@@ -115,14 +106,11 @@ export default new Command({
               break;
             case "leave_queue":
               if (userExist.length === 1 && player.length === 1) {
-                await btnInt.deferReply({
-                  ephemeral: true,
-                  fetchReply: false,
-                });
                 try {
-                  await btnInt.editReply({
+                  await btnInt.reply({
                     content: "❌ VOCÊ SAIU DA FILA ❌",
                     components: [],
+                    ephemeral: true,
                   });
                   await removeUser(btnInt.user.id);
                 } catch (err) {

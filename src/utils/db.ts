@@ -153,3 +153,9 @@ export async function removeUser(user_id) {
   const { data } = await db.from("users").delete().match({ user_id: user_id });
   return data;
 }
+
+export async function fetchToCSV() {
+  const { data } = await db.from("users_queue").select("*").csv();
+
+  return data;
+}
