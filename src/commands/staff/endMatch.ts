@@ -23,6 +23,15 @@ export default new Command({
     ) {
       const channelMod_id = interaction.channelId;
       const lobby = await fetchChannels(channelMod_id);
+      if (!lobby[0]) {
+        await interaction.editReply({
+          content: "⠀!",
+          embeds: [embedPermission],
+        });
+        setTimeout(() => interaction.deleteReply(), 3000);
+
+        return;
+      }
       const lobbyChannel = interaction.guild.channels.cache.get(
         lobby[0].channel_id
       );
@@ -32,12 +41,13 @@ export default new Command({
         .setTitle(`${lobbyChannel.name} - Partida Encerrada`)
         .setDescription(
           `Essa partida foi encerrada. Todos os jogadores foram registrados em meu banco de dados, e removidos da call.\n\n
-      Para chamar mais jogadores na fila, digite /startmatch `
+      Para chamar mais jogadores na fila, digite /start `
         );
       const embedChannelInvalid = new MessageEmbed()
         .setColor("#fd4a5f")
         .setTitle("Channel Invalid!")
         .setDescription(`${lobbyChannel.name} is not a lobby channel!`);
+
       if (
         lobbyChannel.type === "GUILD_VOICE" ||
         lobbyChannel.type === "GUILD_STAGE_VOICE"
@@ -46,25 +56,30 @@ export default new Command({
           await fetchUserInMatch(lobbyChannel.id).then((data) => {
             data.map((p) => {
               const member = interaction.guild.members.cache.get(p.user_id);
+
+              try {
+                // MOVE DE SALA
+                setTimeout(
+                  () =>
+                    member.voice
+                      .setChannel(waiting_room_id)
+                      .catch((err) => "usuario não está na sala"),
+                  1000
+                );
+
+                // REMOVE CARGO
+                setTimeout(
+                  () =>
+                    member.roles
+                      .remove(p.role_id)
+                      .catch((err) => "Não conseguiu remover o cargo"),
+                  1000
+                );
+              } catch (error) {
+                console.log(error);
+              }
+
               removeUser(p.user_id);
-
-              // MOVE DE SALA
-              setTimeout(
-                () =>
-                  member.voice
-                    .setChannel(waiting_room_id)
-                    .catch((err) => console.error(err)),
-                1000
-              );
-
-              // REMOVE CARGO
-              setTimeout(
-                () =>
-                  member.roles
-                    .remove(p.role_id)
-                    .catch((err) => console.error(err)),
-                1000
-              );
             });
           });
           await interaction
@@ -72,7 +87,6 @@ export default new Command({
               embeds: [embedEndMatch],
             })
             .catch((err) => console.error(err));
-          setTimeout(() => interaction.deleteReply(), 5000);
         } else {
           await interaction
             .editReply({
