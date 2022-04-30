@@ -55,17 +55,23 @@ export default new Command({
         if (lobby.length != 0 && lobby[0].text_channel_id == channelMod_id) {
           const users = await fetchUserInMatch(lobbyChannel.id);
           for (const user of users) {
-            const member = await interaction.guild.members.fetch(user.user_id);
+            try {
+              const member = await interaction.guild.members.fetch(
+                user.user_id
+              );
 
-            // MOVE DE SALA
-            await member.voice
-              .setChannel(waiting_room_id)
-              .catch((err) => "usuario não está na sala"),
-              // REMOVE CARGO
-              await member.roles
-                .remove(user.role_id)
-                .catch((err) => "Não conseguiu remover o cargo"),
-              await removeUser(user.user_id);
+              // MOVE DE SALA
+              await member.voice
+                .setChannel(waiting_room_id)
+                .catch((err) => "usuario não está na sala"),
+                // REMOVE CARGO
+                await member.roles
+                  .remove(user.role_id)
+                  .catch((err) => "Não conseguiu remover o cargo"),
+                await removeUser(user.user_id);
+            } catch (error) {
+              console.log(error);
+            }
           }
           await interaction
             .followUp({
