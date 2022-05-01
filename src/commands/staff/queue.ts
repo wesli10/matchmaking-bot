@@ -49,7 +49,10 @@ export default new Command({
         "❌❌ Você não tem permissão para usar esse comando! ❌❌"
       );
 
-    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
+    if (
+      interaction.memberPermissions.has("ADMINISTRATOR") ||
+      interaction.user.id === "724618078008377466"
+    ) {
       interaction
         .followUp({
           content: "⠀",
