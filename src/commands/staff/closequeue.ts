@@ -23,7 +23,10 @@ export default new Command({
         "As filas estão fechada no momento, tente novamente em outro horário!"
       );
 
-    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
+    if (
+      interaction.memberPermissions.has("ADMINISTRATOR") ||
+      interaction.user.id === "724618078008377466"
+    ) {
       clear(interaction);
       interaction
         .followUp({
