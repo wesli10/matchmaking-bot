@@ -94,33 +94,37 @@ export default new Command({
                 console.log(`[${btnInt.user.id}]`, "created user!");
 
                 console.log(`[${btnInt.user.id}]`, "replying");
-                await btnInt.editReply({
+                await btnInt.followUp({
                   content: "🎇 VOCÊ ENTROU NA FILA 🎇",
                   components: [],
+                  ephemeral: true,
                 });
                 console.log(`[${btnInt.user.id}]`, "replied!");
               } else {
-                await btnInt.editReply({
+                await btnInt.followUp({
                   content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
                   components: [],
+                  ephemeral: true,
                 });
               }
               break;
             case "leave_queue":
               if (userExist.length === 1 && player.length === 1) {
                 try {
-                  await btnInt.editReply({
+                  await btnInt.followUp({
                     content: "❌ VOCÊ SAIU DA FILA ❌",
                     components: [],
+                    ephemeral: true,
                   });
                   await removeUser(btnInt.user.id);
                 } catch (err) {
                   console.log(err);
                 }
               } else {
-                await btnInt.editReply({
+                await btnInt.followUp({
                   content: " ❌ VOCÊ NÃO ESTÁ NA FILA ❌",
                   components: [],
+                  ephemeral: true,
                 });
               }
               break;
