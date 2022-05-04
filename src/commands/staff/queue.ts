@@ -44,7 +44,10 @@ async function handleButtonInteraction(btnInt: ButtonInteraction) {
   };
 
   try {
-    await btnInt.deferReply({ ephemeral: true, fetchReply: true });
+    const message = await btnInt.deferReply({
+      ephemeral: true,
+      fetchReply: true,
+    });
 
     log("Iniciando ação do botão", btnInt.customId);
     const player = await verifyUserState(btnInt.user.id, false);
@@ -60,10 +63,9 @@ async function handleButtonInteraction(btnInt: ButtonInteraction) {
         if (isInQueue) {
           log("User already in queue");
 
-          await btnInt.reply({
+          await btnInt.editReply({
             content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
             components: [],
-            ephemeral: true,
           });
           return;
         }
@@ -72,10 +74,9 @@ async function handleButtonInteraction(btnInt: ButtonInteraction) {
         await createUser(btnInt.user.id, btnInt.user.tag);
 
         log("user added to queue.");
-        await btnInt.reply({
+        await btnInt.editReply({
           content: "🎇 VOCÊ ENTROU NA FILA 🎇",
           components: [],
-          ephemeral: true,
         });
         log("message replied.");
         break;
@@ -84,20 +85,18 @@ async function handleButtonInteraction(btnInt: ButtonInteraction) {
         if (!isInQueue) {
           log("User not in queue");
 
-          await btnInt.reply({
+          await btnInt.editReply({
             content: " ❌ VOCÊ NÃO ESTÁ NA FILA ❌",
             components: [],
-            ephemeral: true,
           });
           return;
         }
         log("removing user from queue");
         await removeUser(btnInt.user.id);
         log("user removed from queue");
-        await btnInt.reply({
+        await btnInt.editReply({
           content: "❌ VOCÊ SAIU DA FILA ❌",
           components: [],
-          ephemeral: true,
         });
         log("message replied.");
         break;
@@ -105,10 +104,9 @@ async function handleButtonInteraction(btnInt: ButtonInteraction) {
   } catch (error) {
     log("Error!", error);
 
-    await btnInt.reply({
+    await btnInt.editReply({
       content: "⚠️ Encontramos um error, tente novamente.",
       components: [],
-      ephemeral: true,
     });
   }
 }
@@ -150,6 +148,10 @@ export default new Command({
     });
 
     collector.on("collect", handleButtonInteraction);
+
+    collector.on("end", (collected) => {
+      console.log(`Ended collecting ${collected.size} items`);
+    });
 
     // Now that everything is setup, send message
 
