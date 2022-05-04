@@ -121,7 +121,7 @@ export default new Command({
     const queueRoom_id = "968922689190371328";
 
     if (
-      !interaction.memberPermissions.has("ADMINISTRATOR") ||
+      !interaction.memberPermissions.has("ADMINISTRATOR") &&
       interaction.user.id !== "724618078008377466"
     ) {
       interaction
