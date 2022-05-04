@@ -74,7 +74,6 @@ export default new Command({
       });
       collector.on("collect", async (btnInt: ButtonInteraction) => {
         try {
-          await btnInt.deferUpdate();
           console.log(`[${btnInt.user.id}]`, "getting userState");
           const player = await verifyUserState(btnInt.user.id, false);
 
@@ -94,14 +93,14 @@ export default new Command({
                 console.log(`[${btnInt.user.id}]`, "created user!");
 
                 console.log(`[${btnInt.user.id}]`, "replying");
-                await btnInt.followUp({
+                await btnInt.reply({
                   content: "🎇 VOCÊ ENTROU NA FILA 🎇",
                   components: [],
                   ephemeral: true,
                 });
                 console.log(`[${btnInt.user.id}]`, "replied!");
               } else {
-                await btnInt.followUp({
+                await btnInt.reply({
                   content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
                   components: [],
                   ephemeral: true,
@@ -111,7 +110,7 @@ export default new Command({
             case "leave_queue":
               if (userExist.length === 1 && player.length === 1) {
                 try {
-                  await btnInt.followUp({
+                  await btnInt.reply({
                     content: "❌ VOCÊ SAIU DA FILA ❌",
                     components: [],
                     ephemeral: true,
@@ -121,7 +120,7 @@ export default new Command({
                   console.log(err);
                 }
               } else {
-                await btnInt.followUp({
+                await btnInt.reply({
                   content: " ❌ VOCÊ NÃO ESTÁ NA FILA ❌",
                   components: [],
                   ephemeral: true,
