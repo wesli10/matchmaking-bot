@@ -74,6 +74,7 @@ export default new Command({
       });
       collector.on("collect", async (btnInt: ButtonInteraction) => {
         try {
+          await btnInt.deferUpdate();
           console.log(`[${btnInt.user.id}]`, "getting userState");
           const player = await verifyUserState(btnInt.user.id, false);
 
