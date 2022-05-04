@@ -44,6 +44,8 @@ async function handleButtonInteraction(btnInt: ButtonInteraction) {
   };
 
   try {
+    await btnInt.deferReply({ ephemeral: true, fetchReply: true });
+
     log("Iniciando ação do botão", btnInt.customId);
     const player = await verifyUserState(btnInt.user.id, false);
     const userExist = await verifyUserExist(btnInt.user.id);
