@@ -38,15 +38,15 @@ const EMBED_PERMISSIONS = new MessageEmbed()
   .setTitle("Negativo")
   .setDescription("❌❌ Você não tem permissão para usar esse comando! ❌❌");
 
-async function handleButtonInteraction(btnInt: ButtonInteraction) {
+export async function handleButtonInteraction(btnInt: ButtonInteraction) {
   const log = (...message: any[]) => {
     console.log(`[${btnInt.user.username}] --`, ...message);
   };
 
   try {
-    const message = await btnInt.deferReply({
+    await btnInt.deferReply({
       ephemeral: true,
-      fetchReply: true,
+      fetchReply: false,
     });
 
     log("Iniciando ação do botão", btnInt.customId);
@@ -147,7 +147,8 @@ export default new Command({
       componentType: "BUTTON",
     });
 
-    collector.on("collect", handleButtonInteraction);
+    // Handling on interaction
+    // collector.on("collect", handleButtonInteraction);
 
     collector.on("end", (collected) => {
       console.log(`Ended collecting ${collected.size} items`);
