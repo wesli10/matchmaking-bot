@@ -10,28 +10,28 @@ export default new Command({
   userPermissions: ["ADMINISTRATOR"],
   options: [
     {
-      name: "Dia",
+      name: "dia",
       description: "Day of the month",
       type: "STRING",
       required: true,
     },
     {
-      name: "Mês",
+      name: "mes",
       description: "Month of the year",
       type: "STRING",
       required: true,
     },
     {
-      name: "Ano",
+      name: "ano",
       description: "Year",
       type: "STRING",
       required: true,
     },
   ],
   run: async ({ interaction }) => {
-    const day = interaction.options.getString("day");
-    const month = interaction.options.getString("month");
-    const year = interaction.options.getString("year");
+    const day = interaction.options.getString("dia");
+    const month = interaction.options.getString("mes");
+    const year = interaction.options.getString("ano");
 
     const data = await fetchToCSV(day, month, year);
 
@@ -52,6 +52,7 @@ export default new Command({
       });
     } else {
       interaction.editReply({
+        content: "Você não tem permissão para executar este comando!",
         embeds: [embedPermission],
       });
     }
