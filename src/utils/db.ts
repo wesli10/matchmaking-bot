@@ -154,8 +154,12 @@ export async function removeUser(user_id) {
   return data;
 }
 
-export async function fetchToCSV() {
-  const { data } = await db.from("users_queue").select("*").csv();
+export async function fetchToCSV(day: string, month: string, year: string) {
+  const { data } = await db
+    .from("users_queue")
+    .select("*")
+    .gte("created_at", `${year}-${month}-${day} 19:00:00`)
+    .csv();
 
   return data;
 }

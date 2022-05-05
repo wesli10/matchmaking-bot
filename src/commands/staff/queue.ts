@@ -63,7 +63,7 @@ export default new Command({
         queueRoom_id
       ) as TextChannel;
 
-      channel.send({
+      await channel.send({
         content: "Fila Aberta!",
         embeds: [embedLobby],
         components: [buttons],
