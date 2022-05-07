@@ -82,7 +82,7 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
         break;
 
       case "leave_queue":
-        if (!isInQueue) {
+        if (!isInQueue || player.length !== 1) {
           log("User not in queue");
 
           await btnInt.editReply({
