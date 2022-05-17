@@ -11,8 +11,8 @@ export default new Command({
     const role1 = "945293155866148914";
     const role2 = "958065673156841612";
     const role3 = "968697582706651188";
-    const waiting_room_id = "968933862606503986";
     const roleTeste = "965501155016835085";
+    const waiting_room_id = "968197006117986324";
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (
@@ -68,7 +68,7 @@ export default new Command({
                 await member.roles
                   .remove(user.role_id)
                   .catch((err) => "Não conseguiu remover o cargo"),
-                await removeUser(user.user_id);
+                await removeUser("users", user.user_id);
             } catch (error) {
               console.log(error);
             }

@@ -1,44 +1,41 @@
+import { Command } from "../../structures/Command";
 import {
   ButtonInteraction,
-  Client,
   MessageActionRow,
   MessageButton,
   MessageEmbed,
+  ReactionCollector,
   TextChannel,
 } from "discord.js";
-import { Command } from "../../structures/Command";
 import {
-  createUser,
   verifyUserState,
-  removeUser,
   verifyUserExist,
+  removeUser,
+  createUser4v4,
 } from "../../utils/db";
+import { embedPermission } from "../../utils/embeds";
+
+const StartQueue = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Sejam bem vindos as salas premiadas de 4x4 da SNACKCLUB!")
+  .setDescription(
+    "Para entrar na fila, aperte o botão abaixo e aguarde na chamada de voz"
+  );
 
 const BUTTONS = new MessageActionRow().addComponents(
   new MessageButton()
-    .setCustomId("enter_queue")
+    .setCustomId("enter_queue_4v4")
     .setEmoji("🎮")
     .setLabel("Entrar na Fila")
     .setStyle("SUCCESS"),
   new MessageButton()
-    .setCustomId("leave_queue")
+    .setCustomId("leave_queue_4v4")
     .setEmoji("❌")
     .setLabel("Sair da Fila")
     .setStyle("DANGER")
 );
 
-const EMBED_LOBBY = new MessageEmbed().setColor("#fd4a5f").setDescription(
-  `Seja bem-vindo à fila de Sala Premiada na SNACKCLUB.\n 
-    Aqui você poderá aguardar na fila para participar de um dos nossos lobbies. \n 
-    Clique em 🎮 Entrar para entrar na fila, e em ❌ Sair para sair da fila. \n `
-);
-
-const EMBED_PERMISSIONS = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setTitle("Negativo")
-  .setDescription("❌❌ Você não tem permissão para usar esse comando! ❌❌");
-
-export async function handleButtonInteraction(btnInt: ButtonInteraction) {
+export async function handleButtonInteraction_4v4(btnInt: ButtonInteraction) {
   const log = (...message: any[]) => {
     console.log(`[${btnInt.user.username}] --`, ...message);
   };
@@ -50,8 +47,8 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
     });
 
     log("Iniciando ação do botão", btnInt.customId);
-    const player = await verifyUserState("users", btnInt.user.id, false);
-    const userExist = await verifyUserExist("users", btnInt.user.id);
+    const player = await verifyUserState("users_4v4", btnInt.user.id, false);
+    const userExist = await verifyUserExist("users_4v4", btnInt.user.id);
     log("Requests feitos");
 
     const isInQueue = userExist.length !== 0 || player.length !== 0;
@@ -59,7 +56,7 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
     log("Is in queue=", isInQueue);
 
     switch (btnInt.customId) {
-      case "enter_queue":
+      case "enter_queue_4v4":
         if (isInQueue) {
           log("User already in queue");
 
@@ -71,7 +68,7 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
         }
 
         log("adding user to queue");
-        await createUser(btnInt.user.id, btnInt.user.tag);
+        await createUser4v4(btnInt.user.id, btnInt.user.tag);
 
         log("user added to queue.");
         await btnInt.editReply({
@@ -81,7 +78,7 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
         log("message replied.");
         break;
 
-      case "leave_queue":
+      case "leave_queue_4v4":
         if (!isInQueue || player.length !== 1) {
           log("User not in queue");
 
@@ -92,7 +89,7 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
           return;
         }
         log("removing user from queue");
-        await removeUser("users", btnInt.user.id);
+        await removeUser("users_4v4", btnInt.user.id);
         log("user removed from queue");
         await btnInt.editReply({
           content: "❌ VOCÊ SAIU DA FILA ❌",
@@ -112,8 +109,8 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
 }
 
 export default new Command({
-  name: "abrirfila",
-  description: "Open queue to players",
+  name: "fila4v4",
+  description: "Entra na fila para jogar 4v4",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
     const queueRoom_id = "964294426543390791";
@@ -124,7 +121,7 @@ export default new Command({
     ) {
       interaction
         .editReply({
-          embeds: [EMBED_PERMISSIONS],
+          embeds: [embedPermission],
         })
         .then(() => setTimeout(() => interaction.deleteReply(), 3000));
 
@@ -136,7 +133,6 @@ export default new Command({
       .followUp({
         content: "⠀",
       })
-      // then delete right after...
       .then(() => interaction.deleteReply());
 
     const channel = interaction.guild.channels.cache.get(
@@ -147,18 +143,12 @@ export default new Command({
       componentType: "BUTTON",
     });
 
-    // Handling on interaction
-    // collector.on("collect", handleButtonInteraction);
-
     collector.on("end", (collected) => {
       console.log(`Ended collecting ${collected.size} items`);
     });
 
-    // Now that everything is setup, send message
-
     const message = await channel.send({
-      content: "Fila Aberta!",
-      embeds: [EMBED_LOBBY],
+      embeds: [StartQueue],
       components: [BUTTONS],
     });
   },

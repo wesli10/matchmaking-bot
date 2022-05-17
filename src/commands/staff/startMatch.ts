@@ -76,7 +76,7 @@ export default new Command({
       ) {
         if (lobby.length != 0 && lobby[0].text_channel_id == channelMod_id) {
           if (qtdQueue.length >= qtdPlayers) {
-            const users = await fetchUsersQtd(qtdPlayers);
+            const users = await fetchUsersQtd("users", qtdPlayers);
             for (const user of users) {
               try {
                 const member = await interaction.guild.members.fetch(
@@ -99,7 +99,7 @@ export default new Command({
                   await member.voice
                     .setChannel(lobbyChannel.id)
                     .catch((err) => console.log("usuario não está no canal")),
-                  await updateInMatch(user.user_id, true);
+                  await updateInMatch("users", user.user_id, true);
                 await updateUserChannel(user.user_id, lobbyChannel.id);
                 await updateUserRole(user.user_id, lobby[0].role_id);
               } catch (error) {
