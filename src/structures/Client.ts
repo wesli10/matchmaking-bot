@@ -86,7 +86,7 @@ export class ExtendedClient extends Client {
     return supabase;
   }
 
-  // // DB DEV
+  // DB DEV
   // connectToDataBase() {
   //   const options = {
   //     schema: "public",

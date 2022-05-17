@@ -1,3 +1,4 @@
+import { table } from "console";
 import { ExtendedClient } from "../structures/Client";
 
 const client = new ExtendedClient();
@@ -17,9 +18,9 @@ export async function fetchUser(user_id) {
   return data;
 }
 
-export async function fetchUsersQtd(qtd) {
+export async function fetchUsersQtd(table, qtd) {
   const { data } = await await db
-    .from("users")
+    .from(table)
     .select("*")
     .eq("in_match", false)
     .limit(qtd);
@@ -35,12 +36,33 @@ export async function createUser(user_id, name) {
   return data;
 }
 
-export async function setwaitingRoomConfig(guild_id, channel_id) {
-  const { data } = await db.from("channels_config").insert({
-    guild_id: guild_id,
-    channel_id: channel_id,
-    channel_type: "waiting_room",
+export async function createUser4v4(user_id, name) {
+  const { data } = await db.from("users_4v4").insert({
+    user_id: user_id,
+    name: name,
+    in_match: false,
   });
+  return data;
+}
+
+export async function updateModerator(user_id, moderator_id) {
+  const { data } = await db
+    .from("users_4v4")
+    .update({
+      moderator_id: moderator_id,
+    })
+    .match({
+      user_id: user_id,
+    });
+  return data;
+}
+
+export async function removeUsersFromCategory(category_id) {
+  const { data } = await db
+    .from("users_4v4")
+    .delete()
+    .eq("category_id", category_id);
+
   return data;
 }
 
@@ -59,27 +81,24 @@ export async function createUserQueue(
   return data;
 }
 
-export async function verifyUserState(user_id, state) {
+export async function verifyUserState(table, user_id, state) {
   const { data } = await db
-    .from("users")
+    .from(table)
     .select("user_id")
     .eq("user_id", user_id)
     .eq("in_match", state);
 
   return data;
 }
-export async function verifyUserElegibleToMatch() {
-  const { data } = await db
-    .from("users")
-    .select("user_id")
-    .eq("in_match", false);
+export async function verifyUserElegibleToMatch(table) {
+  const { data } = await db.from(table).select("user_id").eq("in_match", false);
 
   return data;
 }
 
-export async function verifyUserInMatch(user_id) {
+export async function verifyUserInMatch(table, user_id) {
   const { data } = await db
-    .from("users")
+    .from(table)
     .select("*")
     .eq("in_match", true)
     .match({ user_id: user_id });
@@ -87,11 +106,52 @@ export async function verifyUserInMatch(user_id) {
   return data;
 }
 
-export async function updateInMatch(user_id, state) {
+export async function create4v4Lobby(
+  user_id1,
+  name1,
+  user_id2,
+  name2,
+  category_id,
+  moderator_id
+) {
+  const { data } = await db.from("lobbys").insert([
+    {
+      time1: [{ user_id: user_id1, name: name1 }],
+      time2: [{ user_id: user_id2, name: name2 }],
+      category_id: category_id,
+      moderator_id: moderator_id,
+    },
+  ]);
+  return data;
+}
+
+export async function updateInMatch(table, user_id, state) {
   const { data } = await db
-    .from("users")
+    .from(table)
     .update({
       in_match: state,
+    })
+    .match({ user_id: user_id });
+
+  return data;
+}
+
+export async function updateWinnerAndFinishTime(winner, category_id) {
+  const { data } = await db
+    .from("lobbys")
+    .update({
+      winner: winner,
+      finished_at: new Date(),
+    })
+    .match({ category_id: category_id });
+  return data;
+}
+
+export async function updateUserTeam(user_id, team) {
+  const { data } = await db
+    .from("users_4v4")
+    .update({
+      team: team,
     })
     .match({ user_id: user_id });
 
@@ -103,6 +163,17 @@ export async function updateUserRole(user_id, role_id) {
     .from("users")
     .update({
       role_id: role_id,
+    })
+    .match({ user_id: user_id });
+
+  return data;
+}
+
+export async function updateCategory(user_id, category_id) {
+  const { data } = await db
+    .from("users_4v4")
+    .update({
+      category_id: category_id,
     })
     .match({ user_id: user_id });
 
@@ -128,6 +199,15 @@ export async function fetchUserInMatch(channel_id) {
   return data;
 }
 
+export async function fetchCategory(moderator_id) {
+  const { data } = await db
+    .from("users_4v4")
+    .select("category_id")
+    .eq("moderator_id", moderator_id);
+
+  return data;
+}
+
 export async function fetchChannels(channel_id) {
   const { data } = await db
     .from("channels_config")
@@ -137,8 +217,17 @@ export async function fetchChannels(channel_id) {
   return data;
 }
 
-export async function verifyUserExist(user_id) {
-  const { data } = await db.from("users").select("*").eq("user_id", user_id);
+export async function fetchUsersInMatch(category_id) {
+  const { data } = await db
+    .from("users_4v4")
+    .select("*")
+    .match({ category_id: category_id });
+
+  return data;
+}
+
+export async function verifyUserExist(table, user_id) {
+  const { data } = await db.from(table).select("*").eq("user_id", user_id);
 
   return data;
 }
@@ -149,8 +238,8 @@ export async function clearQueue() {
   return data;
 }
 
-export async function removeUser(user_id) {
-  const { data } = await db.from("users").delete().match({ user_id: user_id });
+export async function removeUser(table, user_id) {
+  const { data } = await db.from(table).delete().match({ user_id: user_id });
   return data;
 }
 

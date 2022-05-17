@@ -32,7 +32,7 @@ export default new Command({
       admin.includes(role3) ||
       admin.includes(roleTeste)
     ) {
-      const member = interaction.guild.members.cache.get(user.id);
+      const member = await interaction.guild.members.fetch(user.id);
       const player = await fetchUser(user.id);
       if (!player[0]) {
         await interaction.editReply({
@@ -41,25 +41,18 @@ export default new Command({
 
         return;
       }
-
-      member.voice
-        .disconnect()
-        .then(() => {
-          interaction.editReply({
+      try {
+        await member.voice.disconnect().then(async () => {
+          await interaction.editReply({
             content: `⠀`,
             embeds: [embedKick],
             components: [],
           });
-          removeUser(user.id);
-          setTimeout(() => interaction.deleteReply(), 7000);
-        })
-        .catch((err) => {
-          console.error(err);
+          await removeUser("users", user.id);
         });
-      try {
-        member.roles.remove(player[0].role_id);
-      } catch (err) {
-        console.error(err);
+        await member.roles.remove(player[0].role_id);
+      } catch (error) {
+        console.log(error);
       }
     }
   },
