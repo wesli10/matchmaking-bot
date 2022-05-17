@@ -1,6 +1,8 @@
 import { CommandInteractionOptionResolver, Message } from "discord.js";
 import { client } from "..";
 import { handleButtonInteraction } from "../commands/staff/queue";
+import { handleButtonInteraction_4v4 } from "../commands/staff/queue_lobby";
+import { handleButtonInteractionPlayerMenu } from "../commands/staff/startLobby";
 import { Event } from "../structures/Event";
 import { ExtendedInteraction } from "../typings/Command";
 
@@ -26,6 +28,16 @@ export default new Event("interactionCreate", async (interaction) => {
       interaction.customId === "leave_queue"
     ) {
       await handleButtonInteraction(interaction);
+    } else if (
+      interaction.customId === "enter_queue_4v4" ||
+      interaction.customId === "leave_queue_4v4"
+    ) {
+      await handleButtonInteraction_4v4(interaction);
+    } else if (
+      interaction.customId === "call_mod" ||
+      interaction.customId === "finish_match"
+    ) {
+      await handleButtonInteractionPlayerMenu(interaction);
     } else {
       console.warn("unknown button interaction", interaction.customId);
     }
