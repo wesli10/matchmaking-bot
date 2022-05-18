@@ -138,10 +138,11 @@ export async function handleButtonInteractionPlayerMenu(
               }
             }
             await removeUsersFromCategory(category_id);
-            await deleteCategory(btnInt);
+            setTimeout(async () => await deleteCategory(btnInt), 3000);
             console.log(`Collected ${collected.size} items`);
           }
         );
+        break;
     }
   } catch (error) {
     log("Error!", error);
@@ -175,7 +176,6 @@ export default new Command({
     }
     const players = shuffleArray(dataAll);
     const team2 = players.splice(0, metade);
-
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (
