@@ -112,13 +112,13 @@ export async function handleButtonInteractionPlayerMenu(
 
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
-            if (reaction.count === 3) {
+            if (reaction.count === 6) {
               updateWinnerAndFinishTime("Time 1", category_id);
               collectorReaction.stop();
             }
             console.log(reaction.count);
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-            if (reaction.count === 3) {
+            if (reaction.count === 6) {
               updateWinnerAndFinishTime("Time 2", category_id);
               collectorReaction.stop();
             }
@@ -171,9 +171,9 @@ export default new Command({
   description: "start 4v4 match with player in queue",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const qtd = 4;
+    const qtd = 8;
     const dataAll = await fetchUsersQtd("users_4v4", qtd);
-    const metade = qtd / 2;
+    const metade = qtd / 4;
     if (dataAll.length < qtd) {
       await interaction.editReply({
         content: "❌ Não há jogadores suficientes na fila.",
