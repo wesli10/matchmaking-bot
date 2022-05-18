@@ -85,7 +85,7 @@ export async function handleButtonInteractionPlayerMenu(
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
         await btnInt.editReply({
-          content: `<@&${roleTeste}>`,
+          content: `<@&${968697582706651188}>`,
         });
         break;
       case "finish_match":
@@ -113,16 +113,21 @@ export async function handleButtonInteractionPlayerMenu(
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
             if (reaction.count >= 6) {
-              updateWinnerAndFinishTime("Time 1", category_id);
+              await updateWinnerAndFinishTime("Time 1", category_id);
               collectorReaction.stop();
             }
             console.log(reaction.count);
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
             if (reaction.count >= 6) {
-              updateWinnerAndFinishTime("Time 2", category_id);
+              await updateWinnerAndFinishTime("Time 2", category_id);
               collectorReaction.stop();
             }
-          } else if (reaction.emoji.name === "❌" && !user.bot) {
+            console.log(reaction.count);
+          } else if (
+            reaction.emoji.name === "❌" &&
+            !user.bot &&
+            user.id === "968697582706651188"
+          ) {
             sendMessage.delete();
             btnInt.channel.send({
               content: "Partida cancelada!",
@@ -202,6 +207,18 @@ export default new Command({
             {
               id: interaction.guild.id,
               deny: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "945293155866148914",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "958065673156841612",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "968697582706651188",
+              allow: "VIEW_CHANNEL",
             },
           ],
         }
