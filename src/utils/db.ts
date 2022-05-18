@@ -199,11 +199,11 @@ export async function fetchUserInMatch(channel_id) {
   return data;
 }
 
-export async function fetchCategory(moderator_id) {
+export async function fetchCategory(user_id) {
   const { data } = await db
     .from("users_4v4")
     .select("category_id")
-    .eq("moderator_id", moderator_id);
+    .eq("user_id", user_id);
 
   return data;
 }

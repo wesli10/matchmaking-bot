@@ -6,6 +6,9 @@ import {
   MessageButton,
   VoiceChannel,
   Interaction,
+  MessageReaction,
+  User,
+  ReactionCollector,
 } from "discord.js";
 import { embedPermission } from "../../utils/embeds";
 import {
@@ -42,6 +45,20 @@ const StartLobby = new MessageEmbed()
     "A sua sala premiada irá iniciar em instantes.\n Se encontrar problemas ou precisar reportar um jogador, utilize os controles do bot"
   );
 
+const embedTime1 = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Vencedor da Partida")
+  .setDescription(
+    `O time 1 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby `
+  );
+
+const embedTime2 = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Vencedor da Partida")
+  .setDescription(
+    `O time 2 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby `
+  );
+
 const FinishLobby = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("A partida foi finalizada!")
@@ -61,6 +78,13 @@ const BUTTONS = new MessageActionRow().addComponents(
     .setStyle("DANGER")
 );
 
+const EMBEDCALLMOD = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Chamando Mod")
+  .setDescription(
+    `⚠️ - UM <@&${"968697582706651188"}> foi notificado e está a caminho.\n\n jogador que fez o chamado: $`
+  );
+
 export async function handleButtonInteractionPlayerMenu(
   btnInt: ButtonInteraction
 ) {
@@ -74,6 +98,14 @@ export async function handleButtonInteractionPlayerMenu(
     category.children.forEach((channel) => channel.delete());
     category.delete();
   }
+  const EMBEDCALLMOD = new MessageEmbed()
+    .setColor("#fd4a5f")
+    .setTitle("Chamando Mod")
+    .setDescription(
+      `⚠️ - UM <@&${"968697582706651188"}> foi notificado e está a caminho.\n\n jogador que fez o chamado: ${
+        btnInt.user.tag
+      }`
+    );
 
   try {
     await btnInt.deferReply({
@@ -84,7 +116,7 @@ export async function handleButtonInteractionPlayerMenu(
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
         await btnInt.editReply({
-          content: `<@&${"968697582706651188"}>`,
+          embeds: [EMBEDCALLMOD],
         });
         break;
       case "finish_match":
@@ -106,24 +138,54 @@ export async function handleButtonInteractionPlayerMenu(
 
           return;
         }
-
+        var winnerTeam = "";
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
             if (reaction.count >= 3) {
-              await updateWinnerAndFinishTime("Time 1", category_id);
-              collectorReaction.stop();
+              winnerTeam = "Time 1";
+              const messageTime1 = await btnInt.channel.send({
+                embeds: [embedTime1],
+              });
+              messageTime1.react("✅");
+              const collectorWinner1 = messageTime1.createReactionCollector({});
+              collectorWinner1.on("collect", async (reaction, user) => {
+                const member = await btnInt.guild.members.fetch(user.id);
+                if (
+                  reaction.emoji.name === "✅" &&
+                  !user.bot &&
+                  member.permissions.has("MANAGE_MESSAGES")
+                ) {
+                  collectorReaction.stop();
+                }
+              });
             }
-            console.log(reaction.count);
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
             if (reaction.count >= 3) {
-              await updateWinnerAndFinishTime("Time 2", category_id);
-              collectorReaction.stop();
+              winnerTeam = "Time 2";
+              const messageTime2 = await btnInt.channel.send({
+                embeds: [embedTime2],
+              });
+              messageTime2.react("✅");
+              const collectorWinner2 = messageTime2.createReactionCollector({});
+              collectorWinner2.on("collect", async (reaction, user) => {
+                const member = await btnInt.guild.members.fetch(user.id);
+                if (
+                  reaction.emoji.name === "✅" &&
+                  !user.bot &&
+                  member.permissions.has("MANAGE_MESSAGES")
+                ) {
+                  try {
+                    collectorReaction.stop();
+                  } catch (error) {
+                    console.log(error);
+                  }
+                }
+              });
             }
-            console.log(reaction.count);
           } else if (
             reaction.emoji.name === "❌" &&
             !user.bot &&
-            user.id === "968697582706651188"
+            btnInt.memberPermissions.has("MANAGE_EVENTS")
           ) {
             sendMessage.delete();
             btnInt.channel.send({
@@ -133,6 +195,7 @@ export async function handleButtonInteractionPlayerMenu(
             setTimeout(() => deleteCategory(btnInt), 3000);
           }
         });
+
         collectorReaction.on(
           "end",
           async (collected, interaction: Interaction) => {
@@ -148,6 +211,7 @@ export async function handleButtonInteractionPlayerMenu(
                 console.log("Usuario não conectado");
               }
             }
+            await updateWinnerAndFinishTime(winnerTeam, category_id);
             await removeUsersFromCategory(category_id);
             setTimeout(async () => await deleteCategory(btnInt), 3000);
             console.log(`Collected ${collected.size} items`);
