@@ -33,7 +33,7 @@ function shuffleArray(arr) {
   // Retornando array com aleatoriedade
   return arr;
 }
-const waiting_room_id = "968197006117986324";
+const waiting_room_id = "968933862606503986";
 
 const StartLobby = new MessageEmbed()
   .setColor("#fd4a5f")
@@ -102,6 +102,13 @@ export async function handleButtonInteractionPlayerMenu(
         const collectorReaction = sendMessage.createReactionCollector({});
         const data = await fetchCategory(btnInt.user.id);
         const category_id = data[0].category_id;
+        if (!data[0].category_id) {
+          await btnInt.editReply("Ocorreu um erro, Tento novamente!");
+
+          setTimeout(() => btnInt.deleteReply(), 3000);
+
+          return;
+        }
 
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {

@@ -113,7 +113,7 @@ export default new Command({
   description: "Entra na fila para jogar 4v4",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const queueRoom_id = "964294426543390791";
+    const queueRoom_id = "968922689190371328";
 
     if (
       !interaction.memberPermissions.has("ADMINISTRATOR") &&
