@@ -67,10 +67,9 @@ export async function handleButtonInteractionPlayerMenu(
   const log = (...message: any[]) => {
     console.log(`[${btnInt.user.username}] --`, ...message);
   };
-
-  async function deleteCategory(btnInt) {
-    const parent = btnInt.message.channel.parent;
-    const category = await btnInt.guild.channels.cache.get(parent.id);
+  async function deleteCategory(interaction) {
+    const parent = interaction.message.channel.parent;
+    const category = await interaction.guild.channels.cache.get(parent.id);
 
     category.children.forEach((channel) => channel.delete());
     category.delete();
@@ -85,14 +84,14 @@ export async function handleButtonInteractionPlayerMenu(
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
         await btnInt.editReply({
-          content: `<@&${968697582706651188}>`,
+          content: `<@&${"968697582706651188"}>`,
         });
         break;
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
-        // delete bot reply
-        await btnInt.deleteReply();
         // display menu
+        const data = await fetchCategory(btnInt.user.id);
+        const category_id = data[0].category_id;
         const sendMessage = await btnInt.channel.send({
           embeds: [FinishLobby],
         });
@@ -100,8 +99,6 @@ export async function handleButtonInteractionPlayerMenu(
         await sendMessage.react("2️⃣");
         await sendMessage.react("❌");
         const collectorReaction = sendMessage.createReactionCollector({});
-        const data = await fetchCategory(btnInt.user.id);
-        const category_id = data[0].category_id;
         if (!data[0].category_id) {
           await btnInt.editReply("Ocorreu um erro, Tento novamente!");
 
@@ -112,13 +109,13 @@ export async function handleButtonInteractionPlayerMenu(
 
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
-            if (reaction.count >= 6) {
+            if (reaction.count >= 3) {
               await updateWinnerAndFinishTime("Time 1", category_id);
               collectorReaction.stop();
             }
             console.log(reaction.count);
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-            if (reaction.count >= 6) {
+            if (reaction.count >= 3) {
               await updateWinnerAndFinishTime("Time 2", category_id);
               collectorReaction.stop();
             }
@@ -136,7 +133,6 @@ export async function handleButtonInteractionPlayerMenu(
             setTimeout(() => deleteCategory(btnInt), 3000);
           }
         });
-
         collectorReaction.on(
           "end",
           async (collected, interaction: Interaction) => {
@@ -179,7 +175,7 @@ export default new Command({
   description: "start 4v4 match with player in queue",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const qtd = 8;
+    const qtd = 2;
     const dataAll = await fetchUsersQtd("users_4v4", qtd);
     const metade = qtd / 2;
     if (dataAll.length < qtd) {
@@ -208,18 +204,18 @@ export default new Command({
               id: interaction.guild.id,
               deny: ["VIEW_CHANNEL"],
             },
-            {
-              id: "945293155866148914",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "958065673156841612",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "968697582706651188",
-              allow: "VIEW_CHANNEL",
-            },
+            // {
+            //   id: "945293155866148914",
+            //   allow: ["VIEW_CHANNEL"],
+            // },
+            // {
+            //   id: "958065673156841612",
+            //   allow: ["VIEW_CHANNEL"],
+            // },
+            // {
+            //   id: "968697582706651188",
+            //   allow: "VIEW_CHANNEL",
+            // },
           ],
         }
       );
@@ -234,18 +230,18 @@ export default new Command({
               id: interaction.guild.id,
               deny: ["VIEW_CHANNEL"],
             },
-            {
-              id: "945293155866148914",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "958065673156841612",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "968697582706651188",
-              allow: "VIEW_CHANNEL",
-            },
+            // {
+            //   id: "945293155866148914",
+            //   allow: ["VIEW_CHANNEL"],
+            // },
+            // {
+            //   id: "958065673156841612",
+            //   allow: ["VIEW_CHANNEL"],
+            // },
+            // {
+            //   id: "968697582706651188",
+            //   allow: "VIEW_CHANNEL",
+            // },
           ],
         })
         .then(async (channel) => {
@@ -292,18 +288,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
+          // {
+          //   id: "945293155866148914",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "958065673156841612",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "968697582706651188",
+          //   allow: "VIEW_CHANNEL",
+          // },
         ],
       })) as VoiceChannel;
       for (const player of players) {
@@ -331,18 +327,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
+          // {
+          //   id: "945293155866148914",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "958065673156841612",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "968697582706651188",
+          //   allow: "VIEW_CHANNEL",
+          // },
         ],
       })) as VoiceChannel;
       for (const player of team2) {
