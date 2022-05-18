@@ -102,7 +102,7 @@ export async function handleButtonInteractionPlayerMenu(
     .setColor("#fd4a5f")
     .setTitle("Chamando Mod")
     .setDescription(
-      `⚠️ - UM <@&${"968697582706651188"}> foi notificado e está a caminho.\n\n jogador que fez o chamado: ${
+      `⚠️ - Um <@&${"968697582706651188"}> foi notificado e está a caminho.\n\n jogador que fez o chamado: ${
         btnInt.user.tag
       }`
     );
@@ -116,6 +116,7 @@ export async function handleButtonInteractionPlayerMenu(
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
         await btnInt.editReply({
+          content: `<@&${"968697582706651188"}>`,
           embeds: [EMBEDCALLMOD],
         });
         break;
@@ -144,6 +145,7 @@ export async function handleButtonInteractionPlayerMenu(
             if (reaction.count >= 3) {
               winnerTeam = "Time 1";
               const messageTime1 = await btnInt.channel.send({
+                content: `<@&${"968697582706651188"}>`,
                 embeds: [embedTime1],
               });
               messageTime1.react("✅");
@@ -153,7 +155,7 @@ export async function handleButtonInteractionPlayerMenu(
                 if (
                   reaction.emoji.name === "✅" &&
                   !user.bot &&
-                  member.permissions.has("MANAGE_MESSAGES")
+                  member.permissions.has("MODERATE_MEMBERS")
                 ) {
                   collectorReaction.stop();
                 }
@@ -163,6 +165,7 @@ export async function handleButtonInteractionPlayerMenu(
             if (reaction.count >= 3) {
               winnerTeam = "Time 2";
               const messageTime2 = await btnInt.channel.send({
+                content: `<@&${"968697582706651188"}>`,
                 embeds: [embedTime2],
               });
               messageTime2.react("✅");
@@ -172,7 +175,7 @@ export async function handleButtonInteractionPlayerMenu(
                 if (
                   reaction.emoji.name === "✅" &&
                   !user.bot &&
-                  member.permissions.has("MANAGE_MESSAGES")
+                  member.permissions.has("MODERATE_MEMBERS")
                 ) {
                   try {
                     collectorReaction.stop();
@@ -185,7 +188,7 @@ export async function handleButtonInteractionPlayerMenu(
           } else if (
             reaction.emoji.name === "❌" &&
             !user.bot &&
-            btnInt.memberPermissions.has("MANAGE_EVENTS")
+            btnInt.memberPermissions.has("MODERATE_MEMBERS")
           ) {
             sendMessage.delete();
             btnInt.channel.send({
@@ -268,18 +271,18 @@ export default new Command({
               id: interaction.guild.id,
               deny: ["VIEW_CHANNEL"],
             },
-            // {
-            //   id: "945293155866148914",
-            //   allow: ["VIEW_CHANNEL"],
-            // },
-            // {
-            //   id: "958065673156841612",
-            //   allow: ["VIEW_CHANNEL"],
-            // },
-            // {
-            //   id: "968697582706651188",
-            //   allow: "VIEW_CHANNEL",
-            // },
+            {
+              id: "945293155866148914",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "958065673156841612",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "968697582706651188",
+              allow: "VIEW_CHANNEL",
+            },
           ],
         }
       );
@@ -294,18 +297,18 @@ export default new Command({
               id: interaction.guild.id,
               deny: ["VIEW_CHANNEL"],
             },
-            // {
-            //   id: "945293155866148914",
-            //   allow: ["VIEW_CHANNEL"],
-            // },
-            // {
-            //   id: "958065673156841612",
-            //   allow: ["VIEW_CHANNEL"],
-            // },
-            // {
-            //   id: "968697582706651188",
-            //   allow: "VIEW_CHANNEL",
-            // },
+            {
+              id: "945293155866148914",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "958065673156841612",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "968697582706651188",
+              allow: "VIEW_CHANNEL",
+            },
           ],
         })
         .then(async (channel) => {
@@ -352,18 +355,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          // {
-          //   id: "945293155866148914",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "958065673156841612",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "968697582706651188",
-          //   allow: "VIEW_CHANNEL",
-          // },
+          {
+            id: "945293155866148914",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "958065673156841612",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "968697582706651188",
+            allow: "VIEW_CHANNEL",
+          },
         ],
       })) as VoiceChannel;
       for (const player of players) {
@@ -391,18 +394,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          // {
-          //   id: "945293155866148914",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "958065673156841612",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "968697582706651188",
-          //   allow: "VIEW_CHANNEL",
-          // },
+          {
+            id: "945293155866148914",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "958065673156841612",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "968697582706651188",
+            allow: "VIEW_CHANNEL",
+          },
         ],
       })) as VoiceChannel;
       for (const player of team2) {
