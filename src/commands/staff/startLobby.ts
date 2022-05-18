@@ -112,21 +112,23 @@ export async function handleButtonInteractionPlayerMenu(
 
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
-            if (reaction.count === 6) {
+            if (reaction.count >= 6) {
               updateWinnerAndFinishTime("Time 1", category_id);
               collectorReaction.stop();
             }
             console.log(reaction.count);
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-            if (reaction.count === 6) {
+            if (reaction.count >= 6) {
               updateWinnerAndFinishTime("Time 2", category_id);
               collectorReaction.stop();
             }
           } else if (reaction.emoji.name === "❌" && !user.bot) {
-            btnInt.channel.send({});
             sendMessage.delete();
-            await removeUsersFromCategory(category_id);
-            deleteCategory(btnInt);
+            btnInt.channel.send({
+              content: "Partida cancelada!",
+            });
+            collectorReaction.stop();
+            setTimeout(() => deleteCategory(btnInt), 3000);
           }
         });
 
