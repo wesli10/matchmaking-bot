@@ -22,6 +22,10 @@ import {
   updateWinnerAndFinishTime,
 } from "../../utils/db";
 
+const MIN_NUM_PLAYERS_TO_START_LOBBY = 8;
+const MIN_REACTION_TO_VOTE_END_MATCH = 6;
+const WAITING_ROOM_ID = "968933862606503986";
+
 function shuffleArray(arr) {
   // Loop em todos os elementos
   for (let i = arr.length - 1; i > 0; i--) {
@@ -33,7 +37,6 @@ function shuffleArray(arr) {
   // Retornando array com aleatoriedade
   return arr;
 }
-const waiting_room_id = "968933862606503986";
 
 const StartLobby = new MessageEmbed()
   .setColor("#fd4a5f")
@@ -81,6 +84,15 @@ const buttonFinishMatch = new MessageActionRow().addComponents(
     .setLabel("Finalizar Partida")
     .setStyle("DANGER")
 );
+
+const buttonFinishMatchDisabled = new MessageActionRow().addComponents(
+  new MessageButton()
+    .setCustomId("finish_match")
+    .setEmoji("🏁")
+    .setLabel("Finalizar Partida")
+    .setStyle("DANGER")
+    .setDisabled(true)
+);
 export async function handleButtonInteractionPlayerMenu(
   btnInt: ButtonInteraction
 ) {
@@ -126,6 +138,11 @@ export async function handleButtonInteractionPlayerMenu(
         });
         break;
       case "finish_match":
+        await btnInt.editReply({
+          embeds: [StartLobby],
+          components: [buttonCallMod, buttonFinishMatchDisabled],
+        });
+
         log("Iniciando ação do botão", btnInt.customId);
 
         btnInt.deleteReply(); // delete thinking message
@@ -149,7 +166,7 @@ export async function handleButtonInteractionPlayerMenu(
         var winnerTeam = "";
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
-            if (reaction.count >= 6) {
+            if (reaction.count >= MIN_REACTION_TO_VOTE_END_MATCH) {
               winnerTeam = "Time 1";
               const messageTime1 = await btnInt.channel.send({
                 content: `<@&${"968697582706651188"}>`,
@@ -184,7 +201,7 @@ export async function handleButtonInteractionPlayerMenu(
               });
             }
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-            if (reaction.count >= 6) {
+            if (reaction.count >= MIN_REACTION_TO_VOTE_END_MATCH) {
               winnerTeam = "Time 2";
               const messageTime2 = await btnInt.channel.send({
                 content: `<@&${"968697582706651188"}>`,
@@ -241,7 +258,7 @@ export async function handleButtonInteractionPlayerMenu(
                   user.user_id
                 );
 
-                await member.voice.setChannel(waiting_room_id);
+                await member.voice.setChannel(WAITING_ROOM_ID);
               } catch (error) {
                 console.log("Usuario não conectado");
               }
@@ -278,7 +295,7 @@ export default new Command({
   description: "start 4v4 match with player in queue",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const qtd = 8;
+    const qtd = MIN_NUM_PLAYERS_TO_START_LOBBY;
     const dataAll = await fetchUsersQtd("users_4v4", qtd);
     const metade = qtd / 2;
     if (dataAll.length < qtd) {
