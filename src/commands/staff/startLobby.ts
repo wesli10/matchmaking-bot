@@ -149,7 +149,7 @@ export async function handleButtonInteractionPlayerMenu(
         var winnerTeam = "";
         collectorReaction.on("collect", async (reaction, user) => {
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
-            if (reaction.count >= 3) {
+            if (reaction.count >= 6) {
               winnerTeam = "Time 1";
               const messageTime1 = await btnInt.channel.send({
                 content: `<@&${"968697582706651188"}>`,
@@ -184,7 +184,7 @@ export async function handleButtonInteractionPlayerMenu(
               });
             }
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-            if (reaction.count >= 3) {
+            if (reaction.count >= 6) {
               winnerTeam = "Time 2";
               const messageTime2 = await btnInt.channel.send({
                 content: `<@&${"968697582706651188"}>`,
@@ -278,7 +278,7 @@ export default new Command({
   description: "start 4v4 match with player in queue",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const qtd = 2;
+    const qtd = 8;
     const dataAll = await fetchUsersQtd("users_4v4", qtd);
     const metade = qtd / 2;
     if (dataAll.length < qtd) {
