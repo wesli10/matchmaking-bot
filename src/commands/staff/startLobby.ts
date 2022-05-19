@@ -281,6 +281,14 @@ export default new Command({
           console.log("Usuario não conectado");
         }
       }
+      textChat.send({
+        content: `Time 1: <@${players
+          .map((p) => p.user_id)
+          .join("\n")}> \n Time 2: <@${team2
+          .map((p) => p.user_id)
+          .join("\n")}>`,
+      });
+
       textMessage = await textChat.send({
         embeds: [StartLobby],
         components: [buttonCallMod, buttonFinishMatch],
@@ -353,6 +361,7 @@ export async function handleButtonInteractionPlayerMenu(
         break;
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
+        btnInt.deleteReply();
 
         // await btnInt.editReply({
         //   embeds: [StartLobby],
