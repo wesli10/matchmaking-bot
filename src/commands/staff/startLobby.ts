@@ -307,18 +307,18 @@ export default new Command({
               id: interaction.guild.id,
               deny: ["VIEW_CHANNEL"],
             },
-            // {
-            //   id: "945293155866148914",
-            //   allow: ["VIEW_CHANNEL"],
-            // },
-            // {
-            //   id: "958065673156841612",
-            //   allow: ["VIEW_CHANNEL"],
-            // },
-            // {
-            //   id: "968697582706651188",
-            //   allow: "VIEW_CHANNEL",
-            // },
+            {
+              id: "945293155866148914",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "958065673156841612",
+              allow: ["VIEW_CHANNEL"],
+            },
+            {
+              id: "968697582706651188",
+              allow: "VIEW_CHANNEL",
+            },
           ],
         }
       );
@@ -332,18 +332,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          // {
-          //   id: "945293155866148914",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "958065673156841612",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "968697582706651188",
-          //   allow: "VIEW_CHANNEL",
-          // },
+          {
+            id: "945293155866148914",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "958065673156841612",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "968697582706651188",
+            allow: "VIEW_CHANNEL",
+          },
         ],
       })) as TextChannel;
       players.forEach(async (player) => {
@@ -383,18 +383,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          // {
-          //   id: "945293155866148914",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "958065673156841612",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "968697582706651188",
-          //   allow: "VIEW_CHANNEL",
-          // },
+          {
+            id: "945293155866148914",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "958065673156841612",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "968697582706651188",
+            allow: "VIEW_CHANNEL",
+          },
         ],
       })) as VoiceChannel;
       for (const player of players) {
@@ -422,18 +422,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          // {
-          //   id: "945293155866148914",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "958065673156841612",
-          //   allow: ["VIEW_CHANNEL"],
-          // },
-          // {
-          //   id: "968697582706651188",
-          //   allow: "VIEW_CHANNEL",
-          // },
+          {
+            id: "945293155866148914",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "958065673156841612",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "968697582706651188",
+            allow: "VIEW_CHANNEL",
+          },
         ],
       })) as VoiceChannel;
       for (const player of team2) {
