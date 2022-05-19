@@ -6,9 +6,7 @@ import {
   MessageButton,
   VoiceChannel,
   Interaction,
-  MessageReaction,
-  User,
-  ReactionCollector,
+  TextChannel,
 } from "discord.js";
 import { embedPermission } from "../../utils/embeds";
 import {
@@ -16,7 +14,6 @@ import {
   fetchCategory,
   fetchUsersInMatch,
   fetchUsersQtd,
-  removeUser,
   removeUsersFromCategory,
   updateCategory,
   updateInMatch,
@@ -45,18 +42,23 @@ const StartLobby = new MessageEmbed()
     "A sua sala premiada irá iniciar em instantes.\n Se encontrar problemas ou precisar reportar um jogador, utilize os controles do bot"
   );
 
+const PartidaCancelada = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Partida Cancelada")
+  .setDescription("A partida foi cancelada.");
+
 const embedTime1 = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("Vencedor da Partida")
   .setDescription(
-    `O time 1 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby `
+    `O time 1 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação. `
   );
 
 const embedTime2 = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("Vencedor da Partida")
   .setDescription(
-    `O time 2 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby `
+    `O time 2 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação.`
   );
 
 const FinishLobby = new MessageEmbed()
@@ -65,26 +67,20 @@ const FinishLobby = new MessageEmbed()
   .setDescription(
     "Clique na reação adequada para indicar qual time foi o vencedor.\n Se precisar, chame os organizadores."
   );
-const BUTTONS = new MessageActionRow().addComponents(
+const buttonCallMod = new MessageActionRow().addComponents(
   new MessageButton()
     .setCustomId("call_mod")
     .setEmoji("📞")
     .setLabel("Chamar Mod")
-    .setStyle("SUCCESS"),
+    .setStyle("SUCCESS")
+);
+const buttonFinishMatch = new MessageActionRow().addComponents(
   new MessageButton()
     .setCustomId("finish_match")
     .setEmoji("🏁")
     .setLabel("Finalizar Partida")
     .setStyle("DANGER")
 );
-
-const EMBEDCALLMOD = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setTitle("Chamando Mod")
-  .setDescription(
-    `⚠️ - UM <@&${"968697582706651188"}> foi notificado e está a caminho.\n\n jogador que fez o chamado: $`
-  );
-
 export async function handleButtonInteractionPlayerMenu(
   btnInt: ButtonInteraction
 ) {
@@ -93,10 +89,19 @@ export async function handleButtonInteractionPlayerMenu(
   };
   async function deleteCategory(interaction) {
     const parent = interaction.message.channel.parent;
-    const category = await interaction.guild.channels.cache.get(parent.id);
-
-    category.children.forEach((channel) => channel.delete());
-    category.delete();
+    if (!parent.id) {
+      await btnInt.channel.send({
+        content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
+      });
+      setTimeout(async () => await btnInt.deleteReply(), 3000);
+    }
+    const category = interaction.guild.channels.cache.get(parent.id);
+    try {
+      category.children.forEach((channel) => channel.delete());
+      category.delete();
+    } catch (error) {
+      console.log(error);
+    }
   }
   const EMBEDCALLMOD = new MessageEmbed()
     .setColor("#fd4a5f")
@@ -115,13 +120,16 @@ export async function handleButtonInteractionPlayerMenu(
     switch (btnInt.customId) {
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
-        await btnInt.editReply({
+        await btnInt.channel.send({
           content: `<@&${"968697582706651188"}>`,
           embeds: [EMBEDCALLMOD],
         });
         break;
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
+
+        btnInt.deleteReply(); // delete thinking message
+
         // display menu
         const data = await fetchCategory(btnInt.user.id);
         const category_id = data[0].category_id;
@@ -133,10 +141,9 @@ export async function handleButtonInteractionPlayerMenu(
         await sendMessage.react("❌");
         const collectorReaction = sendMessage.createReactionCollector({});
         if (!data[0].category_id) {
-          await btnInt.editReply("Ocorreu um erro, Tento novamente!");
+          await btnInt.channel.send("Ocorreu um erro, Tente novamente!");
 
           setTimeout(() => btnInt.deleteReply(), 3000);
-
           return;
         }
         var winnerTeam = "";
@@ -149,6 +156,7 @@ export async function handleButtonInteractionPlayerMenu(
                 embeds: [embedTime1],
               });
               messageTime1.react("✅");
+              messageTime1.react("🛑");
               const collectorWinner1 = messageTime1.createReactionCollector({});
               collectorWinner1.on("collect", async (reaction, user) => {
                 const member = await btnInt.guild.members.fetch(user.id);
@@ -157,7 +165,21 @@ export async function handleButtonInteractionPlayerMenu(
                   !user.bot &&
                   member.permissions.has("MODERATE_MEMBERS")
                 ) {
-                  collectorReaction.stop();
+                  try {
+                    collectorReaction.stop();
+                  } catch (error) {
+                    console.log(error);
+                  }
+                } else if (
+                  reaction.emoji.name === "🛑" &&
+                  !user.bot &&
+                  member.permissions.has("MODERATE_MEMBERS")
+                ) {
+                  try {
+                    await messageTime1.delete();
+                  } catch (error) {
+                    console.log(error);
+                  }
                 }
               });
             }
@@ -169,6 +191,7 @@ export async function handleButtonInteractionPlayerMenu(
                 embeds: [embedTime2],
               });
               messageTime2.react("✅");
+              messageTime2.react("🛑");
               const collectorWinner2 = messageTime2.createReactionCollector({});
               collectorWinner2.on("collect", async (reaction, user) => {
                 const member = await btnInt.guild.members.fetch(user.id);
@@ -182,6 +205,16 @@ export async function handleButtonInteractionPlayerMenu(
                   } catch (error) {
                     console.log(error);
                   }
+                } else if (
+                  reaction.emoji.name === "🛑" &&
+                  !user.bot &&
+                  member.permissions.has("MODERATE_MEMBERS")
+                ) {
+                  try {
+                    await messageTime2.delete();
+                  } catch (error) {
+                    console.log(error);
+                  }
                 }
               });
             }
@@ -190,12 +223,11 @@ export async function handleButtonInteractionPlayerMenu(
             !user.bot &&
             btnInt.memberPermissions.has("MODERATE_MEMBERS")
           ) {
-            sendMessage.delete();
-            btnInt.channel.send({
-              content: "Partida cancelada!",
+            await sendMessage.delete();
+            await btnInt.channel.send({
+              embeds: [PartidaCancelada],
             });
             collectorReaction.stop();
-            setTimeout(() => deleteCategory(btnInt), 3000);
           }
         });
 
@@ -214,10 +246,14 @@ export async function handleButtonInteractionPlayerMenu(
                 console.log("Usuario não conectado");
               }
             }
-            await updateWinnerAndFinishTime(winnerTeam, category_id);
-            await removeUsersFromCategory(category_id);
-            setTimeout(async () => await deleteCategory(btnInt), 3000);
-            console.log(`Collected ${collected.size} items`);
+            try {
+              await updateWinnerAndFinishTime(winnerTeam, category_id);
+              await removeUsersFromCategory(category_id);
+              console.log(`Collected ${collected.size} items`);
+              await deleteCategory(btnInt);
+            } catch (error) {
+              console.log(error);
+            }
           }
         );
         break;
@@ -271,72 +307,64 @@ export default new Command({
               id: interaction.guild.id,
               deny: ["VIEW_CHANNEL"],
             },
-            {
-              id: "945293155866148914",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "958065673156841612",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "968697582706651188",
-              allow: "VIEW_CHANNEL",
-            },
+            // {
+            //   id: "945293155866148914",
+            //   allow: ["VIEW_CHANNEL"],
+            // },
+            // {
+            //   id: "958065673156841612",
+            //   allow: ["VIEW_CHANNEL"],
+            // },
+            // {
+            //   id: "968697582706651188",
+            //   allow: "VIEW_CHANNEL",
+            // },
           ],
         }
       );
 
       // TEXT CHAT
-      await interaction.guild.channels
-        .create("Chat", {
-          type: "GUILD_TEXT",
-          parent: category.id,
-          permissionOverwrites: [
-            {
-              id: interaction.guild.id,
-              deny: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "945293155866148914",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "958065673156841612",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "968697582706651188",
-              allow: "VIEW_CHANNEL",
-            },
-          ],
-        })
-        .then(async (channel) => {
-          // Team 1 Acess to TextChat
-          players.forEach(async (player) => {
-            try {
-              await channel.permissionOverwrites.create(player.user_id, {
-                VIEW_CHANNEL: true,
-              });
-            } catch (error) {
-              console.log(error);
-            }
+      const textChat = (await interaction.guild.channels.create("Chat", {
+        type: "GUILD_TEXT",
+        parent: category.id,
+        permissionOverwrites: [
+          {
+            id: interaction.guild.id,
+            deny: ["VIEW_CHANNEL"],
+          },
+          // {
+          //   id: "945293155866148914",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "958065673156841612",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "968697582706651188",
+          //   allow: "VIEW_CHANNEL",
+          // },
+        ],
+      })) as TextChannel;
+      players.forEach(async (player) => {
+        try {
+          await textChat.permissionOverwrites.create(player.user_id, {
+            VIEW_CHANNEL: true,
           });
-          // Team 2 Acess to TextChat
-          team2.forEach(async (player) => {
-            try {
-              await channel.permissionOverwrites.create(player.user_id, {
-                VIEW_CHANNEL: true,
-              });
-            } catch (error) {
-              console.log(error);
-            }
+        } catch (error) {
+          console.log(error);
+        }
+      });
+      // Team 2 Acess to TextChat
+      team2.forEach(async (player) => {
+        try {
+          await textChat.permissionOverwrites.create(player.user_id, {
+            VIEW_CHANNEL: true,
           });
-          channel.send({
-            embeds: [StartLobby],
-            components: [BUTTONS],
-          });
-        });
+        } catch (error) {
+          console.log(error);
+        }
+      });
 
       await create4v4Lobby(
         players.map((p) => p.user_id),
@@ -355,18 +383,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
+          // {
+          //   id: "945293155866148914",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "958065673156841612",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "968697582706651188",
+          //   allow: "VIEW_CHANNEL",
+          // },
         ],
       })) as VoiceChannel;
       for (const player of players) {
@@ -394,18 +422,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
+          // {
+          //   id: "945293155866148914",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "958065673156841612",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "968697582706651188",
+          //   allow: "VIEW_CHANNEL",
+          // },
         ],
       })) as VoiceChannel;
       for (const player of team2) {
@@ -423,6 +451,18 @@ export default new Command({
           console.log("Usuario não conectado");
         }
       }
+      await textChat.send({
+        embeds: [StartLobby],
+        components: [buttonCallMod, buttonFinishMatch],
+      });
+      const collectorButton =
+        interaction.channel.createMessageComponentCollector({
+          componentType: "BUTTON",
+        });
+
+      collectorButton.on("end", (collectedButton) => {
+        console.log(`Ended Collecting ${collectedButton.size} items`);
+      });
 
       await interaction.deleteReply();
     } else {
@@ -430,15 +470,5 @@ export default new Command({
         embeds: [embedPermission],
       });
     }
-
-    const collectorButton = interaction.channel.createMessageComponentCollector(
-      {
-        componentType: "BUTTON",
-      }
-    );
-
-    collectorButton.on("end", (collectedButton) => {
-      console.log(`Ended Collecting ${collectedButton.size} items`);
-    });
   },
 });
