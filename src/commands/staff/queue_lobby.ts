@@ -109,7 +109,7 @@ export async function handleButtonInteraction_4v4(btnInt: ButtonInteraction) {
 }
 
 export default new Command({
-  name: "fila4v4",
+  name: "abrirfila4v4",
   description: "Entra na fila para jogar 4v4",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {

@@ -2,7 +2,7 @@ import { Command } from "../../structures/Command";
 import { fetchUsersInQueue, fetchUsersInQueue4v4 } from "../../utils/db";
 
 export default new Command({
-  name: "fila",
+  name: "fila4v4",
   description: "Mostra a quantidade de players na fila",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
