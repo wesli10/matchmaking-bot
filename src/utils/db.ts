@@ -13,6 +13,14 @@ export async function fetchUsersInQueue() {
   return data;
 }
 
+export async function fetchUsersInQueue4v4() {
+  const { data } = await await db
+    .from("users_4v4")
+    .select("*")
+    .eq("in_match", false);
+  return data;
+}
+
 export async function fetchUser(user_id) {
   const { data } = await db.from("users").select("*").eq("user_id", user_id);
   return data;
