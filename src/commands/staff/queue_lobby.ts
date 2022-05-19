@@ -15,6 +15,8 @@ import {
 } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 
+const QUEUE_ROOM_ID = "968922689190371328";
+
 const StartQueue = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("Sejam bem vindos as salas premiadas de 4x4 da SNACKCLUB!")
@@ -113,8 +115,6 @@ export default new Command({
   description: "Entra na fila para jogar 4v4",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const queueRoom_id = "968922689190371328";
-
     if (
       !interaction.memberPermissions.has("ADMINISTRATOR") &&
       interaction.user.id !== "724618078008377466"
@@ -136,7 +136,7 @@ export default new Command({
       .then(() => interaction.deleteReply());
 
     const channel = interaction.guild.channels.cache.get(
-      queueRoom_id
+      QUEUE_ROOM_ID
     ) as TextChannel;
 
     const collector = interaction.channel.createMessageComponentCollector({
