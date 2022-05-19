@@ -65,6 +65,7 @@ const embedTime2 = new MessageEmbed()
     `O time 2 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação.`
   );
 
+const players = new MessageEmbed().setColor("#fd4a5f");
 const FinishLobby = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("A partida foi finalizada!")
@@ -99,7 +100,6 @@ const role2 = "958065673156841612";
 const role3 = "968697582706651188";
 const roleTeste = "965501155016835085";
 
-let textChat: TextChannel = null;
 let textMessage = null;
 
 export default new Command({
@@ -153,7 +153,7 @@ export default new Command({
       );
 
       // TEXT CHAT
-      textChat = (await interaction.guild.channels.create("Chat", {
+      const textChat = (await interaction.guild.channels.create("Chat", {
         type: "GUILD_TEXT",
         parent: category.id,
         permissionOverwrites: [
@@ -342,20 +342,22 @@ export async function handleButtonInteractionPlayerMenu(
     switch (btnInt.customId) {
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
+
+        await btnInt.deleteReply(); // delete thinking message
+
         await btnInt.channel.send({
           content: `<@&${"968697582706651188"}>`,
           embeds: [EMBEDCALLMOD],
         });
+
         break;
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
 
-        await textMessage.delete();
-
-        await btnInt.editReply({
-          embeds: [StartLobby],
-          components: [buttonCallMod, buttonFinishMatchDisabled],
-        });
+        // await btnInt.editReply({
+        //   embeds: [StartLobby],
+        //   components: [buttonCallMod, buttonFinishMatchDisabled],
+        // });
 
         // display menu
         const data = await fetchCategory(btnInt.user.id);
