@@ -98,7 +98,7 @@ const buttonFinishMatchDisabled = new MessageActionRow().addComponents(
     .setDisabled(true)
 );
 
-let textMessage = null;
+let textMessage: Message = null;
 
 export default new Command({
   name: "4v4",
@@ -143,18 +143,18 @@ export default new Command({
             id: interaction.guild.id,
             deny: ["VIEW_CHANNEL"],
           },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
+          // {
+          //   id: "945293155866148914",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "958065673156841612",
+          //   allow: ["VIEW_CHANNEL"],
+          // },
+          // {
+          //   id: "968697582706651188",
+          //   allow: "VIEW_CHANNEL",
+          // },
         ],
       }
     );
@@ -168,18 +168,18 @@ export default new Command({
           id: interaction.guild.id,
           deny: ["VIEW_CHANNEL"],
         },
-        {
-          id: "945293155866148914",
-          allow: ["VIEW_CHANNEL"],
-        },
-        {
-          id: "958065673156841612",
-          allow: ["VIEW_CHANNEL"],
-        },
-        {
-          id: "968697582706651188",
-          allow: "VIEW_CHANNEL",
-        },
+        // {
+        //   id: "945293155866148914",
+        //   allow: ["VIEW_CHANNEL"],
+        // },
+        // {
+        //   id: "958065673156841612",
+        //   allow: ["VIEW_CHANNEL"],
+        // },
+        // {
+        //   id: "968697582706651188",
+        //   allow: "VIEW_CHANNEL",
+        // },
       ],
     })) as TextChannel;
     // Team 1 Acess to TextChat
@@ -219,11 +219,11 @@ export default new Command({
       category.id,
       interaction.user.id
     );
-    textChat.send({
-      content: `Time 1: <@${players
-        .map((p) => p.user_id)
-        .join(",")}> \n Time 2: <@${team2.map((p) => p.user_id).join(",")}>`,
-    });
+    // textChat.send({
+    //   content: `Time 1: <@${players
+    //     .map((p) => p.user_id)
+    //     .join(",")}> \n Time 2: <@${team2.map((p) => p.user_id).join(",")}>`,
+    // });
 
     textMessage = await textChat.send({
       embeds: [StartLobby],
@@ -294,12 +294,10 @@ export async function handleButtonInteractionPlayerMenu(
 
         await btnInt.deleteReply(); // delete thinking message
 
-        await btnInt.channel.send({
+        textMessage.edit({
           embeds: [StartLobby],
           components: [buttonCallMod, buttonFinishMatchDisabled],
         });
-
-        textMessage.delete();
 
         // display menu
         const data = await fetchCategory(btnInt.user.id);

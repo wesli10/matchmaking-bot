@@ -25,7 +25,7 @@ export const DISCORD_ENV_CONFIG = {
       queue_room_id: "968922689190371328",
     },
     numbers: {
-      MIN_NUM_PLAYERS_TO_START_LOBBY: 2,
+      MIN_NUM_PLAYERS_TO_START_LOBBY: 1,
       MIN_REACTION_TO_VOTE_END_MATCH: 2,
     },
   },
