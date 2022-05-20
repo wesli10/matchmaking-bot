@@ -17,16 +17,16 @@ export const DISCORD_ENV_CONFIG = {
   development: {
     roles: {
       moderator: "945293155866148914",
-      event: "958065673156841612",
+      event: "593658220753453056",
       aux_event: "968697582706651188",
-      admin: "965501155016835085",
+      admin: "977262483918163999",
     },
     channels: {
-      queue_room_id: "968922689190371328",
+      queue_room_id: "977264480943747093",
     },
     numbers: {
-      MIN_NUM_PLAYERS_TO_START_LOBBY: 2,
-      MIN_REACTION_TO_VOTE_END_MATCH: 2,
+      MIN_NUM_PLAYERS_TO_START_LOBBY: 8,
+      MIN_REACTION_TO_VOTE_END_MATCH: 6,
     },
   },
 };

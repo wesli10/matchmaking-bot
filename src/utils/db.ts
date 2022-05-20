@@ -114,18 +114,23 @@ export async function verifyUserInMatch(table, user_id) {
   return data;
 }
 
-export async function create4v4Lobby(
-  user_id1,
-  name1,
-  user_id2,
-  name2,
+export async function create4v4Lobby({
+  players,
   category_id,
-  moderator_id
-) {
+  moderator_id,
+}: {
+  players: Array<any>;
+  category_id: string;
+  moderator_id: string;
+}) {
   const { data } = await db.from("lobbys").insert([
     {
-      time1: [{ user_id: user_id1, name: name1 }],
-      time2: [{ user_id: user_id2, name: name2 }],
+      time1: players
+        .filter((p) => p.team === 1)
+        .map((p) => ({ user_id: p.user_id, name: p.name })),
+      time2: players
+        .filter((p) => p.team === 2)
+        .map((p) => ({ user_id: p.user_id, name: p.name })),
       category_id: category_id,
       moderator_id: moderator_id,
     },

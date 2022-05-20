@@ -2,16 +2,14 @@ import { Command } from "../../structures/Command";
 import {
   MessageEmbed,
   ButtonInteraction,
-  MessageActionRow,
-  MessageButton,
-  TextChannel,
   Message,
+  OverwriteResolvable,
+  CacheType,
 } from "discord.js";
 import { embedPermission } from "../../utils/embeds";
 import {
   create4v4Lobby,
   fetchCategory,
-  fetchUsersQtd,
   removeUsersFromCategory,
   updateCategory,
   updateInMatch,
@@ -20,108 +18,38 @@ import {
   updateWinnerAndFinishTime,
 } from "../../utils/db";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
+import { generateTeam } from "../../utils/4v4/generateTeam";
+import {
+  buttonCallMod,
+  buttonFinishMatch,
+  buttonFinishMatchDisabled,
+  embedTime1,
+  embedTime2,
+  FinishLobby,
+  PartidaCancelada,
+  StartLobby,
+} from "../../utils/4v4/messageInteractionsTemplates";
+import { client } from "../..";
 
-function shuffleArray(arr) {
-  // Loop em todos os elementos
-  for (let i = arr.length - 1; i > 0; i--) {
-    // Escolhendo elemento aleatório
-    const j = Math.floor(Math.random() * (i + 1));
-    // Reposicionando elemento
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  // Retornando array com aleatoriedade
-  return arr;
-}
 const { roles } = DISCORD_CONFIG;
 
 const role_aux_event = roles.aux_event;
 const role_event = roles.event;
 const role_moderator = roles.moderator;
-const role_test = roles.admin;
-
-const StartLobby = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setTitle("Começo de Lobby")
-  .setDescription(
-    "A sua sala premiada irá iniciar em instantes.\n Se encontrar problemas ou precisar reportar um jogador, utilize os controles do bot"
-  );
-
-const PartidaCancelada = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setTitle("Partida Cancelada")
-  .setDescription("A partida foi cancelada.");
-
-const embedTime1 = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setTitle("Vencedor da Partida")
-  .setDescription(
-    `O time 1 foi declarado como vencedor!\n <@&${role_aux_event}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação. `
-  );
-
-const embedTime2 = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setTitle("Vencedor da Partida")
-  .setDescription(
-    `O time 2 foi declarado como vencedor!\n <@&${role_aux_event}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação.`
-  );
-
-const FinishLobby = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setTitle("A partida foi finalizada!")
-  .setDescription(
-    "Clique na reação adequada para indicar qual time foi o vencedor.\n Se precisar, chame os organizadores."
-  );
-const buttonCallMod = new MessageActionRow().addComponents(
-  new MessageButton()
-    .setCustomId("call_mod")
-    .setEmoji("📞")
-    .setLabel("Chamar Mod")
-    .setStyle("SUCCESS")
-);
-const buttonFinishMatch = new MessageActionRow().addComponents(
-  new MessageButton()
-    .setCustomId("finish_match")
-    .setEmoji("🏁")
-    .setLabel("Finalizar Partida")
-    .setStyle("DANGER")
-);
-
-const buttonFinishMatchDisabled = new MessageActionRow().addComponents(
-  new MessageButton()
-    .setCustomId("finish_match")
-    .setEmoji("🏁")
-    .setLabel("Finalizar Partida")
-    .setStyle("DANGER")
-    .setDisabled(true)
-);
-
-let textMessage: Message = null;
+const role_admin = roles.admin;
 
 export default new Command({
   name: "4v4",
   description: "start 4v4 match with player in queue",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const qtd = DISCORD_CONFIG.numbers.MIN_NUM_PLAYERS_TO_START_LOBBY;
-    const dataAll = await fetchUsersQtd("users_4v4", qtd);
-    const metade = qtd / 2;
-    if (dataAll.length < qtd) {
-      await interaction.editReply({
-        content: "❌ Não há jogadores suficientes na fila.",
-      });
-      setTimeout(() => interaction.deleteReply(), 3000);
-      return;
-    }
-    const players = shuffleArray(dataAll);
-    const team2 = players.splice(0, metade);
-    const team1 = players;
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (
       !admin.includes(role_aux_event) &&
       !admin.includes(role_event) &&
       !admin.includes(role_moderator) &&
-      !admin.includes(role_test)
+      !admin.includes(role_admin)
     ) {
       interaction
         .editReply({
@@ -132,98 +60,88 @@ export default new Command({
       return;
     }
 
+    const players = await generateTeam();
+
+    if (
+      players.length < DISCORD_CONFIG.numbers.MIN_NUM_PLAYERS_TO_START_LOBBY
+    ) {
+      await interaction.editReply({
+        content: "❌ Não há jogadores suficientes na fila.",
+      });
+      setTimeout(() => interaction.deleteReply(), 3000);
+      return;
+    }
+
+    const permissions: OverwriteResolvable[] = [
+      {
+        id: interaction.guild.id,
+        deny: ["VIEW_CHANNEL"],
+      },
+      // {
+      //   id: role_aux_event,
+      //   allow: ["VIEW_CHANNEL"],
+      // },
+      {
+        id: role_event,
+        allow: ["VIEW_CHANNEL"],
+      },
+      // {
+      //   id: role_moderator,
+      //   allow: ["VIEW_CHANNEL"],
+      // },
+      {
+        id: role_admin,
+        allow: ["VIEW_CHANNEL"],
+      },
+      // Add players permissions as well
+      ...players.map((player) => {
+        return {
+          id: player.user_id,
+          allow: ["VIEW_CHANNEL"],
+          deny: ["SPEAK"],
+        };
+      }),
+    ];
+
+    // Create category
     const category = await interaction.guild.channels.create(
       `${interaction.user.username}`,
       {
         type: "GUILD_CATEGORY",
-        permissionOverwrites: [
-          {
-            id: interaction.guild.id,
-            deny: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
-        ],
+        permissionOverwrites: permissions,
       }
     );
 
-    // TEXT CHAT
-    const textChat = (await interaction.guild.channels.create("Chat", {
+    // Create Text Chat
+    const textChat = await interaction.guild.channels.create("Chat", {
       type: "GUILD_TEXT",
       parent: category.id,
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id,
-          deny: ["VIEW_CHANNEL"],
-        },
-        {
-          id: "945293155866148914",
-          allow: ["VIEW_CHANNEL"],
-        },
-        {
-          id: "958065673156841612",
-          allow: ["VIEW_CHANNEL"],
-        },
-        {
-          id: "968697582706651188",
-          allow: "VIEW_CHANNEL",
-        },
-      ],
-    })) as TextChannel;
-    // Team 1 Acess to TextChat
-    for (const player of team1) {
-      try {
-        await textChat.permissionOverwrites.create(player.user_id, {
-          VIEW_CHANNEL: true,
-        });
-        await updateInMatch("users_4v4", player.user_id, true);
-        await updateUserTeam(player.user_id, "Time 1");
-        await updateCategory(player.user_id, category.id);
-        await updateModerator(player.user_id, interaction.user.id);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    // Team 2 Acess to TextChat
-    for (const player of team2) {
-      try {
-        await textChat.permissionOverwrites.create(player.user_id, {
-          VIEW_CHANNEL: true,
-        });
-        await updateInMatch("users_4v4", player.user_id, true);
-        await updateUserTeam(player.user_id, "Time 2");
-        await updateCategory(player.user_id, category.id);
-        await updateModerator(player.user_id, interaction.user.id);
-      } catch (error) {
-        console.log(error);
-      }
+      permissionOverwrites: permissions,
+    });
+
+    // Voice chat
+    await interaction.guild.channels.create("Voice chat", {
+      type: "GUILD_VOICE",
+      parent: category.id,
+      permissionOverwrites: permissions,
+    });
+
+    for (const player of players) {
+      await Promise.all([
+        updateInMatch("users_4v4", player.user_id, true),
+        updateUserTeam(player.user_id, player.team === 1 ? "Time1" : "Time 2"),
+        updateCategory(player.user_id, category.id),
+        updateModerator(player.user_id, interaction.user.id),
+      ]);
     }
 
-    await create4v4Lobby(
-      players.map((p) => p.user_id),
-      players.map((p) => p.name),
-      team2.map((p) => p.user_id),
-      team2.map((p) => p.name),
-      category.id,
-      interaction.user.id
-    );
-    // textChat.send({
-    //   content: `Time 1: <@${players
-    //     .map((p) => p.user_id)
-    //     .join(",")}> \n Time 2: <@${team2.map((p) => p.user_id).join(",")}>`,
-    // });
+    await create4v4Lobby({
+      players,
+      category_id: category.id,
+      moderator_id: interaction.user.id,
+    });
 
-    textMessage = await textChat.send({
+    await textChat.send({
       embeds: [StartLobby],
       components: [buttonCallMod, buttonFinishMatch],
     });
@@ -247,22 +165,31 @@ export async function handleButtonInteractionPlayerMenu(
   const log = (...message: any[]) => {
     console.log(`[${btnInt.user.username}] --`, ...message);
   };
-  async function deleteCategory(interaction) {
-    const parent = interaction.message.channel.parent;
-    if (!parent) {
+  async function deleteCategory(interaction: ButtonInteraction<CacheType>) {
+    const channelId = interaction.channelId;
+    const channel = await client.channels.fetch(channelId);
+
+    try {
+      if (channel.type !== "GUILD_TEXT") {
+        throw new Error("Channel is not a text channel");
+      }
+
+      const parentCategory = await channel.parent;
+
+      if (!parentCategory) {
+        throw new Error("Channel has no parent");
+      }
+
+      await Promise.all(
+        parentCategory.children.map((channel) => channel.delete())
+      );
+      parentCategory.delete();
+    } catch (error) {
+      console.log(error);
       await btnInt.channel.send({
         content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
       });
       setTimeout(async () => await btnInt.deleteReply(), 3000);
-      return;
-    }
-
-    const category = interaction.guild.channels.cache.get(parent.id);
-    try {
-      category.children.forEach((channel) => channel.delete());
-      category.delete();
-    } catch (error) {
-      console.log(error);
     }
   }
   const EMBEDCALLMOD = new MessageEmbed()
@@ -292,16 +219,19 @@ export async function handleButtonInteractionPlayerMenu(
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
 
-        await btnInt.deleteReply(); // delete thinking message
+        const channel = await btnInt.channel.fetch();
 
-        textMessage.edit({
+        await channel.messages.edit(btnInt.message.id, {
           embeds: [StartLobby],
           components: [buttonCallMod, buttonFinishMatchDisabled],
         });
 
+        await btnInt.deleteReply(); // delete thinking message
+
         // display menu
         const data = await fetchCategory(btnInt.user.id);
         const category_id = data[0].category_id;
+
         const sendMessage = await btnInt.channel.send({
           embeds: [FinishLobby],
         });
@@ -312,13 +242,12 @@ export async function handleButtonInteractionPlayerMenu(
         if (!data[0].category_id) {
           try {
             await btnInt.channel.send("Ocorreu um erro, Tente novamente!");
-            setTimeout(() => btnInt.deleteReply(), 3000);
           } catch (error) {
             console.log(error);
           }
           return;
         }
-        var winnerTeam = "";
+        let winnerTeam = "";
         collectorReaction.on("collect", async (reaction, user) => {
           const { MIN_REACTION_TO_VOTE_END_MATCH } = DISCORD_CONFIG.numbers;
 
