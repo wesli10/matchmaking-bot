@@ -4,8 +4,6 @@ import {
   ButtonInteraction,
   MessageActionRow,
   MessageButton,
-  VoiceChannel,
-  Interaction,
   TextChannel,
   Message,
 } from "discord.js";
@@ -13,7 +11,6 @@ import { embedPermission } from "../../utils/embeds";
 import {
   create4v4Lobby,
   fetchCategory,
-  fetchUsersInMatch,
   fetchUsersQtd,
   removeUsersFromCategory,
   updateCategory,
@@ -117,6 +114,7 @@ export default new Command({
     }
     const players = shuffleArray(dataAll);
     const team2 = players.splice(0, metade);
+    const team1 = players;
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (
@@ -183,13 +181,13 @@ export default new Command({
       ],
     })) as TextChannel;
     // Team 1 Acess to TextChat
-    for (const player of players) {
+    for (const player of team1) {
       try {
         await textChat.permissionOverwrites.create(player.user_id, {
           VIEW_CHANNEL: true,
         });
         await updateInMatch("users_4v4", player.user_id, true);
-        await updateUserTeam(player.user_id, "Time 2");
+        await updateUserTeam(player.user_id, "Time 1");
         await updateCategory(player.user_id, category.id);
         await updateModerator(player.user_id, interaction.user.id);
       } catch (error) {
@@ -256,7 +254,9 @@ export async function handleButtonInteractionPlayerMenu(
         content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
       });
       setTimeout(async () => await btnInt.deleteReply(), 3000);
+      return;
     }
+
     const category = interaction.guild.channels.cache.get(parent.id);
     try {
       category.children.forEach((channel) => channel.delete());
