@@ -14,8 +14,9 @@ import {
   createUser4v4,
 } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
+import { DISCORD_CONFIG } from "../../configs/discord.config";
 
-const QUEUE_ROOM_ID = "968922689190371328";
+const { channels } = DISCORD_CONFIG;
 
 const StartQueue = new MessageEmbed()
   .setColor("#fd4a5f")
@@ -136,7 +137,7 @@ export default new Command({
       .then(() => interaction.deleteReply());
 
     const channel = interaction.guild.channels.cache.get(
-      QUEUE_ROOM_ID
+      channels.queue_room_id
     ) as TextChannel;
 
     const collector = interaction.channel.createMessageComponentCollector({

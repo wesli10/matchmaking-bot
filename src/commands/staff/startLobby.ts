@@ -22,10 +22,7 @@ import {
   updateUserTeam,
   updateWinnerAndFinishTime,
 } from "../../utils/db";
-
-const MIN_NUM_PLAYERS_TO_START_LOBBY = 8;
-const MIN_REACTION_TO_VOTE_END_MATCH = 6;
-const WAITING_ROOM_ID = "968933862606503986";
+import { DISCORD_CONFIG } from "../../configs/discord.config";
 
 function shuffleArray(arr) {
   // Loop em todos os elementos
@@ -38,6 +35,12 @@ function shuffleArray(arr) {
   // Retornando array com aleatoriedade
   return arr;
 }
+const { roles } = DISCORD_CONFIG;
+
+const role_aux_event = roles.aux_event;
+const role_event = roles.event;
+const role_moderator = roles.moderator;
+const role_test = roles.admin;
 
 const StartLobby = new MessageEmbed()
   .setColor("#fd4a5f")
@@ -55,17 +58,16 @@ const embedTime1 = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("Vencedor da Partida")
   .setDescription(
-    `O time 1 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação. `
+    `O time 1 foi declarado como vencedor!\n <@&${role_aux_event}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação. `
   );
 
 const embedTime2 = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("Vencedor da Partida")
   .setDescription(
-    `O time 2 foi declarado como vencedor!\n <@&${"968697582706651188"}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação.`
+    `O time 2 foi declarado como vencedor!\n <@&${role_aux_event}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação.`
   );
 
-const players = new MessageEmbed().setColor("#fd4a5f");
 const FinishLobby = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("A partida foi finalizada!")
@@ -95,10 +97,6 @@ const buttonFinishMatchDisabled = new MessageActionRow().addComponents(
     .setStyle("DANGER")
     .setDisabled(true)
 );
-const role1 = "945293155866148914";
-const role2 = "958065673156841612";
-const role3 = "968697582706651188";
-const roleTeste = "965501155016835085";
 
 let textMessage = null;
 
@@ -107,7 +105,7 @@ export default new Command({
   description: "start 4v4 match with player in queue",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const qtd = MIN_NUM_PLAYERS_TO_START_LOBBY;
+    const qtd = DISCORD_CONFIG.numbers.MIN_NUM_PLAYERS_TO_START_LOBBY;
     const dataAll = await fetchUsersQtd("users_4v4", qtd);
     const metade = qtd / 2;
     if (dataAll.length < qtd) {
@@ -122,192 +120,126 @@ export default new Command({
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (
-      admin.includes(role1) ||
-      admin.includes(role2) ||
-      admin.includes(role3) ||
-      admin.includes(roleTeste)
+      !admin.includes(role_aux_event) &&
+      !admin.includes(role_event) &&
+      !admin.includes(role_moderator) &&
+      !admin.includes(role_test)
     ) {
-      const category = await interaction.guild.channels.create(
-        `${interaction.user.username}`,
-        {
-          type: "GUILD_CATEGORY",
-          permissionOverwrites: [
-            {
-              id: interaction.guild.id,
-              deny: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "945293155866148914",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "958065673156841612",
-              allow: ["VIEW_CHANNEL"],
-            },
-            {
-              id: "968697582706651188",
-              allow: "VIEW_CHANNEL",
-            },
-          ],
-        }
-      );
+      interaction
+        .editReply({
+          embeds: [embedPermission],
+        })
+        .then(() => setTimeout(() => interaction.deleteReply(), 3000));
 
-      // TEXT CHAT
-      const textChat = (await interaction.guild.channels.create("Chat", {
-        type: "GUILD_TEXT",
-        parent: category.id,
-        permissionOverwrites: [
-          {
-            id: interaction.guild.id,
-            deny: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
-        ],
-      })) as TextChannel;
-
-      players.forEach(async (player) => {
-        try {
-          await textChat.permissionOverwrites.create(player.user_id, {
-            VIEW_CHANNEL: true,
-          });
-        } catch (error) {
-          console.log(error);
-        }
-      });
-      // Team 2 Acess to TextChat
-      team2.forEach(async (player) => {
-        try {
-          await textChat.permissionOverwrites.create(player.user_id, {
-            VIEW_CHANNEL: true,
-          });
-        } catch (error) {
-          console.log(error);
-        }
-      });
-
-      await create4v4Lobby(
-        players.map((p) => p.user_id),
-        players.map((p) => p.name),
-        team2.map((p) => p.user_id),
-        team2.map((p) => p.name),
-        category.id,
-        interaction.user.id
-      );
-      // VOICE CHANNEL 1
-      const channel1 = (await interaction.guild.channels.create("Time 1", {
-        type: "GUILD_VOICE",
-        parent: category.id,
-        permissionOverwrites: [
-          {
-            id: interaction.guild.id,
-            deny: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
-        ],
-      })) as VoiceChannel;
-      for (const player of players) {
-        try {
-          const member = await interaction.guild.members.fetch(player.user_id);
-          await channel1.permissionOverwrites.create(player.user_id, {
-            VIEW_CHANNEL: true,
-          });
-          await updateUserTeam(player.user_id, "Time 1");
-          await updateInMatch("users_4v4", player.user_id, true);
-          await updateCategory(player.user_id, category.id);
-          await updateModerator(player.user_id, interaction.user.id);
-          await member.voice.setChannel(channel1.id);
-        } catch (error) {
-          console.log("Usuario não conectado");
-        }
-      }
-
-      // VOICE CHANNEL 2
-      const channel2 = (await interaction.guild.channels.create("Time 2", {
-        type: "GUILD_VOICE",
-        parent: category.id,
-        permissionOverwrites: [
-          {
-            id: interaction.guild.id,
-            deny: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "945293155866148914",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "958065673156841612",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: "968697582706651188",
-            allow: "VIEW_CHANNEL",
-          },
-        ],
-      })) as VoiceChannel;
-      for (const player of team2) {
-        try {
-          const member = await interaction.guild.members.fetch(player.user_id);
-          await channel2.permissionOverwrites.create(player.user_id, {
-            VIEW_CHANNEL: true,
-          });
-          await updateUserTeam(player.user_id, "Time 2");
-          await updateInMatch("users_4v4", player.user_id, true);
-          await updateCategory(player.user_id, category.id);
-          await updateModerator(player.user_id, interaction.user.id);
-          await member.voice.setChannel(channel2.id);
-        } catch (error) {
-          console.log("Usuario não conectado");
-        }
-      }
-      textChat.send({
-        content: `Time 1: <@${players
-          .map((p) => p.user_id)
-          .join("\n")}> \n Time 2: <@${team2
-          .map((p) => p.user_id)
-          .join("\n")}>`,
-      });
-
-      textMessage = await textChat.send({
-        embeds: [StartLobby],
-        components: [buttonCallMod, buttonFinishMatch],
-      });
-      const collectorButton =
-        interaction.channel.createMessageComponentCollector({
-          componentType: "BUTTON",
-        });
-
-      collectorButton.on("end", (collectedButton) => {
-        console.log(`Ended Collecting ${collectedButton.size} items`);
-      });
-
-      await interaction.deleteReply();
-    } else {
-      interaction.editReply({
-        embeds: [embedPermission],
-      });
+      return;
     }
+
+    const category = await interaction.guild.channels.create(
+      `${interaction.user.username}`,
+      {
+        type: "GUILD_CATEGORY",
+        permissionOverwrites: [
+          {
+            id: interaction.guild.id,
+            deny: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "945293155866148914",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "958065673156841612",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: "968697582706651188",
+            allow: "VIEW_CHANNEL",
+          },
+        ],
+      }
+    );
+
+    // TEXT CHAT
+    const textChat = (await interaction.guild.channels.create("Chat", {
+      type: "GUILD_TEXT",
+      parent: category.id,
+      permissionOverwrites: [
+        {
+          id: interaction.guild.id,
+          deny: ["VIEW_CHANNEL"],
+        },
+        {
+          id: "945293155866148914",
+          allow: ["VIEW_CHANNEL"],
+        },
+        {
+          id: "958065673156841612",
+          allow: ["VIEW_CHANNEL"],
+        },
+        {
+          id: "968697582706651188",
+          allow: "VIEW_CHANNEL",
+        },
+      ],
+    })) as TextChannel;
+    // Team 1 Acess to TextChat
+    for (const player of players) {
+      try {
+        await textChat.permissionOverwrites.create(player.user_id, {
+          VIEW_CHANNEL: true,
+        });
+        await updateInMatch("users_4v4", player.user_id, true);
+        await updateUserTeam(player.user_id, "Time 2");
+        await updateCategory(player.user_id, category.id);
+        await updateModerator(player.user_id, interaction.user.id);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    // Team 2 Acess to TextChat
+    for (const player of team2) {
+      try {
+        await textChat.permissionOverwrites.create(player.user_id, {
+          VIEW_CHANNEL: true,
+        });
+        await updateInMatch("users_4v4", player.user_id, true);
+        await updateUserTeam(player.user_id, "Time 2");
+        await updateCategory(player.user_id, category.id);
+        await updateModerator(player.user_id, interaction.user.id);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    await create4v4Lobby(
+      players.map((p) => p.user_id),
+      players.map((p) => p.name),
+      team2.map((p) => p.user_id),
+      team2.map((p) => p.name),
+      category.id,
+      interaction.user.id
+    );
+    textChat.send({
+      content: `Time 1: <@${players
+        .map((p) => p.user_id)
+        .join(",")}> \n Time 2: <@${team2.map((p) => p.user_id).join(",")}>`,
+    });
+
+    textMessage = await textChat.send({
+      embeds: [StartLobby],
+      components: [buttonCallMod, buttonFinishMatch],
+    });
+    const collectorButton = interaction.channel.createMessageComponentCollector(
+      {
+        componentType: "BUTTON",
+      }
+    );
+
+    collectorButton.on("end", (collectedButton) => {
+      console.log(`Ended Collecting ${collectedButton.size} items`);
+    });
+
+    await interaction.deleteReply();
   },
 });
 
@@ -337,9 +269,7 @@ export async function handleButtonInteractionPlayerMenu(
     .setColor("#fd4a5f")
     .setTitle("Chamando Mod")
     .setDescription(
-      `⚠️ - Um <@&${"968697582706651188"}> foi notificado e está a caminho.\n\n jogador que fez o chamado: ${
-        btnInt.user.tag
-      }`
+      `⚠️ - Um <@&${role_aux_event}> foi notificado e está a caminho.\n\n jogador que fez o chamado: ${btnInt.user.tag}`
     );
 
   try {
@@ -354,19 +284,22 @@ export async function handleButtonInteractionPlayerMenu(
         await btnInt.deleteReply(); // delete thinking message
 
         await btnInt.channel.send({
-          content: `<@&${"968697582706651188"}>`,
+          content: `<@&${role_aux_event}>`,
           embeds: [EMBEDCALLMOD],
         });
 
         break;
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
-        btnInt.deleteReply();
 
-        // await btnInt.editReply({
-        //   embeds: [StartLobby],
-        //   components: [buttonCallMod, buttonFinishMatchDisabled],
-        // });
+        await btnInt.deleteReply(); // delete thinking message
+
+        await btnInt.channel.send({
+          embeds: [StartLobby],
+          components: [buttonCallMod, buttonFinishMatchDisabled],
+        });
+
+        textMessage.delete();
 
         // display menu
         const data = await fetchCategory(btnInt.user.id);
@@ -379,23 +312,32 @@ export async function handleButtonInteractionPlayerMenu(
         await sendMessage.react("❌");
         const collectorReaction = sendMessage.createReactionCollector({});
         if (!data[0].category_id) {
-          await btnInt.channel.send("Ocorreu um erro, Tente novamente!");
-
-          setTimeout(() => btnInt.deleteReply(), 3000);
+          try {
+            await btnInt.channel.send("Ocorreu um erro, Tente novamente!");
+            setTimeout(() => btnInt.deleteReply(), 3000);
+          } catch (error) {
+            console.log(error);
+          }
           return;
         }
         var winnerTeam = "";
         collectorReaction.on("collect", async (reaction, user) => {
+          const { MIN_REACTION_TO_VOTE_END_MATCH } = DISCORD_CONFIG.numbers;
+
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
             if (reaction.count >= MIN_REACTION_TO_VOTE_END_MATCH) {
               winnerTeam = "Time 1";
+
               const messageTime1 = await btnInt.channel.send({
-                content: `<@&${"968697582706651188"}>`,
+                content: `<@&${role_aux_event}>`,
                 embeds: [embedTime1],
               });
+
               messageTime1.react("✅");
               messageTime1.react("🛑");
+
               const collectorWinner1 = messageTime1.createReactionCollector({});
+
               collectorWinner1.on("collect", async (reaction, user) => {
                 const member = await btnInt.guild.members.fetch(user.id);
                 if (
@@ -424,15 +366,20 @@ export async function handleButtonInteractionPlayerMenu(
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
             if (reaction.count >= MIN_REACTION_TO_VOTE_END_MATCH) {
               winnerTeam = "Time 2";
+
               const messageTime2 = await btnInt.channel.send({
-                content: `<@&${"968697582706651188"}>`,
+                content: `<@&${role_aux_event}>`,
                 embeds: [embedTime2],
               });
+
               messageTime2.react("✅");
               messageTime2.react("🛑");
+
               const collectorWinner2 = messageTime2.createReactionCollector({});
+
               collectorWinner2.on("collect", async (reaction, user) => {
                 const member = await btnInt.guild.members.fetch(user.id);
+
                 if (
                   reaction.emoji.name === "✅" &&
                   !user.bot &&
@@ -469,30 +416,12 @@ export async function handleButtonInteractionPlayerMenu(
           }
         });
 
-        collectorReaction.on(
-          "end",
-          async (collected, interaction: Interaction) => {
-            const users = await fetchUsersInMatch(category_id);
-            for (const user of users) {
-              try {
-                const member = await interaction.guild.members.fetch(
-                  user.user_id
-                );
-                await member.voice.setChannel(WAITING_ROOM_ID);
-              } catch (error) {
-                console.log("Usuario não conectado");
-              }
-            }
-            try {
-              console.log(`Collected ${collected.size} items`);
-              await removeUsersFromCategory(category_id);
-              await updateWinnerAndFinishTime(winnerTeam, category_id);
-              setTimeout(() => deleteCategory(btnInt), 3000);
-            } catch (error) {
-              console.log(error);
-            }
-          }
-        );
+        collectorReaction.on("end", async (collected) => {
+          console.log(`Collected ${collected.size} items`);
+          await removeUsersFromCategory(category_id);
+          await updateWinnerAndFinishTime(winnerTeam, category_id);
+          setTimeout(() => deleteCategory(btnInt), 3000);
+        });
         break;
     }
   } catch (error) {
