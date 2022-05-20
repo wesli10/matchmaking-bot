@@ -251,7 +251,7 @@ export async function handleButtonInteractionPlayerMenu(
   };
   async function deleteCategory(interaction) {
     const parent = interaction.message.channel.parent;
-    if (!parent.id) {
+    if (!parent) {
       await btnInt.channel.send({
         content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
       });
@@ -323,7 +323,7 @@ export async function handleButtonInteractionPlayerMenu(
           const { MIN_REACTION_TO_VOTE_END_MATCH } = DISCORD_CONFIG.numbers;
 
           if (reaction.emoji.name === "1️⃣" && !user.bot) {
-            if (reaction.count >= MIN_REACTION_TO_VOTE_END_MATCH) {
+            if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
               winnerTeam = "Time 1";
 
               const messageTime1 = await btnInt.channel.send({
@@ -362,7 +362,7 @@ export async function handleButtonInteractionPlayerMenu(
               });
             }
           } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-            if (reaction.count >= MIN_REACTION_TO_VOTE_END_MATCH) {
+            if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
               winnerTeam = "Time 2";
 
               const messageTime2 = await btnInt.channel.send({
@@ -418,7 +418,11 @@ export async function handleButtonInteractionPlayerMenu(
           console.log(`Collected ${collected.size} items`);
           await removeUsersFromCategory(category_id);
           await updateWinnerAndFinishTime(winnerTeam, category_id);
-          setTimeout(() => deleteCategory(btnInt), 3000);
+          try {
+            setTimeout(() => deleteCategory(btnInt), 3000);
+          } catch (error) {
+            console.log(error);
+          }
         });
         break;
     }
