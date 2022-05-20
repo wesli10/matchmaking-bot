@@ -69,7 +69,7 @@ export class ExtendedClient extends Client {
     });
   }
 
-  // DB PRODUÇÃO
+  // DB DEV
   connectToDataBase() {
     const options = {
       schema: "public",
@@ -79,27 +79,10 @@ export class ExtendedClient extends Client {
       detectSessionInUrl: true,
     };
     const supabase = createClient(
-      "https://nymuufxfhoscijpaadnr.supabase.co",
-      process.env.db_url,
+      process.env.SUPABASE_URL,
+      process.env.db_dev_url,
       options
     );
     return supabase;
   }
-
-  // DB DEV
-  // connectToDataBase() {
-  //   const options = {
-  //     schema: "public",
-  //     headers: { "x-my-custom-header": "my-app-name" },
-  //     autoRefreshToken: true,
-  //     persistSession: true,
-  //     detectSessionInUrl: true,
-  //   };
-  //   const supabase = createClient(
-  //     "https://avgtipfdidvibjzwjavr.supabase.co",
-  //     process.env.db_dev_url,
-  //     options
-  //   );
-  //   return supabase;
-  // }
 }

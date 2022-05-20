@@ -1,2 +1,4 @@
 BOT_TOKEN=
-db_url=
+db_dev_url=
+SUPABASE_URL=
+NODE_ENV=

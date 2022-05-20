@@ -3,7 +3,7 @@ declare global {
     interface ProcessEnv {
       BOT_TOKEN: string;
       GUILD_ID: string;
-      enviroment: "dev" | "prod";
+      enviroment: "development" | "production";
     }
   }
 }
