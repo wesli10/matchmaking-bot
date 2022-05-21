@@ -20,14 +20,14 @@ export const DISCORD_ENV_CONFIG = {
       moderator: "945293155866148914",
       event: "958065673156841612",
       aux_event: "968697582706651188",
-      admin: "945293150749098004",
+      admin: "965501155016835085",
     },
     channels: {
       queue_room_id: "968922689190371328",
     },
     numbers: {
-      MIN_NUM_PLAYERS_TO_START_LOBBY: 8,
-      MIN_REACTION_TO_VOTE_END_MATCH: 6,
+      MIN_NUM_PLAYERS_TO_START_LOBBY: 4,
+      MIN_REACTION_TO_VOTE_END_MATCH: 2,
     },
   },
 };

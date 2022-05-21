@@ -89,10 +89,10 @@ export default new Command({
         id: role_moderator,
         allow: ["VIEW_CHANNEL"],
       },
-      {
-        id: role_admin,
-        allow: ["VIEW_CHANNEL"],
-      },
+      // {
+      //   id: role_admin,
+      //   allow: ["VIEW_CHANNEL"],
+      // },
       // Add players permissions as well
       ...players.map((player) => {
         return {
@@ -139,6 +139,18 @@ export default new Command({
       players,
       category_id: category.id,
       moderator_id: interaction.user.id,
+    });
+    await textChat.send({
+      content: `Time 1: <@${players
+        .filter((player) => player.team === 1)
+        .map((player) => player.user_id)
+        .join(">, <@")}>`,
+    });
+    await textChat.send({
+      content: `Time 2: <@${players
+        .filter((player) => player.team === 2)
+        .map((player) => player.user_id)
+        .join(">, <@")}>`,
     });
 
     await textChat.send({
