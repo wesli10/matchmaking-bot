@@ -32,6 +32,7 @@ export async function fetchUsersQtd(table, qtd, guildId?: string) {
     .select("*")
     .eq("in_match", false)
     .eq("guild_id", guildId)
+    .order("created_at", { ascending: true })
     .limit(qtd);
   return data;
 }
