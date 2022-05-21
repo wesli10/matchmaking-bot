@@ -26,28 +26,31 @@ export async function fetchUser(user_id) {
   return data;
 }
 
-export async function fetchUsersQtd(table, qtd) {
+export async function fetchUsersQtd(table, qtd, guildId?: string) {
   const { data } = await await db
     .from(table)
     .select("*")
     .eq("in_match", false)
+    .eq("guild_id", guildId)
     .limit(qtd);
   return data;
 }
 
-export async function createUser(user_id, name) {
+export async function createUser(user_id, name, guild_id) {
   const { data } = await db.from("users").insert({
     user_id: user_id,
     name: name,
     in_match: false,
+    guild_id,
   });
   return data;
 }
 
-export async function createUser4v4(user_id, name) {
+export async function createUser4v4(user_id, name, guild_id) {
   const { data } = await db.from("users_4v4").insert({
     user_id: user_id,
     name: name,
+    guild_id,
     in_match: false,
   });
   return data;
@@ -77,12 +80,14 @@ export async function removeUsersFromCategory(category_id) {
 export async function createUserQueue(
   user_id,
   channel_id,
+  guild_id,
   channel_name,
   moderator_id
 ) {
   const { data } = await db.from("users_queue").insert({
     user_id: user_id,
     channel_id: channel_id,
+    guild_id: guild_id,
     channel_name: channel_name,
     moderator_id: moderator_id,
   });

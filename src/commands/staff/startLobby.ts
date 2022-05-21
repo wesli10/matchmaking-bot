@@ -60,7 +60,7 @@ export default new Command({
       return;
     }
 
-    const players = await generateTeam();
+    const players = await generateTeam(interaction.guildId);
 
     if (
       players.length < DISCORD_CONFIG.numbers.MIN_NUM_PLAYERS_TO_START_LOBBY

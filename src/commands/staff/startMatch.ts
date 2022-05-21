@@ -86,7 +86,8 @@ export default new Command({
                   user.user_id,
                   lobbyChannel.id,
                   lobbyChannel.name,
-                  interaction.user.id
+                  interaction.user.id,
+                  interaction.guildId
                 )
                   .then(() => console.log("Criando"))
                   .catch((err) => console.log(err));

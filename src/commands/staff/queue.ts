@@ -71,7 +71,7 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
         }
 
         log("adding user to queue");
-        await createUser(btnInt.user.id, btnInt.user.tag);
+        await createUser(btnInt.user.id, btnInt.user.tag, btnInt.guildId);
 
         log("user added to queue.");
         await btnInt.editReply({
