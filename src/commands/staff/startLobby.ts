@@ -245,8 +245,6 @@ export async function handleButtonInteractionPlayerMenu(
         await btnInt.deleteReply(); // delete thinking message
 
         // display menu
-        const data = await fetchCategory(btnInt.user.id);
-        const category_id = data[0].category_id;
 
         const sendMessage = await btnInt.channel.send({
           embeds: [FinishLobby],
@@ -255,14 +253,6 @@ export async function handleButtonInteractionPlayerMenu(
         await sendMessage.react("2️⃣");
         await sendMessage.react("❌");
         const collectorReaction = sendMessage.createReactionCollector({});
-        if (!data[0].category_id) {
-          try {
-            await btnInt.channel.send("Ocorreu um erro, Tente novamente!");
-          } catch (error) {
-            console.log(error);
-          }
-          return;
-        }
         let winnerTeam = "";
         collectorReaction.on("collect", async (reaction, user) => {
           const { MIN_REACTION_TO_VOTE_END_MATCH } = DISCORD_CONFIG.numbers;
@@ -367,8 +357,11 @@ export async function handleButtonInteractionPlayerMenu(
 
         collectorReaction.on("end", async (collected) => {
           console.log(`Collected ${collected.size} items`);
-          await removeUsersFromCategory(category_id);
-          await updateWinnerAndFinishTime(winnerTeam, category_id);
+          const channel = await client.channels.cache.get(btnInt.channelId);
+          if (channel.type === "GUILD_TEXT") {
+            await removeUsersFromCategory(channel.parentId);
+            await updateWinnerAndFinishTime(winnerTeam, channel.parentId);
+          }
           try {
             setTimeout(() => deleteCategory(btnInt), 3000);
           } catch (error) {
