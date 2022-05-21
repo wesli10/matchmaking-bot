@@ -103,6 +103,8 @@ export default new Command({
       }),
     ];
 
+    console.log(permissions);
+
     // Create category
     const category = await interaction.guild.channels.create(
       `${interaction.user.username}`,
@@ -171,39 +173,41 @@ export default new Command({
   },
 });
 
+async function deleteCategory(interaction: ButtonInteraction<CacheType>) {
+  const channelId = interaction.channelId;
+  const channel = await client.channels.fetch(channelId);
+
+  try {
+    if (channel.type !== "GUILD_TEXT") {
+      throw new Error("Channel is not a text channel");
+    }
+
+    const parentCategory = await channel.parent;
+
+    if (!parentCategory) {
+      throw new Error("Channel has no parent");
+    }
+
+    await Promise.all(
+      parentCategory.children.map((channel) => channel.delete())
+    );
+    parentCategory.delete();
+  } catch (error) {
+    console.log(error);
+    await interaction.channel.send({
+      content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
+    });
+    setTimeout(async () => await interaction.deleteReply(), 3000);
+  }
+}
+
 export async function handleButtonInteractionPlayerMenu(
   btnInt: ButtonInteraction
 ) {
   const log = (...message: any[]) => {
     console.log(`[${btnInt.user.username}] --`, ...message);
   };
-  async function deleteCategory(interaction: ButtonInteraction<CacheType>) {
-    const channelId = interaction.channelId;
-    const channel = await client.channels.fetch(channelId);
 
-    try {
-      if (channel.type !== "GUILD_TEXT") {
-        throw new Error("Channel is not a text channel");
-      }
-
-      const parentCategory = await channel.parent;
-
-      if (!parentCategory) {
-        throw new Error("Channel has no parent");
-      }
-
-      await Promise.all(
-        parentCategory.children.map((channel) => channel.delete())
-      );
-      parentCategory.delete();
-    } catch (error) {
-      console.log(error);
-      await btnInt.channel.send({
-        content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
-      });
-      setTimeout(async () => await btnInt.deleteReply(), 3000);
-    }
-  }
   const EMBEDCALLMOD = new MessageEmbed()
     .setColor("#fd4a5f")
     .setTitle("Chamando Mod")
@@ -327,7 +331,10 @@ export async function handleButtonInteractionPlayerMenu(
                   try {
                     collectorReaction.stop();
                   } catch (error) {
-                    console.log(error);
+                    console.log(
+                      "error when stopping winenr2 collector =",
+                      error
+                    );
                   }
                 } else if (
                   reaction.emoji.name === "🛑" &&
@@ -337,7 +344,10 @@ export async function handleButtonInteractionPlayerMenu(
                   try {
                     await messageTime2.delete();
                   } catch (error) {
-                    console.log(error);
+                    console.log(
+                      "error when deleting message for team2=",
+                      error
+                    );
                   }
                 }
               });
@@ -362,7 +372,7 @@ export async function handleButtonInteractionPlayerMenu(
           try {
             setTimeout(() => deleteCategory(btnInt), 3000);
           } catch (error) {
-            console.log(error);
+            console.log("error when deleting category=", error);
           }
         });
         break;
