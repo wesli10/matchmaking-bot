@@ -77,18 +77,18 @@ export default new Command({
         id: interaction.guild.id,
         deny: ["VIEW_CHANNEL"],
       },
-      // {
-      //   id: role_aux_event,
-      //   allow: ["VIEW_CHANNEL"],
-      // },
+      {
+        id: role_aux_event,
+        allow: ["VIEW_CHANNEL"],
+      },
       {
         id: role_event,
         allow: ["VIEW_CHANNEL"],
       },
-      // {
-      //   id: role_moderator,
-      //   allow: ["VIEW_CHANNEL"],
-      // },
+      {
+        id: role_moderator,
+        allow: ["VIEW_CHANNEL"],
+      },
       {
         id: role_admin,
         allow: ["VIEW_CHANNEL"],
