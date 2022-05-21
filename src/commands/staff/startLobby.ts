@@ -103,7 +103,36 @@ export default new Command({
       }),
     ];
 
-    console.log(permissions);
+    const permissionsAnnouncements: OverwriteResolvable[] = [
+      {
+        id: interaction.guild.id,
+        deny: ["VIEW_CHANNEL"],
+      },
+      {
+        id: role_aux_event,
+        allow: ["VIEW_CHANNEL"],
+      },
+      {
+        id: role_event,
+        allow: ["VIEW_CHANNEL"],
+      },
+      {
+        id: role_moderator,
+        allow: ["VIEW_CHANNEL"],
+      },
+      // {
+      //   id: role_admin,
+      //   allow: ["VIEW_CHANNEL"],
+      // },
+      // Add players permissions as well
+      ...players.map((player) => {
+        return {
+          id: player.user_id,
+          allow: ["VIEW_CHANNEL"],
+          deny: ["SEND_MESSAGES"],
+        };
+      }),
+    ];
 
     // Create category
     const category = await interaction.guild.channels.create(
@@ -115,7 +144,17 @@ export default new Command({
     );
 
     // Create Text Chat
-    const textChat = await interaction.guild.channels.create("Chat", {
+
+    const textChatAnnouncements = await interaction.guild.channels.create(
+      "Informação",
+      {
+        type: "GUILD_TEXT",
+        parent: category.id,
+        permissionOverwrites: permissionsAnnouncements,
+      }
+    );
+
+    await interaction.guild.channels.create("Chat", {
       type: "GUILD_TEXT",
       parent: category.id,
       permissionOverwrites: permissions,
@@ -142,20 +181,20 @@ export default new Command({
       category_id: category.id,
       moderator_id: interaction.user.id,
     });
-    await textChat.send({
+    await textChatAnnouncements.send({
       content: `Time 1: <@${players
         .filter((player) => player.team === 1)
         .map((player) => player.user_id)
         .join(">, <@")}>`,
     });
-    await textChat.send({
+    await textChatAnnouncements.send({
       content: `Time 2: <@${players
         .filter((player) => player.team === 2)
         .map((player) => player.user_id)
         .join(">, <@")}>`,
     });
 
-    await textChat.send({
+    await textChatAnnouncements.send({
       embeds: [StartLobby],
       components: [buttonCallMod, buttonFinishMatch],
     });
