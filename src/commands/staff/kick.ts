@@ -1,10 +1,19 @@
 import { Command } from "../../structures/Command";
 import { fetchUser, removeUser } from "../../utils/db";
-import { MessageEmbed } from "discord.js";
+import { MessageEmbed, TextChannel } from "discord.js";
+import { DISCORD_CONFIG } from "../../configs/discord.config";
+import { embedPermission } from "../../utils/embeds";
+
+const { roles } = DISCORD_CONFIG;
+
+const role_aux_event = roles.aux_event;
+const role_event = roles.event;
+const role_moderator = roles.moderator;
+const role_admin = roles.admin;
 
 export default new Command({
   name: "ffkick",
-  description: "Kick a user from the server",
+  description: "Kick a user queue",
   userPermissions: ["KICK_MEMBERS"],
   options: [
     {
@@ -16,44 +25,44 @@ export default new Command({
   ],
   run: async ({ interaction }) => {
     const user = interaction.options.getUser("user");
-    const role1 = "945293155866148914";
-    const role2 = "958065673156841612";
-    const role3 = "968697582706651188";
-    const roleTeste = "965501155016835085";
-    const admin = JSON.stringify(interaction.member.roles.valueOf());
-
-    const embedKick = new MessageEmbed()
+    const kick_embed = new MessageEmbed()
       .setColor("#fd4a5f")
-      .setTitle(`${user.username.toUpperCase()} foi kickado!`);
-
+      .setTitle("Expulso!")
+      .setDescription(`Usuario: ${user.tag} foi expulso!`);
+    const member = await interaction.guild.members.fetch(user.id);
+    const admin = JSON.stringify(interaction.member.roles.valueOf());
+    const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;
     if (
-      admin.includes(role1) ||
-      admin.includes(role2) ||
-      admin.includes(role3) ||
-      admin.includes(roleTeste)
+      !admin.includes(role_aux_event) &&
+      !admin.includes(role_event) &&
+      !admin.includes(role_moderator) &&
+      !admin.includes(role_admin)
     ) {
-      const member = await interaction.guild.members.fetch(user.id);
-      const player = await fetchUser(user.id);
-      if (!player[0]) {
-        await interaction.editReply({
-          content: "Não encontramos o usuário",
-        });
+      interaction
+        .editReply({
+          embeds: [embedPermission],
+        })
+        .then(() => setTimeout(() => interaction.deleteReply(), 3000));
 
-        return;
-      }
-      try {
-        await member.voice.disconnect().then(async () => {
-          await interaction.editReply({
-            content: `⠀`,
-            embeds: [embedKick],
-            components: [],
-          });
-          await removeUser("users", user.id);
-        });
-        await member.roles.remove(player[0].role_id);
-      } catch (error) {
-        console.log(error);
-      }
+      return;
     }
+    // Move usuario de sala
+    await member.voice
+      .setChannel(waiting_room_id)
+      .catch((error) => console.log(error));
+
+    // Remove usuario da fila
+    removeUser("users_4v4", user.id);
+
+    // Delete a thinking Message
+    interaction.deleteReply();
+
+    // Envia mensagem de usuario expulso
+    const channel = interaction.guild.channels.cache.get(
+      interaction.channelId
+    ) as TextChannel;
+    await channel.send({
+      embeds: [kick_embed],
+    });
   },
 });
