@@ -19,6 +19,7 @@ import {
 } from "../../utils/db";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { generateTeam } from "../../utils/4v4/generateTeam";
+import { removeusersFromChannel } from "../../utils/4v4/manageUsers";
 import {
   buttonCallMod,
   buttonFinishMatch,
@@ -161,18 +162,22 @@ export default new Command({
     });
 
     // Voice chat
-    await interaction.guild.channels.create("Voice chat", {
+    const gameChannel = await interaction.guild.channels.create("Voice chat", {
       type: "GUILD_VOICE",
       parent: category.id,
       permissionOverwrites: permissions,
     });
 
     for (const player of players) {
+      const member = await interaction.guild.members.fetch(player.user_id);
       await Promise.all([
         updateInMatch("users_4v4", player.user_id, true),
         updateUserTeam(player.user_id, player.team === 1 ? "Time1" : "Time 2"),
         updateCategory(player.user_id, category.id),
         updateModerator(player.user_id, interaction.user.id),
+        member.voice
+          .setChannel(gameChannel.id)
+          .catch((error) => console.log(error)),
       ]);
     }
 
@@ -396,10 +401,16 @@ export async function handleButtonInteractionPlayerMenu(
 
         collectorReaction.on("end", async (collected) => {
           console.log(`Collected ${collected.size} items`);
+          const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;
           const channel = await client.channels.cache.get(btnInt.channelId);
           if (channel.type === "GUILD_TEXT") {
-            await removeUsersFromCategory(channel.parentId);
+            await removeusersFromChannel(
+              channel.parentId,
+              waiting_room_id,
+              btnInt
+            );
             await updateWinnerAndFinishTime(winnerTeam, channel.parentId);
+            await removeUsersFromCategory(channel.parentId);
           }
           try {
             setTimeout(() => deleteCategory(btnInt), 3000);

@@ -8,6 +8,7 @@ export const DISCORD_ENV_CONFIG = {
     },
     channels: {
       queue_room_id: "968922689190371328",
+      waiting_room_id: "968933862606503986",
     },
     numbers: {
       MIN_NUM_PLAYERS_TO_START_LOBBY: 8,
@@ -23,10 +24,11 @@ export const DISCORD_ENV_CONFIG = {
       admin: "965501155016835085",
     },
     channels: {
-      queue_room_id: "968922689190371328",
+      queue_room_id: "964294426543390791",
+      waiting_room_id: "968197006117986324",
     },
     numbers: {
-      MIN_NUM_PLAYERS_TO_START_LOBBY: 4,
+      MIN_NUM_PLAYERS_TO_START_LOBBY: 2,
       MIN_REACTION_TO_VOTE_END_MATCH: 2,
     },
   },
