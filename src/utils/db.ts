@@ -278,7 +278,7 @@ export async function removeUser(table, user_id) {
 
 export async function fetchToCSV(day: string, month: string, year: string) {
   const { data } = await db
-    .from("users_queue")
+    .from("lobbys")
     .select("*")
     .gte("created_at", `${year}-${month}-${day} 19:00:00`)
     .csv();
