@@ -1,4 +1,3 @@
-import { table } from "console";
 import { ExtendedClient } from "../structures/Client";
 
 const client = new ExtendedClient();
@@ -73,6 +72,15 @@ export async function removeUsersFromCategory(category_id) {
   const { data } = await db
     .from("users_4v4")
     .delete()
+    .eq("category_id", category_id);
+
+  return data;
+}
+
+export async function fetchUsersFromCategory(category_id) {
+  const { data } = await db
+    .from("users_4v4")
+    .select("*")
     .eq("category_id", category_id);
 
   return data;
