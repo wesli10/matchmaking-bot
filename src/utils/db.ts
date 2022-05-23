@@ -26,13 +26,19 @@ export async function fetchUser(user_id) {
 }
 
 export async function fetchUsersQtd(table, qtd, guildId?: string) {
-  const { data } = await await db
+  const { data } = await db
     .from(table)
     .select("*")
     .eq("in_match", false)
     .eq("guild_id", guildId)
     .order("created_at", { ascending: true })
     .limit(qtd);
+  return data;
+}
+
+export async function resetQueue(table, guild_id) {
+  const { data } = await db.from(table).delete().match({ guild_id: guild_id });
+
   return data;
 }
 
