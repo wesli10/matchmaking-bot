@@ -386,19 +386,24 @@ export async function handleButtonInteractionPlayerMenu(
                 }
               });
             }
-          } else if (
-            reaction.emoji.name === "❌" &&
-            !user.bot &&
-            btnInt.memberPermissions.has("MODERATE_MEMBERS")
-          ) {
-            await sendMessage.delete();
-            await btnInt.channel.send({
-              embeds: [PartidaCancelada],
-            });
-            collectorReaction.stop();
+          } else if (reaction.emoji.name === "❌" && !user.bot) {
+            const member = await btnInt.guild.members.fetch(user.id);
+            console.log("cancel button is pressed!");
+            if (
+              reaction.count === 2 &&
+              member.permissions.has("MODERATE_MEMBERS")
+            ) {
+              try {
+                await btnInt.channel.send({
+                  embeds: [PartidaCancelada],
+                });
+                collectorReaction.stop();
+              } catch (error) {
+                console.log(error);
+              }
+            }
           }
         });
-
         collectorReaction.on("end", async (collected) => {
           console.log(`Collected ${collected.size} items`);
           const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;

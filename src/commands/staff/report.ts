@@ -48,11 +48,12 @@ export default new Command({
       fs.writeFile("data.csv", data, (err) => {
         if (err) throw err;
 
-        interaction.user.send({ files: ["data.csv"] });
+        interaction
+          .editReply({ files: ["./data.csv"] })
+          .catch((error) => console.log(error));
       });
     } else {
       interaction.editReply({
-        content: "Você não tem permissão para executar este comando!",
         embeds: [embedPermission],
       });
     }
