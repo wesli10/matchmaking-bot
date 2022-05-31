@@ -2,7 +2,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - k8s-deployment
+      - master
 
 env:
   DO_REGISTRY: isaw-registry
