@@ -78,8 +78,8 @@ export class ExtendedClient extends Client {
       detectSessionInUrl: true,
     };
     const supabase = createClient(
-      "https://nymuufxfhoscijpaadnr.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55bXV1ZnhmaG9zY2lqcGFhZG5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTA2MTMxMjEsImV4cCI6MTk2NjE4OTEyMX0.M9BUHhtf3PxisrWI9LS1qd9HqQVrWHi9C8c1SOkMOHw",
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_KEY,
       options
     );
     return supabase;
