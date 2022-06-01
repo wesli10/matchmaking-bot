@@ -80,20 +80,20 @@ export default new Command({
       },
       {
         id: role_aux_event,
-        allow: ["VIEW_CHANNEL"],
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
       },
       {
         id: role_event,
-        allow: ["VIEW_CHANNEL"],
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
       },
       {
         id: role_moderator,
-        allow: ["VIEW_CHANNEL"],
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
       },
-      // {
-      //   id: role_admin,
-      //   allow: ["VIEW_CHANNEL"],
-      // },
+      {
+        id: role_admin,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
       // Add players permissions as well
       ...players.map((player) => {
         return {
@@ -111,20 +111,20 @@ export default new Command({
       },
       {
         id: role_aux_event,
-        allow: ["VIEW_CHANNEL"],
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
       },
       {
         id: role_event,
-        allow: ["VIEW_CHANNEL"],
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
       },
       {
         id: role_moderator,
-        allow: ["VIEW_CHANNEL"],
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
       },
-      // {
-      //   id: role_admin,
-      //   allow: ["VIEW_CHANNEL"],
-      // },
+      {
+        id: role_admin,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
       // Add players permissions as well
       ...players.map((player) => {
         return {
@@ -170,9 +170,16 @@ export default new Command({
 
     for (const player of players) {
       const member = await interaction.guild.members.fetch(player.user_id);
+      const playerTeam = player.team === 1 ? "Time 1" : "Time 2";
       await Promise.all([
         updateInMatch("users_4v4", player.user_id, true),
-        updateUserTeam(player.user_id, player.team === 1 ? "Time1" : "Time 2"),
+        create4v4Lobby(
+          player.user_id,
+          category.id,
+          interaction.user.id,
+          playerTeam
+        ),
+        updateUserTeam(player.user_id, player.team === 1 ? "Time 1" : "Time 2"),
         updateCategory(player.user_id, category.id),
         updateModerator(player.user_id, interaction.user.id),
         member.voice
@@ -181,11 +188,6 @@ export default new Command({
       ]);
     }
 
-    await create4v4Lobby({
-      players,
-      category_id: category.id,
-      moderator_id: interaction.user.id,
-    });
     await textChatAnnouncements.send({
       content: `Time 1: <@${players
         .filter((player) => player.team === 1)
@@ -389,14 +391,21 @@ export async function handleButtonInteractionPlayerMenu(
           } else if (reaction.emoji.name === "❌" && !user.bot) {
             const member = await btnInt.guild.members.fetch(user.id);
             console.log("cancel button is pressed!");
-            if (
-              reaction.count === 2 &&
-              member.permissions.has("MODERATE_MEMBERS")
-            ) {
+
+            if (member.permissions.has("MODERATE_MEMBERS")) {
+              console.log(
+                member.permissions.has("MODERATE_MEMBERS")
+                  ? "Tem o cargo"
+                  : "Não tem o cargo"
+              );
+
+              winnerTeam = "Partida Cancelada";
+
               try {
-                await btnInt.channel.send({
+                const message = await btnInt.channel.send({
                   embeds: [PartidaCancelada],
                 });
+                console.log("passei do await");
                 collectorReaction.stop();
               } catch (error) {
                 console.log(error);

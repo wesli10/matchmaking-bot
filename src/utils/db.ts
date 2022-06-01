@@ -1,3 +1,4 @@
+import { table } from "console";
 import { ExtendedClient } from "../structures/Client";
 
 const client = new ExtendedClient();
@@ -134,27 +135,14 @@ export async function verifyUserInMatch(table, user_id) {
   return data;
 }
 
-export async function create4v4Lobby({
-  players,
-  category_id,
-  moderator_id,
-}: {
-  players: Array<any>;
-  category_id: string;
-  moderator_id: string;
-}) {
-  const { data } = await db.from("lobbys").insert([
-    {
-      time1: players
-        .filter((p) => p.team === 1)
-        .map((p) => ({ user_id: p.user_id, name: p.name })),
-      time2: players
-        .filter((p) => p.team === 2)
-        .map((p) => ({ user_id: p.user_id, name: p.name })),
-      category_id: category_id,
-      moderator_id: moderator_id,
-    },
-  ]);
+export async function create4v4Lobby(user_id, category_id, moderator_id, team) {
+  const { data } = await db.from("lobbys").insert({
+    user_id: user_id,
+    category_id: category_id,
+    moderator_id: moderator_id,
+    team: team,
+  });
+
   return data;
 }
 
