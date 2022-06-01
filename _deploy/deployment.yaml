@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snack-mm-bot
+spec:
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: snack-mm-bot
+  template:
+    metadata:
+      labels:
+        app: snack-mm-bot
+    spec:
+      imagePullSecrets:
+        - name: isaw-registry
+      containers:
+        - name: snack-mm-bot
+          image: 'registry.digitalocean.com/isaw-registry/snack-mm-bot:TAG'
+          resources:
+            requests:
+              memory: '2G'
+              cpu: '0.1'
+            limits:
+              memory: '2G'
+              cpu: '0.5'
+          envFrom:
+            - configMapRef:
+                name: snack-mm-bot
