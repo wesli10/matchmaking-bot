@@ -78,18 +78,18 @@ export default new Command({
         id: interaction.guild.id,
         deny: ["VIEW_CHANNEL"],
       },
-      // {
-      //   id: role_aux_event,
-      //   allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      // },
-      // {
-      //   id: role_event,
-      //   allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      // },
-      // {
-      //   id: role_moderator,
-      //   allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      // },
+      {
+        id: role_aux_event,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
+      {
+        id: role_event,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
+      {
+        id: role_moderator,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
       {
         id: role_admin,
         allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
@@ -109,18 +109,18 @@ export default new Command({
         id: interaction.guild.id,
         deny: ["VIEW_CHANNEL"],
       },
-      // {
-      //   id: role_aux_event,
-      //   allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      // },
-      // {
-      //   id: role_event,
-      //   allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      // },
-      // {
-      //   id: role_moderator,
-      //   allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      // },
+      {
+        id: role_aux_event,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
+      {
+        id: role_event,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
+      {
+        id: role_moderator,
+        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
+      },
       {
         id: role_admin,
         allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
@@ -393,13 +393,18 @@ export async function handleButtonInteractionPlayerMenu(
             console.log("cancel button is pressed!");
 
             if (member.permissions.has("MODERATE_MEMBERS")) {
-              console.log(member.permissions.has("MODERATE_MEMBERS"));
-              winnerTeam = "Cancelado";
+              console.log(
+                member.permissions.has("MODERATE_MEMBERS")
+                  ? "Tem o cargo"
+                  : "Não tem o cargo"
+              );
+
+              winnerTeam = "Partida Cancelada";
+
               try {
                 const message = await btnInt.channel.send({
                   embeds: [PartidaCancelada],
                 });
-                console.log(message);
                 console.log("passei do await");
                 collectorReaction.stop();
               } catch (error) {
