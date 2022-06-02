@@ -22,12 +22,14 @@ import { generateTeam } from "../../utils/4v4/generateTeam";
 import { removeusersFromChannel } from "../../utils/4v4/manageUsers";
 import {
   buttonCallMod,
+  buttonConfirmFinishMatch,
   buttonFinishMatch,
   buttonFinishMatchDisabled,
   embedTime1,
   embedTime2,
   FinishLobby,
   PartidaCancelada,
+  PreFinishLobby,
   StartLobby,
 } from "../../utils/4v4/messageInteractionsTemplates";
 import { client } from "../..";
@@ -272,7 +274,20 @@ export async function handleButtonInteractionPlayerMenu(
         });
 
         break;
+
       case "finish_match":
+        log("Iniciando ação do botão", btnInt.customId);
+
+        const sendMessageFinish = await btnInt.channel.send({
+          embeds: [PreFinishLobby],
+          components: [buttonCallMod, buttonConfirmFinishMatch],
+        });
+
+        await btnInt.deleteReply(); // delete thinking message
+
+        break;
+
+      case "confirm_finish_match":
         log("Iniciando ação do botão", btnInt.customId);
 
         const channel = await btnInt.channel.fetch();
