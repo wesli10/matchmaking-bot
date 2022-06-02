@@ -35,7 +35,8 @@ export default new Event("interactionCreate", async (interaction) => {
       await handleButtonInteraction_4v4(interaction);
     } else if (
       interaction.customId === "call_mod" ||
-      interaction.customId === "finish_match"
+      interaction.customId === "finish_match" ||
+      interaction.customId === "confirm_finish_match"
     ) {
       await handleButtonInteractionPlayerMenu(interaction);
     } else {

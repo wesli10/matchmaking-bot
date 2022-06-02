@@ -37,6 +37,12 @@ export const FinishLobby = new MessageEmbed()
   .setDescription(
     "Clique na reação adequada para indicar qual time foi o vencedor.\n Se precisar, chame os organizadores."
   );
+export const PreFinishLobby = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Atenção, confirme para a partida ser finalizada!")
+  .setDescription(
+    "Clique em finalizar partida abaixo para confirmar a finalização.\n Se precisar, chame os organizadores."
+  );
 export const buttonCallMod = new MessageActionRow().addComponents(
   new MessageButton()
     .setCustomId("call_mod")
@@ -60,3 +66,21 @@ export const buttonFinishMatchDisabled = new MessageActionRow().addComponents(
     .setStyle("DANGER")
     .setDisabled(true)
 );
+
+export const buttonConfirmFinishMatch = new MessageActionRow().addComponents(
+  new MessageButton()
+    .setCustomId("confirm_finish_match")
+    .setEmoji("🏁")
+    .setLabel("Finalizar Partida")
+    .setStyle("DANGER")
+);
+
+export const buttonConfirmFinishMatchDisabled =
+  new MessageActionRow().addComponents(
+    new MessageButton()
+      .setCustomId("confirm_finish_match")
+      .setEmoji("🏁")
+      .setLabel("Finalizar Partida")
+      .setStyle("DANGER")
+      .setDisabled(true)
+  );
