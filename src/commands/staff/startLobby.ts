@@ -155,12 +155,6 @@ export default new Command({
       }
     );
 
-    await interaction.guild.channels.create("Chat", {
-      type: "GUILD_TEXT",
-      parent: category.id,
-      permissionOverwrites: permissions,
-    });
-
     // Voice chat
     const gameChannel = await interaction.guild.channels.create("Voice chat", {
       type: "GUILD_VOICE",
@@ -336,6 +330,12 @@ export async function handleButtonInteractionPlayerMenu(
                 ) {
                   try {
                     await messageTime1.delete();
+                    await sendMessage.reactions
+                      .removeAll()
+                      .catch((error) => console.log(error));
+                    await sendMessage.react("1️⃣");
+                    await sendMessage.react("2️⃣");
+                    await sendMessage.react("❌");
                   } catch (error) {
                     console.log(error);
                   }
