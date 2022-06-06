@@ -10,10 +10,13 @@ import { embedPermission } from "../../utils/embeds";
 import {
   create4v4Lobby,
   fetchCategory,
+  fetchUsersFromCategory,
   removeUsersFromCategory,
   updateCategory,
+  updateFinishTime,
   updateInMatch,
   updateModerator,
+  updateResultUser,
   updateUserTeam,
   updateWinnerAndFinishTime,
 } from "../../utils/db";
@@ -278,9 +281,16 @@ export async function handleButtonInteractionPlayerMenu(
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
 
+        const channelLobby = await btnInt.channel.fetch();
+
+        await channelLobby.messages.edit(btnInt.message.id, {
+          embeds: [StartLobby],
+          components: [buttonCallMod, buttonFinishMatchDisabled],
+        });
+
         const sendMessageFinish = await btnInt.channel.send({
           embeds: [PreFinishLobby],
-          components: [buttonCallMod, buttonConfirmFinishMatch],
+          components: [buttonConfirmFinishMatch],
         });
 
         await btnInt.deleteReply(); // delete thinking message
@@ -292,10 +302,7 @@ export async function handleButtonInteractionPlayerMenu(
 
         const channel = await btnInt.channel.fetch();
 
-        await channel.messages.edit(btnInt.message.id, {
-          embeds: [StartLobby],
-          components: [buttonCallMod, buttonFinishMatchDisabled],
-        });
+        await channel.messages.delete(btnInt.message.id);
 
         await btnInt.deleteReply(); // delete thinking message
 
@@ -433,12 +440,39 @@ export async function handleButtonInteractionPlayerMenu(
           const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;
           const channel = await client.channels.cache.get(btnInt.channelId);
           if (channel.type === "GUILD_TEXT") {
+            await updateFinishTime(channel.parentId);
+            const players = await fetchUsersFromCategory(channel.parentId);
+
+            players.forEach(async (player) => {
+              if (player.team === winnerTeam) {
+                await updateResultUser(
+                  player.user_id,
+                  channel.parentId,
+                  "Venceu"
+                );
+              } else if (
+                player.team !== winnerTeam &&
+                winnerTeam !== "Partida Cancelada"
+              ) {
+                await updateResultUser(
+                  player.user_id,
+                  channel.parentId,
+                  "Perdeu"
+                );
+              } else if (winnerTeam === "Partida Cancelada") {
+                await updateResultUser(
+                  player.user_id,
+                  channel.parentId,
+                  "Cancelado"
+                );
+              }
+            });
+
             await removeusersFromChannel(
               channel.parentId,
               waiting_room_id,
               btnInt
             );
-            await updateWinnerAndFinishTime(winnerTeam, channel.parentId);
             await removeUsersFromCategory(channel.parentId);
           }
           try {

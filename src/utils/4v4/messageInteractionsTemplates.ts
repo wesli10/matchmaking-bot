@@ -71,7 +71,7 @@ export const buttonConfirmFinishMatch = new MessageActionRow().addComponents(
   new MessageButton()
     .setCustomId("confirm_finish_match")
     .setEmoji("🏁")
-    .setLabel("Finalizar Partida")
+    .setLabel("Encerrar Partida")
     .setStyle("DANGER")
 );
 

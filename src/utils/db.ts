@@ -168,6 +168,26 @@ export async function updateWinnerAndFinishTime(winner, category_id) {
   return data;
 }
 
+export async function updateFinishTime(category_id) {
+  const { data } = await db
+    .from("lobbys")
+    .update({
+      finished_at: new Date(),
+    })
+    .match({ category_id: category_id });
+  return data;
+}
+
+export async function updateResultUser(user_id, category_id, result) {
+  const { data } = await db
+    .from("lobbys")
+    .update({
+      result: result,
+    })
+    .match({ user_id: user_id, category_id: category_id });
+  return data;
+}
+
 export async function updateUserTeam(user_id, team) {
   const { data } = await db
     .from("users_4v4")
