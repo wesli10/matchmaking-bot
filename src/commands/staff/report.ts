@@ -45,11 +45,11 @@ export default new Command({
         embeds: [embedExport],
       });
 
-      fs.writeFile("data.csv", data, (err) => {
+      fs.writeFile(`${day}-${month}.csv`, data, (err) => {
         if (err) throw err;
 
         interaction
-          .editReply({ files: ["./data.csv"] })
+          .editReply({ files: [`${day}-${month}.csv`] })
           .catch((error) => console.log(error));
       });
     } else {
