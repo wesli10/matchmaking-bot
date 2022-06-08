@@ -43,6 +43,12 @@ export async function resetQueue(table, guild_id) {
   return data;
 }
 
+export async function getAllMembersOnEvent() {
+  const { data } = await db.from("users_4v4").select("user_id, in_match");
+
+  return data;
+}
+
 export async function createUser(user_id, name, guild_id) {
   const { data } = await db.from("users").insert({
     user_id: user_id,

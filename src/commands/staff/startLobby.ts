@@ -161,11 +161,16 @@ export default new Command({
     );
 
     // Voice chat
-    const gameChannel = await interaction.guild.channels.create("Voice chat", {
-      type: "GUILD_VOICE",
-      parent: category.id,
-      permissionOverwrites: permissions,
-    });
+    const gameChannel = await interaction.guild.channels.create(
+      `VOICE - ${interaction.user.username} [${Math.floor(
+        Math.random() * 999
+      )}]`,
+      {
+        type: "GUILD_VOICE",
+        parent: category.id,
+        permissionOverwrites: permissions,
+      }
+    );
 
     for (const player of players) {
       const member = await interaction.guild.members.fetch(player.user_id);
