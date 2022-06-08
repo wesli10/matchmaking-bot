@@ -1,4 +1,3 @@
-import { table } from "console";
 import { ExtendedClient } from "../structures/Client";
 
 const client = new ExtendedClient();
@@ -294,7 +293,8 @@ export async function fetchToCSV(day: string, month: string, year: string) {
   const { data } = await db
     .from("lobbys")
     .select("*")
-    .gte("created_at", `${year}-${month}-${day} 19:00:00`)
+    .gte("created_at", `${year}-${month}-${day}`)
+    .not("result", "in", "(Cancelado)")
     .csv();
 
   return data;
