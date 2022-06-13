@@ -4,3 +4,5 @@ namespace: snack-mm-bot
 resources:
   - namespace.yaml
   - deployment.yaml
+  - metrics.yaml
+  - service.yaml

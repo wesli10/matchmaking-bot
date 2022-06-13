@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  namespace: kube-prometheus-stack
+  name: snack-mm-bot
+spec:
+  selector:
+    matchLabels:
+      app: snack-mm-bot
+  endpoints:
+  - port: snack-mm-bot-port
+
