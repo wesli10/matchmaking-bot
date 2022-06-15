@@ -67,6 +67,7 @@ export default new Command({
       });
     } catch (error) {
       console.log(error);
+      await removeUser("users_4v4", user.id);
     }
   },
 });
