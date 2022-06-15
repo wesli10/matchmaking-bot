@@ -46,23 +46,28 @@ export default new Command({
 
       return;
     }
-    // Move usuario de sala
-    await member.voice
-      .setChannel(waiting_room_id)
-      .catch((error) => console.log(error));
+    try {
+      // Move usuario de sala
+      await member.voice
+        .setChannel(waiting_room_id)
+        .catch((error) => console.log(error));
 
-    // Remove usuario da fila
-    removeUser("users_4v4", user.id);
+      // Remove usuario da fila
+      removeUser("users_4v4", user.id);
 
-    // Delete a thinking Message
-    interaction.deleteReply();
+      // Delete a thinking Message
+      interaction.deleteReply();
 
-    // Envia mensagem de usuario expulso
-    const channel = interaction.guild.channels.cache.get(
-      interaction.channelId
-    ) as TextChannel;
-    await channel.send({
-      embeds: [kick_embed],
-    });
+      // Envia mensagem de usuario expulso
+      const channel = interaction.guild.channels.cache.get(
+        interaction.channelId
+      ) as TextChannel;
+      await channel.send({
+        embeds: [kick_embed],
+      });
+    } catch (error) {
+      console.log(error);
+      await removeUser("users_4v4", user.id);
+    }
   },
 });

@@ -25,6 +25,14 @@ export async function fetchUser(user_id) {
   return data;
 }
 
+export async function fetchUser4v4Feedback(user_id) {
+  const { data } = await db
+    .from("lobbys")
+    .select("result, user_id")
+    .match({ user_id: user_id });
+  return data;
+}
+
 export async function fetchUsersQtd(table, qtd, guildId?: string) {
   const { data } = await db
     .from(table)
