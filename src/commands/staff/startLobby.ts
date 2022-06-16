@@ -9,8 +9,10 @@ import {
 import { embedPermission } from "../../utils/embeds";
 import {
   create4v4Lobby,
+  createEndedMatch,
   fetchCategory,
   fetchUsersFromCategory,
+  getEndedMatch,
   removeUsersFromCategory,
   updateCategory,
   updateFinishTime,
@@ -30,6 +32,7 @@ import {
   buttonFinishMatchDisabled,
   embedTime1,
   embedTime2,
+  FinishedMatch,
   FinishLobby,
   PartidaCancelada,
   PreFinishLobby,
@@ -292,6 +295,24 @@ export async function handleButtonInteractionPlayerMenu(
           embeds: [StartLobby],
           components: [buttonCallMod, buttonFinishMatchDisabled],
         });
+
+        const channelCategory = await client.channels.cache.get(
+          btnInt.channelId
+        );
+        const endedMatch = await getEndedMatch(channelCategory.id);
+
+        if (endedMatch) {
+          const sendMessageFinish = await btnInt.channel.send({
+            embeds: [FinishedMatch],
+            components: [buttonConfirmFinishMatch],
+          });
+
+          await btnInt.deleteReply(); // delete thinking message
+
+          break;
+        }
+
+        await createEndedMatch(channelCategory.id);
 
         const sendMessageFinish = await btnInt.channel.send({
           embeds: [PreFinishLobby],

@@ -43,6 +43,10 @@ export const PreFinishLobby = new MessageEmbed()
   .setDescription(
     "Clique em finalizar partida abaixo para confirmar a finalização.\n Se precisar, chame os organizadores."
   );
+export const FinishedMatch = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Atenção, Partida Já Finalizada!")
+  .setDescription("Essa partida já foi finalizada anteriormente.");
 export const buttonCallMod = new MessageActionRow().addComponents(
   new MessageButton()
     .setCustomId("call_mod")
