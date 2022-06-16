@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { collectDefaultMetrics, Registry } from "prom-client";
 import { ExtendedClient } from "./structures/Client";
 import express from "express";
+import { removeUser } from "./utils/db";
 const server = express();
 
 dotenv.config();
@@ -18,6 +19,11 @@ client.on("warn", (...message) => console.warn("warn", ...message));
 client.on("error", (...message) => console.error("error", ...message));
 client.on("shardError", (...message) => console.log("shardError", ...message));
 client.on("log", (...message) => console.log("log", ...message));
+
+client.on("guildMemberRemove", async (member) => {
+  await removeUser("users", member.id);
+  await removeUser("users_4v4", member.id);
+});
 
 server.get("/metrics", async (_req, res) => {
   try {
