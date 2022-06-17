@@ -4,6 +4,8 @@ import { ExtendedClient } from "./structures/Client";
 import express from "express";
 const server = express();
 
+global.raceStartLobby = false;
+
 dotenv.config();
 
 const register = new Registry();

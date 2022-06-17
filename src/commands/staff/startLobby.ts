@@ -289,12 +289,13 @@ export async function handleButtonInteractionPlayerMenu(
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
 
-        const channelLobby = await btnInt.channel.fetch();
+        if (global.raceStartLobby === true) {
+          await sleep(3000);
+        }
 
-        await channelLobby.messages.edit(btnInt.message.id, {
-          embeds: [StartLobby],
-          components: [buttonCallMod, buttonFinishMatchDisabled],
-        });
+        global.raceStartLobby = true;
+
+        const channelLobby = await btnInt.channel.fetch();
 
         const channelCategory = await client.channels.cache.get(
           btnInt.channelId
@@ -302,11 +303,6 @@ export async function handleButtonInteractionPlayerMenu(
         const endedMatch = await getEndedMatch(channelCategory.id);
 
         if (endedMatch) {
-          const sendMessageFinish = await btnInt.channel.send({
-            embeds: [FinishedMatch],
-            components: [buttonConfirmFinishMatch],
-          });
-
           await btnInt.deleteReply(); // delete thinking message
 
           break;
@@ -314,12 +310,21 @@ export async function handleButtonInteractionPlayerMenu(
 
         await createEndedMatch(channelCategory.id);
 
+        await channelLobby.messages.edit(btnInt.message.id, {
+          embeds: [StartLobby],
+          components: [buttonCallMod, buttonFinishMatchDisabled],
+        });
+
         const sendMessageFinish = await btnInt.channel.send({
           embeds: [PreFinishLobby],
           components: [buttonConfirmFinishMatch],
         });
 
         await btnInt.deleteReply(); // delete thinking message
+
+        setTimeout(() => {
+          global.raceStartLobby = true;
+        }, 5000);
 
         break;
 
@@ -517,4 +522,10 @@ export async function handleButtonInteractionPlayerMenu(
       components: [],
     });
   }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
