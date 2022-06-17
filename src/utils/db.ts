@@ -307,3 +307,28 @@ export async function fetchToCSV(day: string, month: string, year: string) {
 
   return data;
 }
+
+export async function getActionAndMessage(message_id) {
+  const { data } = await db
+    .from("actions_and_messages")
+    .select("id, message_id, action, data")
+    .eq("message_id", message_id)
+    .limit(1)
+    .single();
+
+  return data;
+}
+
+export async function createActionAndMessage(
+  message_id,
+  action,
+  dataInput = ""
+) {
+  const { data } = await db.from("actions_and_messages").insert({
+    action,
+    message_id,
+    data: dataInput,
+  });
+
+  return data;
+}
