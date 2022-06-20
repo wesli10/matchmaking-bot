@@ -25,6 +25,17 @@ const role_moderator = roles.moderator;
 const role_admin = roles.admin;
 
 export async function globalReactions(reaction, user) {
+  // Check type of reaction
+  const actionAndMessage = await getActionAndMessage(reaction.message.id);
+
+  if (
+    actionAndMessage?.action !== "confirm_finish_match" &&
+    actionAndMessage?.action !== "embed_time1" &&
+    actionAndMessage?.action !== "embed_time2"
+  ) {
+    return;
+  }
+
   // When a reaction is received, check if the structure is partial
   if (reaction.partial) {
     // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
@@ -39,15 +50,6 @@ export async function globalReactions(reaction, user) {
 
   if (reaction instanceof MessageReaction) {
     const sendMessage = await reaction.message.fetch();
-    const actionAndMessage = await getActionAndMessage(sendMessage.id);
-
-    if (
-      actionAndMessage?.action !== "confirm_finish_match" &&
-      actionAndMessage?.action !== "embed_time1" &&
-      actionAndMessage?.action !== "embed_time2"
-    ) {
-      return;
-    }
 
     if (actionAndMessage?.action === "confirm_finish_match") {
       await confirmFinishMatch(reaction, user, sendMessage);
