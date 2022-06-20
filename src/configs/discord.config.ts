@@ -24,7 +24,7 @@ export const DISCORD_ENV_CONFIG = {
       admin: "965501155016835085",
     },
     channels: {
-      queue_room_id: "964294426543390791",
+      queue_room_id: "986660072363020320",
       waiting_room_id: "968197006117986324",
     },
     numbers: {

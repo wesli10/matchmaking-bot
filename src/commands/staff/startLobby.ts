@@ -5,12 +5,15 @@ import {
   Message,
   OverwriteResolvable,
   CacheType,
+  MessageInteraction,
 } from "discord.js";
 import { embedPermission } from "../../utils/embeds";
 import {
   create4v4Lobby,
+  createActionAndMessage,
   fetchCategory,
   fetchUsersFromCategory,
+  getActionAndMessage,
   removeUsersFromCategory,
   updateCategory,
   updateFinishTime,
@@ -223,7 +226,9 @@ export default new Command({
   },
 });
 
-async function deleteCategory(interaction: ButtonInteraction<CacheType>) {
+export async function deleteCategory(
+  interaction: ButtonInteraction<CacheType> | Message
+) {
   const channelId = interaction.channelId;
   const channel = await client.channels.fetch(channelId);
 
@@ -247,7 +252,12 @@ async function deleteCategory(interaction: ButtonInteraction<CacheType>) {
     await interaction.channel.send({
       content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
     });
-    setTimeout(async () => await interaction.deleteReply(), 3000);
+
+    if (interaction instanceof ButtonInteraction) {
+      setTimeout(async () => await interaction.deleteReply(), 3000);
+    } else {
+      interaction.delete();
+    }
   }
 }
 
@@ -270,6 +280,7 @@ export async function handleButtonInteractionPlayerMenu(
       ephemeral: false,
       fetchReply: false,
     });
+
     switch (btnInt.customId) {
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
@@ -316,176 +327,13 @@ export async function handleButtonInteractionPlayerMenu(
         const sendMessage = await btnInt.channel.send({
           embeds: [FinishLobby],
         });
+
+        await createActionAndMessage(sendMessage.id, btnInt.customId);
+
         await sendMessage.react("1️⃣");
         await sendMessage.react("2️⃣");
         await sendMessage.react("❌");
-        const collectorReaction = sendMessage.createReactionCollector({});
-        let winnerTeam = "";
-        collectorReaction.on("collect", async (reaction, user) => {
-          const { MIN_REACTION_TO_VOTE_END_MATCH } = DISCORD_CONFIG.numbers;
 
-          if (reaction.emoji.name === "1️⃣" && !user.bot) {
-            if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
-              winnerTeam = "Time 1";
-
-              const messageTime1 = await btnInt.channel.send({
-                content: `<@&${role_aux_event}>`,
-                embeds: [embedTime1],
-              });
-
-              messageTime1.react("✅");
-              messageTime1.react("🛑");
-
-              const collectorWinner1 = messageTime1.createReactionCollector({});
-
-              collectorWinner1.on("collect", async (reaction, user) => {
-                const member = await btnInt.guild.members.fetch(user.id);
-                if (
-                  reaction.emoji.name === "✅" &&
-                  !user.bot &&
-                  member.permissions.has("MODERATE_MEMBERS")
-                ) {
-                  try {
-                    collectorReaction.stop();
-                  } catch (error) {
-                    console.log(error);
-                  }
-                } else if (
-                  reaction.emoji.name === "🛑" &&
-                  !user.bot &&
-                  member.permissions.has("MODERATE_MEMBERS")
-                ) {
-                  try {
-                    await messageTime1.delete();
-                    await sendMessage.reactions
-                      .removeAll()
-                      .catch((error) => console.log(error));
-                    await sendMessage.react("1️⃣");
-                    await sendMessage.react("2️⃣");
-                    await sendMessage.react("❌");
-                  } catch (error) {
-                    console.log(error);
-                  }
-                }
-              });
-            }
-          } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-            if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
-              winnerTeam = "Time 2";
-
-              const messageTime2 = await btnInt.channel.send({
-                content: `<@&${role_aux_event}>`,
-                embeds: [embedTime2],
-              });
-
-              messageTime2.react("✅");
-              messageTime2.react("🛑");
-
-              const collectorWinner2 = messageTime2.createReactionCollector({});
-
-              collectorWinner2.on("collect", async (reaction, user) => {
-                const member = await btnInt.guild.members.fetch(user.id);
-
-                if (
-                  reaction.emoji.name === "✅" &&
-                  !user.bot &&
-                  member.permissions.has("MODERATE_MEMBERS")
-                ) {
-                  try {
-                    collectorReaction.stop();
-                  } catch (error) {
-                    console.log(
-                      "error when stopping winenr2 collector =",
-                      error
-                    );
-                  }
-                } else if (
-                  reaction.emoji.name === "🛑" &&
-                  !user.bot &&
-                  member.permissions.has("MODERATE_MEMBERS")
-                ) {
-                  try {
-                    await messageTime2.delete();
-                  } catch (error) {
-                    console.log(
-                      "error when deleting message for team2=",
-                      error
-                    );
-                  }
-                }
-              });
-            }
-          } else if (reaction.emoji.name === "❌" && !user.bot) {
-            const member = await btnInt.guild.members.fetch(user.id);
-            console.log("cancel button is pressed!");
-
-            if (member.permissions.has("MODERATE_MEMBERS")) {
-              console.log(
-                member.permissions.has("MODERATE_MEMBERS")
-                  ? "Tem o cargo"
-                  : "Não tem o cargo"
-              );
-
-              winnerTeam = "Partida Cancelada";
-
-              try {
-                const message = await btnInt.channel.send({
-                  embeds: [PartidaCancelada],
-                });
-                console.log("passei do await");
-                collectorReaction.stop();
-              } catch (error) {
-                console.log(error);
-              }
-            }
-          }
-        });
-        collectorReaction.on("end", async (collected) => {
-          console.log(`Collected ${collected.size} items`);
-          const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;
-          const channel = await client.channels.cache.get(btnInt.channelId);
-          if (channel.type === "GUILD_TEXT") {
-            await updateFinishTime(channel.parentId);
-            const players = await fetchUsersFromCategory(channel.parentId);
-
-            players.forEach(async (player) => {
-              if (player.team === winnerTeam) {
-                await updateResultUser(
-                  player.user_id,
-                  channel.parentId,
-                  "Venceu"
-                );
-              } else if (
-                player.team !== winnerTeam &&
-                winnerTeam !== "Partida Cancelada"
-              ) {
-                await updateResultUser(
-                  player.user_id,
-                  channel.parentId,
-                  "Perdeu"
-                );
-              } else if (winnerTeam === "Partida Cancelada") {
-                await updateResultUser(
-                  player.user_id,
-                  channel.parentId,
-                  "Cancelado"
-                );
-              }
-            });
-
-            await removeusersFromChannel(
-              channel.parentId,
-              waiting_room_id,
-              btnInt
-            );
-            await removeUsersFromCategory(channel.parentId);
-          }
-          try {
-            setTimeout(() => deleteCategory(btnInt), 3000);
-          } catch (error) {
-            console.log("error when deleting category=", error);
-          }
-        });
         break;
     }
   } catch (error) {
