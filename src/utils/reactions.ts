@@ -40,7 +40,9 @@ export async function globalReactions(reaction, user) {
     return;
   }
 
-  const channelExists = client.channels.fetch(reaction.message?.channelId);
+  const channelExists = await client.channels.fetch(
+    reaction.message?.channelId
+  );
 
   if (!channelExists) {
     return;
