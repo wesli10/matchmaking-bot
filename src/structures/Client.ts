@@ -19,7 +19,7 @@ export class ExtendedClient extends Client {
   commands: Collection<string, CommandType> = new Collection();
 
   constructor() {
-    super({ intents: 32767 });
+    super({ intents: 32767, partials: ["MESSAGE", "CHANNEL", "REACTION"] });
   }
 
   start() {

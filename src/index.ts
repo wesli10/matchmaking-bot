@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import { collectDefaultMetrics, Registry } from "prom-client";
 import { ExtendedClient } from "./structures/Client";
 import express from "express";
+import { removeUser } from "./utils/db";
+import { globalReactions } from "./utils/reactions";
 const server = express();
 
 global.raceStartLobby = false;
@@ -20,6 +22,13 @@ client.on("warn", (...message) => console.warn("warn", ...message));
 client.on("error", (...message) => console.error("error", ...message));
 client.on("shardError", (...message) => console.log("shardError", ...message));
 client.on("log", (...message) => console.log("log", ...message));
+
+client.on("guildMemberRemove", async (member) => {
+  await removeUser("users", member.id);
+  await removeUser("users_4v4", member.id);
+});
+
+client.on("messageReactionAdd", globalReactions);
 
 server.get("/metrics", async (_req, res) => {
   try {
