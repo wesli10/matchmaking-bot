@@ -14,6 +14,8 @@ import {
   fetchCategory,
   fetchUsersFromCategory,
   getActionAndMessage,
+  createEndedMatch,
+  getEndedMatch,
   removeUsersFromCategory,
   updateCategory,
   updateFinishTime,
@@ -33,6 +35,7 @@ import {
   buttonFinishMatchDisabled,
   embedTime1,
   embedTime2,
+  FinishedMatch,
   FinishLobby,
   PartidaCancelada,
   PreFinishLobby,
@@ -297,7 +300,26 @@ export async function handleButtonInteractionPlayerMenu(
       case "finish_match":
         log("Iniciando ação do botão", btnInt.customId);
 
+        if (global.raceStartLobby === true) {
+          await sleep(3000);
+        }
+
+        global.raceStartLobby = true;
+
         const channelLobby = await btnInt.channel.fetch();
+
+        const channelCategory = await client.channels.cache.get(
+          btnInt.channelId
+        );
+        const endedMatch = await getEndedMatch(channelCategory.id);
+
+        if (endedMatch) {
+          await btnInt.deleteReply(); // delete thinking message
+
+          break;
+        }
+
+        await createEndedMatch(channelCategory.id);
 
         await channelLobby.messages.edit(btnInt.message.id, {
           embeds: [StartLobby],
@@ -310,6 +332,10 @@ export async function handleButtonInteractionPlayerMenu(
         });
 
         await btnInt.deleteReply(); // delete thinking message
+
+        setTimeout(() => {
+          global.raceStartLobby = true;
+        }, 5000);
 
         break;
 
@@ -344,4 +370,10 @@ export async function handleButtonInteractionPlayerMenu(
       components: [],
     });
   }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

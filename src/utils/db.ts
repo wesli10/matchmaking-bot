@@ -308,6 +308,17 @@ export async function fetchToCSV(day: string, month: string, year: string) {
   return data;
 }
 
+export async function getEndedMatch(category_id) {
+  const { data } = await db
+    .from("ended_matches")
+    .select("id, category_id")
+    .eq("category_id", category_id)
+    .limit(1)
+    .single();
+
+  return data;
+}
+
 export async function getActionAndMessage(message_id) {
   const { data } = await db
     .from("actions_and_messages")
@@ -315,6 +326,14 @@ export async function getActionAndMessage(message_id) {
     .eq("message_id", message_id)
     .limit(1)
     .single();
+
+  return data;
+}
+
+export async function createEndedMatch(category_id) {
+  const { data } = await db.from("ended_matches").insert({
+    category_id,
+  });
 
   return data;
 }

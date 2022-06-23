@@ -6,6 +6,8 @@ import { removeUser } from "./utils/db";
 import { globalReactions } from "./utils/reactions";
 const server = express();
 
+global.raceStartLobby = false;
+
 dotenv.config();
 
 const register = new Registry();
