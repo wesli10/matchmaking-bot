@@ -8,11 +8,11 @@ export default new Command({
   description: "Remove tags and move out user from lobby room",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const role1 = "945293155866148914";
-    const role2 = "958065673156841612";
-    const role3 = "968697582706651188";
-    const roleTeste = "965501155016835085";
-    const waiting_room_id = "968197006117986324";
+    const role1 = process.env.DISCORD_ROLE_MODERATOR;
+    const role2 = process.env.DISCORD_ROLE_EVENT;
+    const role3 = process.env.DISCORD_ROLE_AUX_EVENT;
+    const roleTeste = process.env.DISCORD_ROLE_ADMIN;
+    const waiting_room_id = process.env.DISCORD_CHANNEL_WAITING_ROOM;
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (

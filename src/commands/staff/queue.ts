@@ -116,11 +116,11 @@ export default new Command({
   description: "Open queue to players",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const queueRoom_id = "964294426543390791";
+    const queueRoom_id = process.env.DISCORD_CHANNEL_QUEUE_ROOM;
 
     if (
       !interaction.memberPermissions.has("ADMINISTRATOR") &&
-      interaction.user.id !== "724618078008377466"
+      interaction.user.id !== process.env.DISCORD_MOCK_ADMIN_ID
     ) {
       interaction
         .editReply({
