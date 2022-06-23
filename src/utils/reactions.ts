@@ -61,18 +61,22 @@ export async function globalReactions(reaction, user) {
   }
 
   if (reaction instanceof MessageReaction) {
-    const sendMessage = await reaction.message.fetch();
+    try {
+      const sendMessage = await reaction.message.fetch();
 
-    if (actionAndMessage?.action === "confirm_finish_match") {
-      await confirmFinishMatch(reaction, user, sendMessage);
-    }
+      if (actionAndMessage?.action === "confirm_finish_match") {
+        await confirmFinishMatch(reaction, user, sendMessage);
+      }
 
-    if (actionAndMessage?.action === "embed_time1") {
-      await embedTime1Func(reaction, user, sendMessage, actionAndMessage);
-    }
+      if (actionAndMessage?.action === "embed_time1") {
+        await embedTime1Func(reaction, user, sendMessage, actionAndMessage);
+      }
 
-    if (actionAndMessage?.action === "embed_time2") {
-      await embedTime2Func(reaction, user, sendMessage, actionAndMessage);
+      if (actionAndMessage?.action === "embed_time2") {
+        await embedTime2Func(reaction, user, sendMessage, actionAndMessage);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 }
@@ -142,7 +146,7 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
 
 async function embedTime1Func(reaction, user, sendMessage, actionAndMessage) {
   const member = await sendMessage.guild.members.fetch(user.id);
-  const messageTime1 = await reaction.message.fetch();
+  const messageTime1 = sendMessage;
   let winnerTeam = "Time 1";
 
   if (
@@ -183,7 +187,7 @@ async function embedTime1Func(reaction, user, sendMessage, actionAndMessage) {
 
 async function embedTime2Func(reaction, user, sendMessage, actionAndMessage) {
   const member = await sendMessage.guild.members.fetch(user.id);
-  const messageTime2 = await reaction.message.fetch();
+  const messageTime2 = sendMessage;
   let winnerTeam = "Time 2";
 
   if (
