@@ -118,7 +118,7 @@ export default new Command({
   run: async ({ interaction }) => {
     if (
       !interaction.memberPermissions.has("ADMINISTRATOR") &&
-      interaction.user.id !== process.env.DISCORD_MOCK_ADMIN_ID
+      interaction.user.id !== DISCORD_CONFIG.mockAdminId
     ) {
       interaction
         .editReply({

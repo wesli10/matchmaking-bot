@@ -15,4 +15,5 @@ export const DISCORD_CONFIG = {
     MIN_REACTION_TO_VOTE_END_MATCH:
       process.env.DISCORD_MIN_REACTION_TO_VOTE_END_MATCH,
   },
+  mockAdminId: process.env.DISCORD_MOCK_ADMIN_ID,
 };

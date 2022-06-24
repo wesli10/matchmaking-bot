@@ -1,3 +1,4 @@
+import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { fetchUsersInQueue } from "../../utils/db";
 
@@ -7,10 +8,10 @@ export default new Command({
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
     const queue = await fetchUsersInQueue();
-    const role1 = process.env.DISCORD_ROLE_MODERATOR;
-    const role2 = process.env.DISCORD_ROLE_EVENT;
-    const role3 = process.env.DISCORD_ROLE_AUX_EVENT;
-    const roleTeste = process.env.DISCORD_ROLE_ADMIN;
+    const role1 = DISCORD_CONFIG.roles.moderator;
+    const role2 = DISCORD_CONFIG.roles.event;
+    const role3 = DISCORD_CONFIG.roles.aux_event;
+    const roleTeste = DISCORD_CONFIG.roles.admin;
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (

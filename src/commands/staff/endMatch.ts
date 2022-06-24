@@ -2,17 +2,18 @@ import { Command } from "../../structures/Command";
 import { MessageEmbed } from "discord.js";
 import { fetchUserInMatch, removeUser, fetchChannels } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
+import { DISCORD_CONFIG } from "../../configs/discord.config";
 
 export default new Command({
   name: "end",
   description: "Remove tags and move out user from lobby room",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const role1 = process.env.DISCORD_ROLE_MODERATOR;
-    const role2 = process.env.DISCORD_ROLE_EVENT;
-    const role3 = process.env.DISCORD_ROLE_AUX_EVENT;
-    const roleTeste = process.env.DISCORD_ROLE_ADMIN;
-    const waiting_room_id = process.env.DISCORD_CHANNEL_WAITING_ROOM;
+    const role1 = DISCORD_CONFIG.roles.moderator;
+    const role2 = DISCORD_CONFIG.roles.event;
+    const role3 = DISCORD_CONFIG.roles.aux_event;
+    const roleTeste = DISCORD_CONFIG.roles.admin;
+    const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     if (

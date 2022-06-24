@@ -6,6 +6,7 @@ import {
   MessageEmbed,
   TextChannel,
 } from "discord.js";
+import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import {
   createUser,
@@ -116,11 +117,11 @@ export default new Command({
   description: "Open queue to players",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const queueRoom_id = process.env.DISCORD_CHANNEL_QUEUE_ROOM;
+    const queueRoom_id = DISCORD_CONFIG.channels.queue_room_id;
 
     if (
       !interaction.memberPermissions.has("ADMINISTRATOR") &&
-      interaction.user.id !== process.env.DISCORD_MOCK_ADMIN_ID
+      interaction.user.id !== DISCORD_CONFIG.mockAdminId
     ) {
       interaction
         .editReply({
