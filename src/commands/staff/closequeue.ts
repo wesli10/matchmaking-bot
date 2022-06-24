@@ -3,18 +3,19 @@ import { Command } from "../../structures/Command";
 import { MessageEmbed } from "discord.js";
 import { clearQueue } from "../../utils/db";
 import { clear } from "../../utils/utils";
+import { DISCORD_CONFIG } from "../../configs/discord.config";
 
 export default new Command({
   name: "fecharfila",
   description: "Close queue to players",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
-    const role1 = "945293155866148914";
-    const role2 = "958065673156841612";
-    const role3 = "968697582706651188";
-    const roleTeste = "965501155016835085";
+    const role1 = DISCORD_CONFIG.roles.moderator;
+    const role2 = DISCORD_CONFIG.roles.event;
+    const role3 = DISCORD_CONFIG.roles.aux_event;
+    const roleTeste = DISCORD_CONFIG.roles.admin;
     const admin = JSON.stringify(interaction.member.roles.valueOf());
-    const queueRoom_id = "968922689190371328";
+    const queueRoom_id = DISCORD_CONFIG.channels.queue_room_id;
 
     const embedCloseQueue = new MessageEmbed()
       .setColor("#fd4a5f")
@@ -25,7 +26,7 @@ export default new Command({
 
     if (
       interaction.memberPermissions.has("ADMINISTRATOR") ||
-      interaction.user.id === "724618078008377466"
+      interaction.user.id === DISCORD_CONFIG.mockAdminId
     ) {
       clear(interaction);
       interaction

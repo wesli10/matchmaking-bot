@@ -10,6 +10,7 @@ import {
 } from "../../utils/db";
 import { MessageEmbed } from "discord.js";
 import { embedEnoughPlayers, embedPermission } from "../../utils/embeds";
+import { DISCORD_CONFIG } from "../../configs/discord.config";
 
 export default new Command({
   name: "start",
@@ -46,10 +47,10 @@ export default new Command({
     const lobbyChannel = interaction.guild.channels.cache.get(
       lobby[0].channel_id
     );
-    const role1 = "945293155866148914";
-    const role2 = "958065673156841612";
-    const role3 = "968697582706651188";
-    const roleTeste = "965501155016835085";
+    const role1 = DISCORD_CONFIG.roles.moderator;
+    const role2 = DISCORD_CONFIG.roles.event;
+    const role3 = DISCORD_CONFIG.roles.aux_event;
+    const roleTeste = DISCORD_CONFIG.roles.admin;
     const admin = JSON.stringify(interaction.member.roles.valueOf());
 
     const embedStart = new MessageEmbed()

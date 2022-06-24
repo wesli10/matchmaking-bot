@@ -42,6 +42,7 @@ import {
   StartLobby,
 } from "../../utils/4v4/messageInteractionsTemplates";
 import { client } from "../..";
+import { getPermissions } from "../../configs/permissions.config";
 
 const { roles } = DISCORD_CONFIG;
 
@@ -85,26 +86,7 @@ export default new Command({
     }
 
     const permissions: OverwriteResolvable[] = [
-      {
-        id: interaction.guild.id,
-        deny: ["VIEW_CHANNEL"],
-      },
-      {
-        id: role_aux_event,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
-      {
-        id: role_event,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
-      {
-        id: role_moderator,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
-      {
-        id: role_admin,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
+      ...getPermissions(interaction),
       // Add players permissions as well
       ...players.map((player) => {
         return {
@@ -116,26 +98,7 @@ export default new Command({
     ];
 
     const permissionsAnnouncements: OverwriteResolvable[] = [
-      {
-        id: interaction.guild.id,
-        deny: ["VIEW_CHANNEL"],
-      },
-      {
-        id: role_aux_event,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
-      {
-        id: role_event,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
-      {
-        id: role_moderator,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
-      {
-        id: role_admin,
-        allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS"],
-      },
+      ...getPermissions(interaction),
       // Add players permissions as well
       ...players.map((player) => {
         return {

@@ -1,38 +1,19 @@
-export const DISCORD_ENV_CONFIG = {
-  production: {
-    roles: {
-      moderator: "945293155866148914",
-      event: "958065673156841612",
-      aux_event: "968697582706651188",
-      admin: "945293150749098004",
-    },
-    channels: {
-      queue_room_id: "968922689190371328",
-      waiting_room_id: "968933862606503986",
-    },
-    numbers: {
-      MIN_NUM_PLAYERS_TO_START_LOBBY: 8,
-      MIN_REACTION_TO_VOTE_END_MATCH: 6,
-    },
+export const DISCORD_CONFIG = {
+  roles: {
+    moderator: process.env.DISCORD_ROLE_MODERATOR,
+    event: process.env.DISCORD_ROLE_EVENT,
+    aux_event: process.env.DISCORD_ROLE_AUX_EVENT,
+    admin: process.env.DISCORD_ROLE_ADMIN,
   },
-
-  development: {
-    roles: {
-      moderator: "945293155866148914",
-      event: "958065673156841612",
-      aux_event: "968697582706651188",
-      admin: "965501155016835085",
-    },
-    channels: {
-      queue_room_id: "986660072363020320",
-      waiting_room_id: "968197006117986324",
-    },
-    numbers: {
-      MIN_NUM_PLAYERS_TO_START_LOBBY: 2,
-      MIN_REACTION_TO_VOTE_END_MATCH: 2,
-    },
+  channels: {
+    queue_room_id: process.env.DISCORD_CHANNEL_QUEUE_ROOM,
+    waiting_room_id: process.env.DISCORD_CHANNEL_WAITING_ROOM,
   },
+  numbers: {
+    MIN_NUM_PLAYERS_TO_START_LOBBY:
+      process.env.DISCORD_MIN_NUM_PLAYERS_TO_START_LOBBY,
+    MIN_REACTION_TO_VOTE_END_MATCH:
+      process.env.DISCORD_MIN_REACTION_TO_VOTE_END_MATCH,
+  },
+  mockAdminId: process.env.DISCORD_MOCK_ADMIN_ID,
 };
-
-export const DISCORD_CONFIG: typeof DISCORD_ENV_CONFIG["development"] =
-  DISCORD_ENV_CONFIG[process.env.NODE_ENV];
