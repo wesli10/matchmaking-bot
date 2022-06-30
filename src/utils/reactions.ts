@@ -198,7 +198,7 @@ async function embedTime2Func(reaction, user, sendMessage, actionAndMessage) {
     try {
       await endReactionConfirmMatch(sendMessage, winnerTeam);
     } catch (error) {
-      console.log("error when stopping winenr2 collector =", error);
+      console.log("error when stopping winner2 collector =", error);
     }
   } else if (
     reaction.emoji.name === "🛑" &&

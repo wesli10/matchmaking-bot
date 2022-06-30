@@ -1,4 +1,5 @@
 import { ExtendedClient } from "../structures/Client";
+import { GAME_LIST } from "./gameList";
 
 const client = new ExtendedClient();
 
@@ -350,4 +351,44 @@ export async function createActionAndMessage(
   });
 
   return data;
+}
+
+export async function updatePontuation(
+  user_id,
+  game_id: GAME_LIST,
+  pontuation,
+  type: "win" | "lose"
+) {
+  const { data } = await db
+    .from("users_mmr")
+    .select("id, actual_pontuation")
+    .eq("user_id", user_id)
+    .eq("game_id", game_id)
+    .limit(1)
+    .single();
+
+  if (data) {
+    let actual_pontuation =
+      type === "win"
+        ? Number(data.actual_pontuation) + Number(pontuation)
+        : Number(data.actual_pontuation) - Number(pontuation);
+
+    actual_pontuation = actual_pontuation < 0 ? 0 : actual_pontuation;
+
+    await db
+      .from("users_mmr")
+      .update({
+        actual_pontuation,
+        updated_at: new Date(),
+      })
+      .match({ id: data.id, user_id, game_id });
+  } else {
+    let actual_pontuation = Number(pontuation) < 0 ? 0 : Number(pontuation);
+
+    await db.from("users_mmr").insert({
+      user_id,
+      game_id,
+      actual_pontuation,
+    });
+  }
 }
