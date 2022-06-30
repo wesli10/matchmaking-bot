@@ -383,7 +383,7 @@ export async function updatePontuation(
       })
       .match({ id: data.id, user_id, game_id });
   } else {
-    let actual_pontuation = Number(pontuation) < 0 ? 0 : Number(pontuation);
+    let actual_pontuation = type === "win" ? pontuation : 0;
 
     await db.from("users_mmr").insert({
       user_id,
