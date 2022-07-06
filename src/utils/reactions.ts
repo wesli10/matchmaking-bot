@@ -89,7 +89,7 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
   const { MIN_REACTION_TO_VOTE_END_MATCH } = DISCORD_CONFIG.numbers;
 
   if (reaction.emoji.name === "1️⃣" && !user.bot) {
-    if (reaction.count == MIN_REACTION_TO_VOTE_END_MATCH) {
+    if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
       const messageTime1 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime1],
@@ -105,7 +105,7 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
       messageTime1.react("🛑");
     }
   } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-    if (reaction.count == MIN_REACTION_TO_VOTE_END_MATCH) {
+    if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
       const messageTime2 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime2],
