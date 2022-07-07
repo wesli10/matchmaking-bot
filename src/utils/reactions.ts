@@ -5,10 +5,15 @@ import {
   fetchUsersFromCategory,
   getActionAndMessage,
   removeUsersFromCategory,
+  updateCategory,
   updateFinishTime,
+  updateInMatch,
+  updateModerator,
   updateResultUser,
+  updateUserCaptain,
+  updateUserTeam,
 } from "./db";
-import { MessageReaction } from "discord.js";
+import { CategoryChannel, MessageEmbed, MessageReaction } from "discord.js";
 import {
   embedTime1,
   embedTime2,
@@ -16,6 +21,11 @@ import {
 } from "./4v4/messageInteractionsTemplates";
 import { removeusersFromChannel } from "./4v4/manageUsers";
 import { deleteCategory } from "../commands/staff/startLobby";
+import { valorantMapsSelectionFunc } from "./5v5/manageMatch";
+import {
+  valorantFinishMatchFunc,
+  valorantStartLobbyFunc,
+} from "./5v5/manageUsers";
 
 const { roles } = DISCORD_CONFIG;
 
@@ -31,7 +41,12 @@ export async function globalReactions(reaction, user) {
   if (
     actionAndMessage?.action !== "confirm_finish_match" &&
     actionAndMessage?.action !== "embed_time1" &&
-    actionAndMessage?.action !== "embed_time2"
+    actionAndMessage?.action !== "embed_time2" &&
+    actionAndMessage?.action !== "maps_selection" &&
+    actionAndMessage?.action !== "confirm_presence" &&
+    actionAndMessage?.action !== "embed_time1_valorant" &&
+    actionAndMessage?.action !== "embed_time2_valorant" &&
+    actionAndMessage?.action !== "confirm_finish_match_valorant"
   ) {
     return;
   }
@@ -75,8 +90,134 @@ export async function globalReactions(reaction, user) {
       if (actionAndMessage?.action === "embed_time2") {
         await embedTime2Func(reaction, user, sendMessage, actionAndMessage);
       }
+
+      if (actionAndMessage?.action === "embed_time1_valorant") {
+        await embedTime1_valorant(
+          reaction,
+          user,
+          sendMessage,
+          actionAndMessage
+        );
+      }
+
+      if (actionAndMessage?.action === "embed_time2_valorant") {
+        await embedTime2_valorant(
+          reaction,
+          user,
+          sendMessage,
+          actionAndMessage
+        );
+      }
+
+      if (actionAndMessage?.action === "maps_selection") {
+        await valorantMapDraw(reaction, user, sendMessage);
+      }
+
+      if (actionAndMessage?.action === "confirm_presence") {
+        await valorantConfirmPresence(reaction, user, sendMessage);
+      }
+
+      if (actionAndMessage?.action === "confirm_finish_match_valorant") {
+        await confirmFinishMatch_valorant(reaction, user, sendMessage);
+      }
     } catch (error) {
       console.log(error);
+    }
+  }
+}
+
+async function valorantConfirmPresence(reaction, user, sendMessage) {
+  const { MIN_REACTION_TO_CONFIRM_MATCH_VALORANT } = DISCORD_CONFIG.numbers;
+  const collector_confirm_presence = sendMessage.createReactionCollector({
+    time: 30000,
+  });
+
+  const channel = await client.channels.cache.get(sendMessage.channelId);
+  if (channel.type !== "GUILD_TEXT") {
+    return;
+  }
+  const category = channel.parentId;
+  const players = await fetchUsersFromCategory("users_5v5", category);
+
+  if (reaction.emoji.name === "👍" && !user.bot) {
+    if (reaction.count === Number(MIN_REACTION_TO_CONFIRM_MATCH_VALORANT)) {
+      await sendMessage.delete();
+
+      // MAP SELECTION
+      const mapa = await valorantMapsSelectionFunc();
+      const selectedMap = new MessageEmbed()
+        .setColor("#fd4a5f")
+        .setTitle("Mapa selecionado")
+        .setDescription(
+          ` Mapa Selecionado foi: **${mapa.name}** \n\n Reaja com 🔄 para selecionar outro mapa \n  Reaja com ✅ para confirmar o mapa \n\n **Em 40 segundos sera confirmado o ultimo mapa selecionado!**`
+        )
+        .setImage(mapa.minimap);
+
+      const mapsMessage = await channel.send({
+        embeds: [selectedMap],
+      });
+
+      await createActionAndMessage(mapsMessage.id, "maps_selection");
+
+      mapsMessage.react("🔄");
+      mapsMessage.react("✅");
+
+      const collector_map_draw = mapsMessage.createReactionCollector({
+        time: 40000,
+      });
+
+      collector_map_draw.on("end", async (reaction, reason) => {
+        if (reason === "time") {
+          await valorantStartLobbyFunc(mapsMessage);
+        }
+      });
+    }
+  }
+
+  collector_confirm_presence.on("end", async (reason) => {
+    console.log(reason);
+    if (reason === "time") {
+      await valorantFinishMatchFunc(sendMessage);
+      setTimeout(() => deleteCategory(sendMessage), 4000);
+    }
+  });
+}
+
+async function valorantMapDraw(reaction, user, sendMessage) {
+  const newMap = await valorantMapsSelectionFunc();
+  const channel = await client.channels.cache.get(sendMessage.channelId);
+
+  if (channel.type !== "GUILD_TEXT") {
+    return;
+  }
+  const {
+    MIN_REACTION_TO_DRAW_MAP_AGAIN,
+    MIN_REACTION_TO_CONFIRM_MAP_VALORANT,
+  } = DISCORD_CONFIG.numbers;
+
+  let map = newMap.name;
+
+  if (reaction.emoji.name === "🔄" && !user.bot) {
+    if (reaction.count === Number(MIN_REACTION_TO_DRAW_MAP_AGAIN)) {
+      const mapMessage = sendMessage;
+      const selectedMap = new MessageEmbed()
+        .setColor("#fd4a5f")
+        .setTitle("Mapa selecionado")
+        .setDescription(
+          ` Mapa Selecionado foi: **${newMap.name}** \n\n Reaja com 🔄 para selecionar outro mapa \n Reaja com ✅ para confirmar o mapa \n\n **Em 40 segundos sera confirmado o ultimo mapa selecionado!**`
+        )
+        .setImage(newMap.minimap);
+
+      await mapMessage.edit({
+        embeds: [selectedMap],
+      });
+      mapMessage.reactions.removeAll();
+      mapMessage.react("🔄");
+      mapMessage.react("✅");
+    }
+  } else if (reaction.emoji.name === "✅" && !user.bot) {
+    if (reaction.count === Number(MIN_REACTION_TO_CONFIRM_MAP_VALORANT)) {
+      await valorantStartLobbyFunc(sendMessage);
     }
   }
 }
@@ -140,6 +281,58 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
       } catch (error) {
         console.log(error);
       }
+    }
+  }
+}
+
+async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
+  let winnerTeam = "";
+
+  const { MIN_REACTION_TO_END_MATCH_VALORANT } = DISCORD_CONFIG.numbers;
+
+  if (reaction.emoji.name === "1️⃣" && !user.bot) {
+    console.log("APERTEI O 1");
+    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+      console.log("BATEU O MINIMO");
+      const messageTime1 = await sendMessage.channel.send({
+        content: `<@&${role_aux_event}>`,
+        embeds: [embedTime1],
+      });
+
+      await createActionAndMessage(
+        messageTime1.id,
+        "embed_time1_valorant",
+        sendMessage.id
+      );
+
+      messageTime1.react("✅");
+      messageTime1.react("🛑");
+    }
+  } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
+    console.log("APERTEI O 2");
+    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+      console.log("BATEU O MINIMO");
+      const messageTime2 = await sendMessage.channel.send({
+        content: `<@&${role_aux_event}>`,
+        embeds: [embedTime2],
+      });
+
+      await createActionAndMessage(
+        messageTime2.id,
+        "embed_time2_valorant",
+        sendMessage.id
+      );
+
+      messageTime2.react("✅");
+      messageTime2.react("🛑");
+    }
+  } else if (reaction.emoji.name === "❌" && !user.bot) {
+    const member = await sendMessage.guild.members.fetch(user.id);
+    console.log("cancel button is pressed!");
+
+    if (member.permissions.has("MODERATE_MEMBERS")) {
+      await valorantFinishMatchFunc(sendMessage, "Partida Cancelada");
+      setTimeout(() => deleteCategory(sendMessage), 4000);
     }
   }
 }
@@ -235,27 +428,183 @@ async function endReactionConfirmMatch(sendMessage, winnerTeam) {
   }
 
   await updateFinishTime(channel.parentId);
-  const players = await fetchUsersFromCategory(channel.parentId);
+  const players = await fetchUsersFromCategory("users_4v4", channel.parentId);
 
   players.forEach(async (player) => {
     if (player.team === winnerTeam) {
-      await updateResultUser(player.user_id, channel.parentId, "Venceu");
+      await updateResultUser(
+        "lobbys",
+        player.user_id,
+        channel.parentId,
+        "Venceu"
+      );
     } else if (
       player.team !== winnerTeam &&
       winnerTeam !== "Partida Cancelada"
     ) {
-      await updateResultUser(player.user_id, channel.parentId, "Perdeu");
+      await updateResultUser(
+        "lobbys",
+        player.user_id,
+        channel.parentId,
+        "Perdeu"
+      );
     } else if (winnerTeam === "Partida Cancelada") {
-      await updateResultUser(player.user_id, channel.parentId, "Cancelado");
+      await updateResultUser(
+        "lobbys",
+        player.user_id,
+        channel.parentId,
+        "Cancelado"
+      );
     }
   });
 
   await removeusersFromChannel(channel.parentId, waiting_room_id, sendMessage);
-  await removeUsersFromCategory(channel.parentId);
+  await removeUsersFromCategory("users_4v4", channel.parentId);
 
   try {
     setTimeout(() => deleteCategory(sendMessage), 3000);
   } catch (error) {
     console.log("error when deleting category=", error);
+  }
+}
+
+async function endReactionConfirmMatch_valorant(sendMessage, winnerTeam) {
+  const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;
+  const channel = await client.channels.cache.get(sendMessage.channelId);
+
+  if (channel.type !== "GUILD_TEXT") {
+    return;
+  }
+
+  await updateFinishTime(channel.parentId);
+  const players = await fetchUsersFromCategory("users_5v5", channel.parentId);
+
+  players.forEach(async (player) => {
+    if (player.team === winnerTeam) {
+      await updateResultUser(
+        "lobbys_valorant",
+        player.user_id,
+        channel.parentId,
+        "Venceu"
+      );
+    } else if (
+      player.team !== winnerTeam &&
+      winnerTeam !== "Partida Cancelada"
+    ) {
+      await updateResultUser(
+        "lobbys_valorant",
+        player.user_id,
+        channel.parentId,
+        "Perdeu"
+      );
+    } else if (winnerTeam === "Partida Cancelada") {
+      await updateResultUser(
+        "lobbys_valorant",
+        player.user_id,
+        channel.parentId,
+        "Cancelado"
+      );
+    }
+  });
+
+  await removeusersFromChannel(channel.parentId, waiting_room_id, sendMessage);
+  await removeUsersFromCategory("users_5v5", channel.parentId);
+
+  try {
+    setTimeout(() => deleteCategory(sendMessage), 3000);
+  } catch (error) {
+    console.log("error when deleting category=", error);
+  }
+}
+
+async function embedTime1_valorant(
+  reaction,
+  user,
+  sendMessage,
+  actionAndMessage
+) {
+  const member = await sendMessage.guild.members.fetch(user.id);
+  const messageTime1 = sendMessage;
+  let winnerTeam = "Time 1";
+
+  if (
+    reaction.emoji.name === "✅" &&
+    !user.bot &&
+    member.permissions.has("MODERATE_MEMBERS")
+  ) {
+    try {
+      await endReactionConfirmMatch_valorant(sendMessage, winnerTeam);
+    } catch (error) {
+      console.log(error);
+    }
+  } else if (
+    reaction.emoji.name === "🛑" &&
+    !user.bot &&
+    member.permissions.has("MODERATE_MEMBERS")
+  ) {
+    try {
+      const channel = await client.channels.cache.get(messageTime1.channelId);
+
+      if (channel.type !== "GUILD_TEXT") {
+        return;
+      }
+
+      const fatherMessage = await channel.messages.fetch(actionAndMessage.data);
+      await messageTime1.delete();
+      await fatherMessage.reactions
+        .removeAll()
+        .catch((error) => console.log(error));
+      await fatherMessage.react("1️⃣");
+      await fatherMessage.react("2️⃣");
+      await fatherMessage.react("❌");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
+async function embedTime2_valorant(
+  reaction,
+  user,
+  sendMessage,
+  actionAndMessage
+) {
+  const member = await sendMessage.guild.members.fetch(user.id);
+  const messageTime2 = sendMessage;
+  let winnerTeam = "Time 2";
+
+  if (
+    reaction.emoji.name === "✅" &&
+    !user.bot &&
+    member.permissions.has("MODERATE_MEMBERS")
+  ) {
+    try {
+      await endReactionConfirmMatch_valorant(sendMessage, winnerTeam);
+    } catch (error) {
+      console.log("error when stopping winenr2 collector =", error);
+    }
+  } else if (
+    reaction.emoji.name === "🛑" &&
+    !user.bot &&
+    member.permissions.has("MODERATE_MEMBERS")
+  ) {
+    try {
+      const channel = await client.channels.cache.get(messageTime2.channelId);
+
+      if (channel.type !== "GUILD_TEXT") {
+        return;
+      }
+
+      const fatherMessage = await channel.messages.fetch(actionAndMessage.data);
+      await messageTime2.delete();
+      await fatherMessage.reactions
+        .removeAll()
+        .catch((error) => console.log(error));
+      await fatherMessage.react("1️⃣");
+      await fatherMessage.react("2️⃣");
+      await fatherMessage.react("❌");
+    } catch (error) {
+      console.log("error when deleting message for team2=", error);
+    }
   }
 }

@@ -13,7 +13,7 @@ function shuffleArray(arr) {
   return arr;
 }
 
-export async function generateTeam(guildId: string) {
+export async function generateTeam4v4(guildId: string) {
   const qtd = Number(DISCORD_CONFIG.numbers.MIN_NUM_PLAYERS_TO_START_LOBBY) | 0;
   const dataAll = await fetchUsersQtd("users_4v4", qtd, guildId);
   const metade = qtd / 2;

@@ -1,3 +1,4 @@
+import { table } from "console";
 import { ExtendedClient } from "../structures/Client";
 
 const client = new ExtendedClient();
@@ -76,9 +77,19 @@ export async function createUser4v4(user_id, name, guild_id) {
   return data;
 }
 
-export async function updateModerator(user_id, moderator_id) {
+export async function createUser5v5(user_id, name, guild_id) {
+  const { data } = await db.from("users_5v5").insert({
+    user_id: user_id,
+    name: name,
+    guild_id,
+    in_match: false,
+  });
+  return data;
+}
+
+export async function updateModerator(table, user_id, moderator_id) {
   const { data } = await db
-    .from("users_4v4")
+    .from(table)
     .update({
       moderator_id: moderator_id,
     })
@@ -88,18 +99,36 @@ export async function updateModerator(user_id, moderator_id) {
   return data;
 }
 
-export async function removeUsersFromCategory(category_id) {
+export async function updateUserCaptain(
+  user_id: string,
+  status: string
+): Promise<Array<string>> {
   const { data } = await db
-    .from("users_4v4")
-    .delete()
-    .eq("category_id", category_id);
+    .from("users_5v5")
+    .update({ status: status })
+    .match({ user_id: user_id });
 
   return data;
 }
 
-export async function fetchUsersFromCategory(category_id) {
+export async function verifyCaptainStatus(user_id) {
   const { data } = await db
-    .from("users_4v4")
+    .from("users_5v5")
+    .select("status")
+    .eq("status", "captain")
+    .match({ user_id: user_id });
+  return data;
+}
+
+export async function removeUsersFromCategory(table, category_id) {
+  const { data } = await db.from(table).delete().eq("category_id", category_id);
+
+  return data;
+}
+
+export async function fetchUsersFromCategory(table, category_id) {
+  const { data } = await db
+    .from(table)
     .select("*")
     .eq("category_id", category_id);
 
@@ -159,6 +188,20 @@ export async function create4v4Lobby(user_id, category_id, moderator_id, team) {
   return data;
 }
 
+export async function createLobbyValorant(
+  user_id: string,
+  category_id: string,
+  team: string
+): Promise<Array<string>> {
+  const { data } = await db.from("lobbys_valorant").insert({
+    user_id: user_id,
+    category_id: category_id,
+    team: team,
+  });
+
+  return data;
+}
+
 export async function updateInMatch(table, user_id, state) {
   const { data } = await db
     .from(table)
@@ -191,9 +234,9 @@ export async function updateFinishTime(category_id) {
   return data;
 }
 
-export async function updateResultUser(user_id, category_id, result) {
+export async function updateResultUser(table, user_id, category_id, result) {
   const { data } = await db
-    .from("lobbys")
+    .from(table)
     .update({
       result: result,
     })
@@ -201,9 +244,9 @@ export async function updateResultUser(user_id, category_id, result) {
   return data;
 }
 
-export async function updateUserTeam(user_id, team) {
+export async function updateUserTeam(table, user_id, team) {
   const { data } = await db
-    .from("users_4v4")
+    .from(table)
     .update({
       team: team,
     })
@@ -223,9 +266,9 @@ export async function updateUserRole(user_id, role_id) {
   return data;
 }
 
-export async function updateCategory(user_id, category_id) {
+export async function updateCategory(table, user_id, category_id) {
   const { data } = await db
-    .from("users_4v4")
+    .from(table)
     .update({
       category_id: category_id,
     })
