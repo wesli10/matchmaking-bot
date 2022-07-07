@@ -13,7 +13,9 @@ import {
   verifyUserState,
   removeUser,
   verifyUserExist,
+  isBanned,
 } from "../../utils/db";
+import { format, parseISO } from "date-fns";
 
 const BUTTONS = new MessageActionRow().addComponents(
   new MessageButton()
@@ -66,6 +68,21 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
 
           await btnInt.editReply({
             content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
+            components: [],
+          });
+          return;
+        }
+
+        const banned = await isBanned(btnInt.user.id);
+
+        if (banned) {
+          log("User is banned");
+
+          await btnInt.editReply({
+            content: ` ❌ VOCÊ ESTÁ BANIDO DA FILA ATÉ ${format(
+              parseISO(banned.end_date),
+              "dd/MM/yyyy HH:mm"
+            )} ❌`,
             components: [],
           });
           return;

@@ -353,6 +353,29 @@ export async function createActionAndMessage(
   return data;
 }
 
+export async function isBanned(user_id) {
+  const { data } = await db
+    .from("users_banned")
+    .select("id, user_id, end_date, reason")
+    .eq("user_id", user_id)
+    .gte("end_date", new Date().toISOString())
+    .limit(1)
+    .single();
+
+  return data;
+}
+
+export async function banUser(user_id, end_date, reason, mod_id) {
+  const { data } = await db.from("users_banned").insert({
+    user_id,
+    end_date,
+    reason,
+    mod_id,
+  });
+
+  return data;
+}
+
 export async function updatePontuation(
   user_id,
   game_id: GAME_LIST,

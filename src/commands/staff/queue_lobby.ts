@@ -12,9 +12,11 @@ import {
   verifyUserExist,
   removeUser,
   createUser4v4,
+  isBanned,
 } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
+import { format, parseISO } from "date-fns";
 
 const { channels } = DISCORD_CONFIG;
 
@@ -65,6 +67,21 @@ export async function handleButtonInteraction_4v4(btnInt: ButtonInteraction) {
 
           await btnInt.editReply({
             content: " ❌ VOCÊ JA ESTÁ PARTICIPANDO ❌",
+            components: [],
+          });
+          return;
+        }
+
+        const banned = await isBanned(btnInt.user.id);
+
+        if (banned) {
+          log("User is banned");
+
+          await btnInt.editReply({
+            content: ` ❌ VOCÊ ESTÁ BANIDO DA FILA ATÉ ${format(
+              parseISO(banned.end_date),
+              "dd/MM/yyyy HH:mm"
+            )} ❌`,
             components: [],
           });
           return;
