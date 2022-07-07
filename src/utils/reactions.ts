@@ -6,6 +6,7 @@ import {
   getActionAndMessage,
   removeUsersFromCategory,
   updateFinishTime,
+  updatePontuation,
   updateResultUser,
 } from "./db";
 import { MessageReaction } from "discord.js";
@@ -16,6 +17,7 @@ import {
 } from "./4v4/messageInteractionsTemplates";
 import { removeusersFromChannel } from "./4v4/manageUsers";
 import { deleteCategory } from "../commands/staff/startLobby";
+import { GAME_LIST } from "./gameList";
 
 const { roles } = DISCORD_CONFIG;
 
@@ -198,7 +200,7 @@ async function embedTime2Func(reaction, user, sendMessage, actionAndMessage) {
     try {
       await endReactionConfirmMatch(sendMessage, winnerTeam);
     } catch (error) {
-      console.log("error when stopping winenr2 collector =", error);
+      console.log("error when stopping winner2 collector =", error);
     }
   } else if (
     reaction.emoji.name === "🛑" &&
@@ -235,6 +237,7 @@ async function endReactionConfirmMatch(sendMessage, winnerTeam) {
   }
 
   await updateFinishTime(channel.parentId);
+  updateMmrMatch(channel.parentId, winnerTeam);
   const players = await fetchUsersFromCategory(channel.parentId);
 
   players.forEach(async (player) => {
@@ -258,4 +261,18 @@ async function endReactionConfirmMatch(sendMessage, winnerTeam) {
   } catch (error) {
     console.log("error when deleting category=", error);
   }
+}
+
+async function updateMmrMatch(channel_id, winner) {
+  const players = await fetchUsersFromCategory(channel_id);
+
+  players.forEach(async (player) => {
+    // TODO: o jogo está fixo como free-fire, tem de identificar o jogo quando a parte de multijogos estiver pronta
+    await updatePontuation(
+      player.user_id,
+      GAME_LIST.FREE_FIRE,
+      1,
+      winner === player.team ? "win" : "lose"
+    );
+  });
 }
