@@ -415,3 +415,36 @@ export async function updatePontuation(
     });
   }
 }
+
+export async function hasCalledMod(category_id) {
+  const datePlus2Minutes = new Date(new Date().getTime() + 2 * 60 * 1000);
+
+  const { data } = await db
+    .from("button_mod_called")
+    .select("id, category_id, called_date")
+    .eq("category_id", category_id)
+    .lte("called_date", datePlus2Minutes.toISOString())
+    .limit(1)
+    .single();
+
+  return data;
+}
+
+export async function insertCallMod(category_id) {
+  const { data } = await db.from("button_mod_called").insert({
+    category_id,
+  });
+
+  return data;
+}
+
+export async function deleteCallsMod() {
+  const dateMinus2Minutes = new Date(new Date().getTime() - 2 * 60 * 1000);
+
+  const { data } = await db
+    .from("button_mod_called")
+    .delete()
+    .lte("called_date", dateMinus2Minutes.toISOString());
+
+  return data;
+}
