@@ -1,5 +1,9 @@
 import { CommandInteractionOptionResolver, Message } from "discord.js";
 import { client } from "..";
+import {
+  handleButtonInteractionQueue_lol,
+  handleSelectMenuInteraction,
+} from "../commands/staff/lol_queue";
 import { handleButtonInteractionPlayerMenu_valorant } from "../commands/staff/match";
 import { handleButtonInteraction } from "../commands/staff/queue";
 import { handleButtonInteraction_4v4 } from "../commands/staff/queue_lobby";
@@ -52,8 +56,17 @@ export default new Event("interactionCreate", async (interaction) => {
       interaction.customId === "call_mod_valorant"
     ) {
       await handleButtonInteractionPlayerMenu_valorant(interaction);
+    } else if (
+      interaction.customId === "enter_queue_lol" ||
+      interaction.customId === "leave_queue_lol"
+    ) {
+      await handleButtonInteractionQueue_lol(interaction);
     } else {
       console.warn("unknown button interaction", interaction.customId);
+    }
+  } else if (interaction.isSelectMenu()) {
+    if (interaction.customId === "roles_lol") {
+      await handleSelectMenuInteraction(interaction);
     }
   }
 });

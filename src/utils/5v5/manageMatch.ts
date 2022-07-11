@@ -46,3 +46,26 @@ export async function valorantMapsSelectionFunc() {
 
   return mapSelect;
 }
+
+export const roles = [
+  {
+    name: "Mid-laner",
+    icon: "https://static.wikia.nocookie.net/leagueoflegends/images/9/98/Middle_icon.png/revision/latest/scale-to-width-down/40",
+  },
+  {
+    name: "Top-laner",
+    icon: "https://static.wikia.nocookie.net/leagueoflegends/images/e/ef/Top_icon.png/revision/latest/scale-to-width-down/40",
+  },
+  {
+    name: "AD Carry",
+    icon: "https://static.wikia.nocookie.net/leagueoflegends/images/9/97/Bottom_icon.png/revision/latest/scale-to-width-down/40",
+  },
+  {
+    name: "Support",
+    icon: "https://static.wikia.nocookie.net/leagueoflegends/images/e/e0/Support_icon.png/revision/latest/scale-to-width-down/40",
+  },
+  {
+    name: "Jungler",
+    icon: "https://static.wikia.nocookie.net/leagueoflegends/images/1/1b/Jungle_icon.png/revision/latest/scale-to-width-down/40",
+  },
+];

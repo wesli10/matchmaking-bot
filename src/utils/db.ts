@@ -87,6 +87,70 @@ export async function createUser5v5(user_id, name, guild_id) {
   return data;
 }
 
+export async function fetchTeam_lol(qtd, guildId) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("*")
+    .eq("in_match", false)
+    .eq("guild_id", guildId)
+    .order("created_at", { ascending: true })
+    .limit(qtd);
+
+  return data;
+}
+
+export async function fetchSpecificRole(role, guild_id) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("*")
+    .eq("guild_id", guild_id)
+    .eq("in_match", false)
+    .eq("role", role)
+    .order("created_at", { ascending: true })
+    .limit(2);
+
+  return data;
+}
+
+export async function fetchSpecificRoleSec(role, guild_id, playerId) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("*")
+    .eq("guild_id", guild_id)
+    .eq("in_match", false)
+    .eq("role_sec", role)
+    .not("user_id", "in", `(${playerId})`)
+    .order("created_at", { ascending: true })
+    .limit(2);
+
+  return data;
+}
+
+export async function createUser5v5_lol(user_id, name, role, role2, guild_id) {
+  const { data } = await db.from("queue_lol").insert({
+    user_id: user_id,
+    name: name,
+    role: role,
+    role_sec: role2,
+    guild_id,
+    in_match: false,
+  });
+  return data;
+}
+
+export async function autoFillRole(guild_id, playerId) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("*")
+    .eq("guild_id", guild_id)
+    .eq("in_match", false)
+    .not("user_id", "in", `(${playerId})`)
+    .order("created_at", { ascending: true })
+    .limit(10);
+
+  return data;
+}
+
 export async function updateModerator(table, user_id, moderator_id) {
   const { data } = await db
     .from(table)
