@@ -95,7 +95,7 @@ export async function handleButtonInteractionQueue_valorant(
           return;
         }
         log("removing user from queue");
-        await removeUser("users_4v4", btnInt.user.id);
+        await removeUser("users_5v5", btnInt.user.id);
         log("user removed from queue");
         await btnInt.editReply({
           content: "❌ VOCÊ SAIU DA FILA ❌",
