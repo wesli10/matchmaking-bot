@@ -24,6 +24,9 @@ import {
   updateResultUser,
   updateUserTeam,
   updateWinnerAndFinishTime,
+  hasCalledMod,
+  insertCallMod,
+  deleteCallsMod,
 } from "../../utils/db";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { generateTeam } from "../../utils/4v4/generateTeam";
@@ -250,6 +253,22 @@ export async function handleButtonInteractionPlayerMenu(
     switch (btnInt.customId) {
       case "call_mod":
         log("Iniciando ação do botão", btnInt.customId);
+
+        await deleteCallsMod();
+
+        const hasCalled = await hasCalledMod(btnInt.channelId);
+        if (hasCalled) {
+          log("Já chamou o mod");
+
+          await btnInt.editReply({
+            content:
+              "❌ Essa partida já chamou o mod, aguarde 2 minutos para chamar novamente!",
+          });
+          setTimeout(() => btnInt.deleteReply(), 3000);
+          break;
+        }
+
+        await insertCallMod(btnInt.channelId);
 
         await btnInt.deleteReply(); // delete thinking message
 
