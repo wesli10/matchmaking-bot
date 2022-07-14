@@ -30,13 +30,18 @@ export default new Command({
 
     const pontuation = await getPontuation(GAME_LIST[game]);
 
-    const strRanking = pontuation
-      .map((user, index) => {
-        return `${index + 1}. <@${user.user_id}> - ${
-          user.actual_pontuation
-        } pontos`;
-      })
-      .join("\n");
+    const strRanking =
+      pontuation.length > 0
+        ? pontuation
+            .map((user, index) => {
+              return `${index + 1}. <@${user.user_id}> - ${
+                user.actual_pontuation
+              } pontos`;
+            })
+            .join("\n")
+        : "Nenhuma pontuação para este jogo encontrado.";
+
+    console.log(strRanking);
 
     interaction.editReply({
       embeds: [
