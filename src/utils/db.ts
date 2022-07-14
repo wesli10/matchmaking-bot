@@ -415,3 +415,14 @@ export async function updatePontuation(
     });
   }
 }
+
+export async function getPontuation(game_id: GAME_LIST) {
+  const { data } = await db
+    .from("users_mmr")
+    .select("user_id, actual_pontuation")
+    .eq("game_id", game_id)
+    .limit(10)
+    .order("actual_pontuation", { ascending: false });
+
+  return data;
+}
