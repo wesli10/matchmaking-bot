@@ -26,6 +26,25 @@ export async function fetchUser(user_id) {
   return data;
 }
 
+export async function checkUserRolelol(user_id) {
+  const { data } = await db
+    .from("players_lol")
+    .select("user_id")
+    .eq("user_id", user_id);
+
+  return data;
+}
+
+export async function registerUserOnPlayerslol(user_id, main_role, name) {
+  const { data } = await db.from("players_lol").insert({
+    user_id: user_id,
+    main_role: main_role,
+    name: name,
+  });
+
+  return data;
+}
+
 export async function fetchUser4v4Feedback(user_id) {
   const { data } = await db
     .from("lobbys")
@@ -102,7 +121,7 @@ export async function fetchTeam_lol(qtd, guildId) {
 export async function fetchSpecificRole(role, guild_id) {
   const { data } = await db
     .from("queue_lol")
-    .select("*")
+    .select("user_id, role")
     .eq("guild_id", guild_id)
     .eq("in_match", false)
     .eq("role", role)

@@ -19,21 +19,6 @@ export default new Command({
       return;
     }
 
-    const choosedMapEmbed = new MessageEmbed()
-      .setColor("#fd4a5f")
-      .setTitle("Lobby Iniciado")
-      .setDescription(
-        `Time 1: \n ${players.time1
-          .map((player) => `<@${player.user_id}> **${player.role}**`)
-          .join("\n")} \n\n Time 2: \n ${players.time2
-          .map((player) => `<@${player.user_id}>  **${player.role}**`)
-          .join("\n")}`
-      );
-
-    await channel.send({
-      embeds: [choosedMapEmbed],
-    });
-
     await interaction.deleteReply();
     //   const players = await generateTeam5v5_lol(interaction.guildId);
     //   if (players.length < DISCORD_CONFIG.numbers.MIN_NUM_PLAYERS_TO_5v5_MATCH) {

@@ -5,7 +5,6 @@ import {
   MessageButton,
   MessageEmbed,
   MessageSelectMenu,
-  ReactionCollector,
   SelectMenuInteraction,
   TextChannel,
 } from "discord.js";
@@ -13,12 +12,14 @@ import {
   verifyUserState,
   verifyUserExist,
   removeUser,
-  createUser4v4,
-  createUser5v5,
   createUser5v5_lol,
+  checkUserRolelol,
+  registerUserOnPlayerslol,
+  updateInMatch,
 } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
+import { generateTeam5v5_lol } from "../../utils/5v5/generateTeam5v5_lol";
 
 const { channels } = DISCORD_CONFIG;
 
@@ -88,9 +89,20 @@ export async function handleSelectMenuInteraction(
     const role2 = btnInt.values[1];
 
     btnInt.editReply({
-      content: `🎇 VOCÊ ENTROU NA FILA 🎇 \n\n Role Principal: **${role1.toUpperCase()}** \n Role Secundária: **${role2.toUpperCase()}**`,
+      content: `🎇 PROCURANDO PARTIDA...🎇 \n\n Role Principal: **${role1.toUpperCase()}** \n Role Secundária: **${role2.toUpperCase()}**`,
       components: [],
     });
+
+    const player = await checkUserRolelol(btnInt.user.id);
+
+    if (player.length === 0) {
+      await registerUserOnPlayerslol(
+        btnInt.user.id,
+        role1,
+        btnInt.user.username
+      );
+    }
+
     await createUser5v5_lol(
       btnInt.user.id,
       btnInt.user.tag,
@@ -143,7 +155,6 @@ export async function handleButtonInteractionQueue_lol(
           components: [row],
         });
 
-        // await createUser5v5(btnInt.user.id, btnInt.user.tag, btnInt.guildId);
         log("user added to queue.");
         log("message replied.");
         break;
@@ -159,7 +170,7 @@ export async function handleButtonInteractionQueue_lol(
           return;
         }
         log("removing user from queue");
-        await removeUser("users_5v5", btnInt.user.id);
+        await removeUser("queue_lol", btnInt.user.id);
         log("user removed from queue");
         await btnInt.editReply({
           content: "❌ VOCÊ SAIU DA FILA ❌",
@@ -215,5 +226,52 @@ export default new Command({
       embeds: [StartQueue],
       components: [BUTTONS],
     });
+
+    const channelAnnouncement = interaction.guild.channels.cache.get(
+      interaction.channel.id
+    );
+    if (channelAnnouncement.type !== "GUILD_TEXT") {
+      return;
+    }
+
+    await testeRecursive(interaction.guildId, channelAnnouncement);
   },
 });
+
+async function testeRecursive(guild_id: string, channel: TextChannel) {
+  const teste = await generateTeam5v5_lol(guild_id);
+
+  if (teste === undefined) {
+    console.log("Procurando...");
+    setTimeout(() => testeRecursive(guild_id, channel), 5000);
+  }
+
+  if (teste !== undefined) {
+    try {
+      for (const player of teste.time1) {
+        Promise.all([updateInMatch("queue_lol", player.user_id, true)]);
+      }
+      for (const player of teste.time2) {
+        Promise.all([updateInMatch("queue_lol", player.user_id, true)]);
+      }
+      console.log("Partida encontrada");
+      const StartLOL = new MessageEmbed()
+        .setColor("#fd4a5f")
+        .setTitle("PARTIDA ENCONTRADA")
+        .setDescription(
+          ` Time 1: \n ${teste.time1
+            .map((player) => `<@${player.user_id}> : ${player.role}`)
+            .join("\n")} \n\n Time 2: \n ${teste.time2
+            .map((player) => `<@${player.user_id}> : ${player.role}`)
+            .join("\n")}`
+        );
+      await channel.send({
+        embeds: [StartLOL],
+      });
+    } catch (error) {
+      console.log(error);
+    }
+    setTimeout(() => testeRecursive(guild_id, channel), 5000);
+    return teste;
+  }
+}

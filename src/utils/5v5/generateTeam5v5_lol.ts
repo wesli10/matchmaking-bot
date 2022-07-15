@@ -1,11 +1,4 @@
-import { time } from "console";
-import { DISCORD_CONFIG } from "../../configs/discord.config";
-import {
-  autoFillRole,
-  fetchSpecificRole,
-  fetchSpecificRoleSec,
-  fetchUsersQtd,
-} from "../db";
+import { autoFillRole, fetchSpecificRole, fetchSpecificRoleSec } from "../db";
 
 function shuffleArray(arr) {
   // Loop em todos os elementos
@@ -48,31 +41,31 @@ export async function generateTeam5v5_lol(guildId: string) {
 
   if (mid.length < 2) {
     const playersId = [...mid, ...sup, ...adc, ...jg, ...top].map(
-      (player) => player.user_id
+      (player) => player?.user_id
     );
     mid = await getSecondaryRole("Mid-laner", guildId, playersId, mid);
   }
   if (sup.length < 2) {
     const playersId = [...mid, ...sup, ...adc, ...jg, ...top].map(
-      (player) => player.user_id
+      (player) => player?.user_id
     );
     sup = await getSecondaryRole("Support", guildId, playersId, sup);
   }
   if (adc.length < 2) {
     const playersId = [...mid, ...sup, ...adc, ...jg, ...top].map(
-      (player) => player.user_id
+      (player) => player?.user_id
     );
     adc = await getSecondaryRole("AD Carry", guildId, playersId, adc);
   }
   if (jg.length < 2) {
     const playersId = [...mid, ...sup, ...adc, ...jg, ...top].map(
-      (player) => player.user_id
+      (player) => player?.user_id
     );
     jg = await getSecondaryRole("Jungler", guildId, playersId, jg);
   }
   if (top.length < 2) {
     const playersId = [...mid, ...sup, ...adc, ...jg, ...top].map(
-      (player) => player.user_id
+      (player) => player?.user_id
     );
     top = await getSecondaryRole("Top-laner", guildId, playersId, top);
   }
@@ -100,6 +93,9 @@ export async function generateTeam5v5_lol(guildId: string) {
       continue;
     }
     const found = shuffleArray(await autoFillRole(guildId, playersId));
+    if (found.length === 0) {
+      return;
+    }
     const playerFound = found.shift();
     playersId.push(playerFound.user_id);
     const idx = playersId.indexOf(player);
@@ -112,8 +108,11 @@ export async function generateTeam5v5_lol(guildId: string) {
       continue;
     }
     const found = shuffleArray(await autoFillRole(guildId, playersId));
+    if (found.length === 0) {
+      return;
+    }
     const playerFound = found.shift();
-    playersId.push(playerFound.user_id);
+    playersId.push(playerFound?.user_id);
 
     const idx = playersId.indexOf(player);
     playerFound.role = roles[idx];
