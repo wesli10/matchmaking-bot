@@ -16,6 +16,7 @@ import {
   isBanned,
 } from "../../utils/db";
 import { format, parseISO } from "date-fns";
+import { emitSentry } from "../..";
 
 const BUTTONS = new MessageActionRow().addComponents(
   new MessageButton()
@@ -121,6 +122,11 @@ export async function handleButtonInteraction(btnInt: ButtonInteraction) {
     }
   } catch (error) {
     log("Error!", error);
+    emitSentry(
+      "queueButtonInteraction",
+      "Tried to press queue button interaction to enter/leave queue",
+      error
+    );
 
     await btnInt.editReply({
       content: "⚠️ Encontramos um error, tente novamente.",

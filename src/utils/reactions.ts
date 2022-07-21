@@ -1,4 +1,4 @@
-import { client } from "../index";
+import { client, emitSentry } from "../index";
 import { DISCORD_CONFIG } from "../configs/discord.config";
 import {
   createActionAndMessage,
@@ -56,6 +56,7 @@ export async function globalReactions(reaction, user) {
     try {
       await reaction.fetch();
     } catch (error) {
+      emitSentry("reactionFetch", "Tried to fetch a reaction", error);
       console.error("Something went wrong when fetching the message:", error);
       // Return as `reaction.message.author` may be undefined/null
       return;
@@ -78,6 +79,11 @@ export async function globalReactions(reaction, user) {
         await embedTime2Func(reaction, user, sendMessage, actionAndMessage);
       }
     } catch (error) {
+      emitSentry(
+        "reactionFetchMessageAction",
+        "Tried to fetch a reaction message and proceed with action",
+        error
+      );
       console.log(error);
     }
   }
@@ -140,6 +146,11 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
         console.log("passei do await");
         await endReactionConfirmMatch(sendMessage, winnerTeam);
       } catch (error) {
+        emitSentry(
+          "endReactionConfirmMatch",
+          "Tried to send a message and cancel the match",
+          error
+        );
         console.log(error);
       }
     }
@@ -159,6 +170,11 @@ async function embedTime1Func(reaction, user, sendMessage, actionAndMessage) {
     try {
       await endReactionConfirmMatch(sendMessage, winnerTeam);
     } catch (error) {
+      emitSentry(
+        "time1ConfirmWinner",
+        "Tried to confirm the team 1 as a winner",
+        error
+      );
       console.log(error);
     }
   } else if (
@@ -182,6 +198,7 @@ async function embedTime1Func(reaction, user, sendMessage, actionAndMessage) {
       await fatherMessage.react("2️⃣");
       await fatherMessage.react("❌");
     } catch (error) {
+      emitSentry("time1CancelMatch", "Tried to cancel the match winner", error);
       console.log(error);
     }
   }
@@ -200,6 +217,11 @@ async function embedTime2Func(reaction, user, sendMessage, actionAndMessage) {
     try {
       await endReactionConfirmMatch(sendMessage, winnerTeam);
     } catch (error) {
+      emitSentry(
+        "time2ConfirmWinner",
+        "Tried to confirm the team 2 as a winner",
+        error
+      );
       console.log("error when stopping winner2 collector =", error);
     }
   } else if (
@@ -223,6 +245,7 @@ async function embedTime2Func(reaction, user, sendMessage, actionAndMessage) {
       await fatherMessage.react("2️⃣");
       await fatherMessage.react("❌");
     } catch (error) {
+      emitSentry("time2CancelMatch", "Tried to cancel the match winner", error);
       console.log("error when deleting message for team2=", error);
     }
   }
@@ -259,6 +282,7 @@ async function endReactionConfirmMatch(sendMessage, winnerTeam) {
   try {
     setTimeout(() => deleteCategory(sendMessage), 3000);
   } catch (error) {
+    emitSentry("deleteCategory", "Tried to delete the category", error);
     console.log("error when deleting category=", error);
   }
 }

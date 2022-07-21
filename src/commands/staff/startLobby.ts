@@ -44,7 +44,7 @@ import {
   PreFinishLobby,
   StartLobby,
 } from "../../utils/4v4/messageInteractionsTemplates";
-import { client } from "../..";
+import { client, emitSentry } from "../..";
 import { getPermissions } from "../../configs/permissions.config";
 
 const { roles } = DISCORD_CONFIG;
@@ -218,6 +218,11 @@ export async function deleteCategory(
     parentCategory.delete();
   } catch (error) {
     console.log(error);
+    emitSentry(
+      "deleteCategory",
+      "Tried to press queue button interaction to enter/leave queue",
+      error
+    );
     await interaction.channel.send({
       content: "Ocorreu um erro ao deletar a categoria, Tente novamente!",
     });
@@ -346,6 +351,11 @@ export async function handleButtonInteractionPlayerMenu(
     }
   } catch (error) {
     log("Error!", error);
+    emitSentry(
+      "buttonInteractionMatch",
+      "Tried to use button call_mod/finish_match",
+      error
+    );
 
     await btnInt.editReply({
       content: "⚠️ Encontramos um error, tente novamente.",

@@ -1,5 +1,5 @@
 import { CommandInteractionOptionResolver, Message } from "discord.js";
-import { client } from "..";
+import { client, emitSentry } from "..";
 import { handleButtonInteraction } from "../commands/staff/queue";
 import { handleButtonInteraction_4v4 } from "../commands/staff/queue_lobby";
 import { handleButtonInteractionPlayerMenu } from "../commands/staff/startLobby";
@@ -41,6 +41,11 @@ export default new Event("interactionCreate", async (interaction) => {
       await handleButtonInteractionPlayerMenu(interaction);
     } else {
       console.warn("unknown button interaction", interaction.customId);
+      emitSentry(
+        "interactionCreateEvent",
+        `buttonInteraction`,
+        `unknown button interaction ${interaction.customId}`
+      );
     }
   }
 });

@@ -1,4 +1,5 @@
 import { MessageEmbed, TextChannel } from "discord.js";
+import { emitSentry } from "../..";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { banUser, isBanned } from "../../utils/db";
@@ -91,6 +92,7 @@ export default new Command({
       await interaction.deleteReply();
     } catch (error) {
       console.log(error);
+      emitSentry("/banir", "Tried to ban user for a specific time", error);
     }
   },
 });
