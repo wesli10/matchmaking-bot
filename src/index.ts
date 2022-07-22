@@ -56,12 +56,6 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-export const emitSentry = (operation, description, exception) => {
-  const transaction = Sentry.startTransaction({
-    op: operation,
-    name: description,
-  });
-
-  Sentry.captureException(exception);
-  transaction.finish();
+export const emitSentry = (name, description, exception) => {
+  Sentry.captureException(exception, { tags: { name, description } });
 };
