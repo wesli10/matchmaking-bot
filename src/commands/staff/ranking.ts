@@ -9,6 +9,13 @@ const choices = [
   { name: "League of Legends", value: "LEAGUE_OF_LEGENDS" },
 ];
 
+const options = [
+  { name: "Geral", value: "G" },
+  { name: "Diário", value: "D" },
+  { name: "Semanal", value: "S" },
+  { name: "Mensal", value: "M" },
+];
+
 const findChoiceByValue = (value: string) =>
   choices.find((choice) => choice.value === value);
 
@@ -24,11 +31,19 @@ export default new Command({
       required: true,
       choices,
     },
+    {
+      name: "option",
+      description: "Opção",
+      type: "STRING",
+      required: true,
+      choices: options,
+    },
   ],
   run: async ({ interaction }) => {
     const game = interaction.options.getString("game");
+    const option = interaction.options.getString("option");
 
-    const pontuation = await getPontuation(GAME_LIST[game]);
+    const pontuation = await choosePontuation(GAME_LIST[game], option);
 
     const strRanking =
       pontuation.length > 0
@@ -53,3 +68,21 @@ export default new Command({
     });
   },
 });
+
+const choosePontuation = async (game: GAME_LIST, option: string) => {
+  let pontuation = [];
+
+  switch (option) {
+    case "G":
+      pontuation = await getPontuation(game);
+      break;
+    case "D":
+      break;
+    case "S":
+      break;
+    case "M":
+      break;
+  }
+
+  return pontuation;
+};
