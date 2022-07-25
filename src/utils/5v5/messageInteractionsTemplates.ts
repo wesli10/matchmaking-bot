@@ -1,5 +1,7 @@
 import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
 
+// VALORANT BUTTONS
+
 export const buttonFinishMatch_valorant = new MessageActionRow().addComponents(
   new MessageButton()
     .setCustomId("finish_match_valorant")
@@ -27,6 +29,51 @@ export const buttonConfirmFinishMatch_valorant =
       .setStyle("DANGER")
   );
 
+export const buttonCallMod_valorant = new MessageActionRow().addComponents(
+  new MessageButton()
+    .setCustomId("call_mod")
+    .setEmoji("📞")
+    .setLabel("Chamar Mod")
+    .setStyle("SUCCESS")
+);
+
+// LEAGUE OF LEGENDS BUTTONS
+
+export const buttonFinishMatch_lol = new MessageActionRow().addComponents(
+  new MessageButton()
+    .setCustomId("finish_match_lol")
+    .setEmoji("🏁")
+    .setLabel("Finalizar Partida")
+    .setStyle("DANGER")
+);
+
+export const buttonCallMod_lol = new MessageActionRow().addComponents(
+  new MessageButton()
+    .setCustomId("call_mod_lol")
+    .setEmoji("📞")
+    .setLabel("Chamar Mod")
+    .setStyle("SUCCESS")
+);
+
+export const buttonFinishMatchDisabled_lol =
+  new MessageActionRow().addComponents(
+    new MessageButton()
+      .setCustomId("finish_match_lol")
+      .setEmoji("🏁")
+      .setLabel("Finalizar Partida")
+      .setStyle("DANGER")
+      .setDisabled(true)
+  );
+
+export const buttonConfirmFinishMatch_lol =
+  new MessageActionRow().addComponents(
+    new MessageButton()
+      .setCustomId("confirm_finish_match_lol")
+      .setEmoji("🏁")
+      .setLabel("Encerrar Partida")
+      .setStyle("DANGER")
+  );
+
 export const PreFinishLobby = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("Atenção, confirme para a partida ser finalizada!")
@@ -40,10 +87,3 @@ export const FinishLobby = new MessageEmbed()
   .setDescription(
     "Clique na reação adequada para indicar qual time foi o vencedor.\n Se precisar, chame os organizadores."
   );
-export const buttonCallMod_valorant = new MessageActionRow().addComponents(
-  new MessageButton()
-    .setCustomId("call_mod")
-    .setEmoji("📞")
-    .setLabel("Chamar Mod")
-    .setStyle("SUCCESS")
-);

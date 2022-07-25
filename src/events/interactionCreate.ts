@@ -1,6 +1,7 @@
 import { CommandInteractionOptionResolver, Message } from "discord.js";
 import { client } from "..";
 import {
+  handleButtonInteractionPlayerMenu_lol,
   handleButtonInteractionQueue_lol,
   handleSelectMenuInteraction,
 } from "../commands/staff/lol_queue";
@@ -61,6 +62,12 @@ export default new Event("interactionCreate", async (interaction) => {
       interaction.customId === "leave_queue_lol"
     ) {
       await handleButtonInteractionQueue_lol(interaction);
+    } else if (
+      interaction.customId === "finish_match_lol" ||
+      interaction.customId === "confirm_finish_match_lol" ||
+      interaction.customId === "call_mod_lol"
+    ) {
+      await handleButtonInteractionPlayerMenu_lol(interaction);
     } else {
       console.warn("unknown button interaction", interaction.customId);
     }

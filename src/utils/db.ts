@@ -271,6 +271,20 @@ export async function create4v4Lobby(user_id, category_id, moderator_id, team) {
   return data;
 }
 
+export async function createLobbyLeagueOfLegends(
+  user_id: string,
+  category_id: string,
+  team: string
+): Promise<Array<string>> {
+  const { data } = await db.from("lobbys_lol").insert({
+    user_id: user_id,
+    category_id: category_id,
+    team: team,
+  });
+
+  return data;
+}
+
 export async function createLobbyValorant(
   user_id: string,
   category_id: string,
@@ -291,6 +305,15 @@ export async function updateInMatch(table, user_id, state) {
     .update({
       in_match: state,
     })
+    .match({ user_id: user_id });
+
+  return data;
+}
+
+export async function updateLolRole(user_id: string, role: string) {
+  const { data } = await db
+    .from("queue_lol")
+    .update({ role: role })
     .match({ user_id: user_id });
 
   return data;
