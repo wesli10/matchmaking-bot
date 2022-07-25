@@ -9,6 +9,7 @@ import {
   updateFinishTime,
   updateInMatch,
   updateModerator,
+  updatePontuation,
   updateResultUser,
   updateUserCaptain,
   updateUserTeam,
@@ -34,6 +35,7 @@ import {
   valorantFinishMatchFunc,
   valorantStartLobbyFunc,
 } from "./5v5/manageUsers";
+import { GAME_LIST } from "./gameList";
 
 const { roles } = DISCORD_CONFIG;
 
@@ -530,7 +532,7 @@ async function embedTime2Func(reaction, user, sendMessage, actionAndMessage) {
     try {
       await endReactionConfirmMatch(sendMessage, winnerTeam);
     } catch (error) {
-      console.log("error when stopping winenr2 collector =", error);
+      console.log("error when stopping winner2 collector =", error);
     }
   } else if (
     reaction.emoji.name === "🛑" &&
@@ -568,6 +570,8 @@ async function endReactionConfirmMatch(sendMessage, winnerTeam) {
 
   await updateFinishTime(channel.parentId);
   const players = await fetchUsersFromCategory("users_4v4", channel.parentId);
+  updateMmrMatch(channel.parentId, winnerTeam);
+  const players = await fetchUsersFromCategory(channel.parentId);
 
   players.forEach(async (player) => {
     if (player.team === winnerTeam) {
@@ -878,4 +882,17 @@ async function embedTime2_valorant(
       console.log("error when deleting message for team2=", error);
     }
   }
+  
+async function updateMmrMatch(channel_id, winner) {
+  const players = await fetchUsersFromCategory(channel_id);
+
+  players.forEach(async (player) => {
+    // TODO: o jogo está fixo como free-fire, tem de identificar o jogo quando a parte de multijogos estiver pronta
+    await updatePontuation(
+      player.user_id,
+      GAME_LIST.FREE_FIRE,
+      1,
+      winner === player.team ? "win" : "lose"
+    );
+  });
 }

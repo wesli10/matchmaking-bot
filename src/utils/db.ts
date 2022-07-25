@@ -1,5 +1,6 @@
 import { table } from "console";
 import { ExtendedClient } from "../structures/Client";
+import { GAME_LIST } from "./gameList";
 
 const client = new ExtendedClient();
 
@@ -497,6 +498,113 @@ export async function createActionAndMessage(
     message_id,
     data: dataInput,
   });
+
+  return data;
+}
+
+export async function isBanned(user_id) {
+  const { data } = await db
+    .from("users_banned")
+    .select("id, user_id, end_date, reason")
+    .eq("user_id", user_id)
+    .gte("end_date", new Date().toISOString())
+    .limit(1)
+    .single();
+
+  return data;
+}
+
+export async function banUser(user_id, end_date, reason, mod_id) {
+  const { data } = await db.from("users_banned").insert({
+    user_id,
+    end_date,
+    reason,
+    mod_id,
+  });
+
+  return data;
+}
+
+export async function updatePontuation(
+  user_id,
+  game_id: GAME_LIST,
+  pontuation,
+  type: "win" | "lose"
+) {
+  const { data } = await db
+    .from("users_mmr")
+    .select("id, actual_pontuation")
+    .eq("user_id", user_id)
+    .eq("game_id", game_id)
+    .limit(1)
+    .single();
+
+  if (data) {
+    let actual_pontuation =
+      type === "win"
+        ? Number(data.actual_pontuation) + Number(pontuation)
+        : Number(data.actual_pontuation) - Number(pontuation);
+
+    actual_pontuation = actual_pontuation < 0 ? 0 : actual_pontuation;
+
+    await db
+      .from("users_mmr")
+      .update({
+        actual_pontuation,
+        updated_at: new Date(),
+      })
+      .match({ id: data.id, user_id, game_id });
+  } else {
+    let actual_pontuation = type === "win" ? pontuation : 0;
+
+    await db.from("users_mmr").insert({
+      user_id,
+      game_id,
+      actual_pontuation,
+    });
+  }
+}
+
+export async function getPontuation(game_id: GAME_LIST) {
+  const { data } = await db
+    .from("users_mmr")
+    .select("user_id, actual_pontuation")
+    .eq("game_id", game_id)
+    .limit(10)
+    .order("actual_pontuation", { ascending: false });
+
+  return data;
+}
+
+export async function hasCalledMod(category_id) {
+  const datePlus2Minutes = new Date(new Date().getTime() + 2 * 60 * 1000);
+
+  const { data } = await db
+    .from("button_mod_called")
+    .select("id, category_id, called_date")
+    .eq("category_id", category_id)
+    .lte("called_date", datePlus2Minutes.toISOString())
+    .limit(1)
+    .single();
+
+  return data;
+}
+
+export async function insertCallMod(category_id) {
+  const { data } = await db.from("button_mod_called").insert({
+    category_id,
+  });
+
+  return data;
+}
+
+export async function deleteCallsMod() {
+  const dateMinus2Minutes = new Date(new Date().getTime() - 2 * 60 * 1000);
+
+  const { data } = await db
+    .from("button_mod_called")
+    .delete()
+    .lte("called_date", dateMinus2Minutes.toISOString());
 
   return data;
 }
