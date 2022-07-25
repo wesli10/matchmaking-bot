@@ -571,7 +571,6 @@ async function endReactionConfirmMatch(sendMessage, winnerTeam) {
   await updateFinishTime(channel.parentId);
   const players = await fetchUsersFromCategory("users_4v4", channel.parentId);
   updateMmrMatch(channel.parentId, winnerTeam);
-  const players = await fetchUsersFromCategory(channel.parentId);
 
   players.forEach(async (player) => {
     if (player.team === winnerTeam) {
@@ -882,9 +881,10 @@ async function embedTime2_valorant(
       console.log("error when deleting message for team2=", error);
     }
   }
-  
+}
+
 async function updateMmrMatch(channel_id, winner) {
-  const players = await fetchUsersFromCategory(channel_id);
+  const players = await fetchUsersFromCategory("users_mmr", channel_id);
 
   players.forEach(async (player) => {
     // TODO: o jogo está fixo como free-fire, tem de identificar o jogo quando a parte de multijogos estiver pronta
