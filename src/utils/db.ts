@@ -427,6 +427,46 @@ export async function getPontuation(game_id: GAME_LIST) {
   return data;
 }
 
+export async function getPontuationRange(
+  table: string,
+  range: { start: Date; end: Date }
+) {
+  const { data } = await db
+    .from(table)
+    .select("user_id, result")
+    .neq("result", null)
+    .neq("result", "Cancelado")
+    .gte("created_at", range.start.toISOString())
+    .lte("created_at", range.end.toISOString());
+
+  const mapaResultados = new Map();
+
+  for (let item of data) {
+    const ponto = item.result === "Venceu" ? 1 : -1;
+
+    if (mapaResultados.has(item.user_id)) {
+      mapaResultados.set(
+        item.user_id,
+        mapaResultados.get(item.user_id) + ponto
+      );
+    } else {
+      mapaResultados.set(item.user_id, ponto);
+    }
+  }
+
+  const rankingArray = [];
+
+  for (const [key, value] of mapaResultados.entries()) {
+    rankingArray.push({ user_id: key, actual_pontuation: value });
+  }
+
+  const rankingSorted = rankingArray.sort((a, b) => {
+    return b.actual_pontuation - a.actual_pontuation;
+  });
+
+  return rankingSorted.slice(0, 10);
+}
+
 export async function hasCalledMod(category_id) {
   const datePlus2Minutes = new Date(new Date().getTime() + 2 * 60 * 1000);
 
