@@ -78,20 +78,20 @@ const row = new MessageActionRow().addComponents(
         value: "Top-laner",
       },
       {
-        label: "MID",
-        value: "Mid-laner",
+        label: "JUNGLE",
+        value: "Jungler",
       },
       {
-        label: "SUPPORT",
-        value: "Support",
+        label: "MID",
+        value: "Mid-laner",
       },
       {
         label: "AD CARRY",
         value: "AD Carry",
       },
       {
-        label: "JUNGLE",
-        value: "Jungler",
+        label: "SUPPORT",
+        value: "Support",
       },
     ])
 );

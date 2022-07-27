@@ -61,11 +61,11 @@ async function getSecondaryRole(role, guildId, playersId, roleList) {
 const roles = ["Mid-laner", "Support", "AD Carry", "Jungler", "Top-laner"];
 
 export async function generateTeam5v5_lol(guildId: string) {
-  let mid = shuffleArray(await fetchSpecificRole("Mid-laner", guildId));
-  let sup = shuffleArray(await fetchSpecificRole("Support", guildId));
-  let adc = shuffleArray(await fetchSpecificRole("AD Carry", guildId));
-  let jg = shuffleArray(await fetchSpecificRole("Jungler", guildId));
   let top = shuffleArray(await fetchSpecificRole("Top-laner", guildId));
+  let jg = shuffleArray(await fetchSpecificRole("Jungler", guildId));
+  let mid = shuffleArray(await fetchSpecificRole("Mid-laner", guildId));
+  let adc = shuffleArray(await fetchSpecificRole("AD Carry", guildId));
+  let sup = shuffleArray(await fetchSpecificRole("Support", guildId));
 
   if (mid.length < 2) {
     const playersId = [...mid, ...sup, ...adc, ...jg, ...top].map(
@@ -99,19 +99,19 @@ export async function generateTeam5v5_lol(guildId: string) {
   }
 
   const time1 = [
-    mid.shift(),
-    sup.shift(),
-    adc.shift(),
-    jg.shift(),
     top.shift(),
+    jg.shift(),
+    mid.shift(),
+    adc.shift(),
+    sup.shift(),
   ];
 
   const time2 = [
-    mid.shift(),
-    sup.shift(),
-    adc.shift(),
-    jg.shift(),
     top.shift(),
+    jg.shift(),
+    mid.shift(),
+    adc.shift(),
+    sup.shift(),
   ];
 
   const playersId = [...time1, ...time2].map((player) => player?.user_id);
