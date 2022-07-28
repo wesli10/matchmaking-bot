@@ -1,3 +1,4 @@
+import { table } from "console";
 import { ExtendedClient } from "../structures/Client";
 import { GAME_LIST } from "./gameList";
 
@@ -23,6 +24,25 @@ export async function fetchUsersInQueue4v4() {
 
 export async function fetchUser(user_id) {
   const { data } = await db.from("users").select("*").eq("user_id", user_id);
+  return data;
+}
+
+export async function checkUserRolelol(user_id) {
+  const { data } = await db
+    .from("players_lol")
+    .select("user_id")
+    .eq("user_id", user_id);
+
+  return data;
+}
+
+export async function registerUserOnPlayerslol(user_id, main_role, name) {
+  const { data } = await db.from("players_lol").insert({
+    user_id: user_id,
+    main_role: main_role,
+    name: name,
+  });
+
   return data;
 }
 
@@ -77,9 +97,84 @@ export async function createUser4v4(user_id, name, guild_id) {
   return data;
 }
 
-export async function updateModerator(user_id, moderator_id) {
+export async function createUser5v5(user_id, name, guild_id) {
+  const { data } = await db.from("users_5v5").insert({
+    user_id: user_id,
+    name: name,
+    guild_id,
+    in_match: false,
+  });
+  return data;
+}
+
+export async function fetchTeam_lol(qtd, guildId) {
   const { data } = await db
-    .from("users_4v4")
+    .from("queue_lol")
+    .select("*")
+    .eq("in_match", false)
+    .eq("guild_id", guildId)
+    .order("created_at", { ascending: true })
+    .limit(qtd);
+
+  return data;
+}
+
+export async function fetchSpecificRole(role, guild_id, playersId) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("user_id, role")
+    .eq("guild_id", guild_id)
+    .eq("in_match", false)
+    .eq("role", role)
+    .not("user_id", "in", `(${playersId})`)
+    .order("created_at", { ascending: true })
+    .limit(2);
+
+  return data;
+}
+
+export async function fetchSpecificRoleSec(role, guild_id, playerId) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("*")
+    .eq("guild_id", guild_id)
+    .eq("in_match", false)
+    .eq("role_sec", role)
+    .not("user_id", "in", `(${playerId})`)
+    .order("created_at", { ascending: true })
+    .limit(2);
+
+  return data;
+}
+
+export async function createUser5v5_lol(user_id, name, role, role2, guild_id) {
+  const { data } = await db.from("queue_lol").insert({
+    user_id: user_id,
+    name: name,
+    role: role,
+    role_sec: role2,
+    guild_id,
+    in_match: false,
+  });
+  return data;
+}
+
+export async function autoFillRole(guild_id, playerId) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("*")
+    .eq("guild_id", guild_id)
+    .eq("in_match", false)
+    .not("user_id", "in", `(${playerId})`)
+    .order("created_at", { ascending: true })
+    .limit(10);
+
+  return data;
+}
+
+export async function updateModerator(table, user_id, moderator_id) {
+  const { data } = await db
+    .from(table)
     .update({
       moderator_id: moderator_id,
     })
@@ -89,18 +184,36 @@ export async function updateModerator(user_id, moderator_id) {
   return data;
 }
 
-export async function removeUsersFromCategory(category_id) {
+export async function updateUserCaptain(
+  user_id: string,
+  status: string
+): Promise<Array<string>> {
   const { data } = await db
-    .from("users_4v4")
-    .delete()
-    .eq("category_id", category_id);
+    .from("users_5v5")
+    .update({ status: status })
+    .match({ user_id: user_id });
 
   return data;
 }
 
-export async function fetchUsersFromCategory(category_id) {
+export async function verifyCaptainStatus(user_id) {
   const { data } = await db
-    .from("users_4v4")
+    .from("users_5v5")
+    .select("status")
+    .eq("status", "captain")
+    .match({ user_id: user_id });
+  return data;
+}
+
+export async function removeUsersFromCategory(table, category_id) {
+  const { data } = await db.from(table).delete().eq("category_id", category_id);
+
+  return data;
+}
+
+export async function fetchUsersFromCategory(table, category_id) {
+  const { data } = await db
+    .from(table)
     .select("*")
     .eq("category_id", category_id);
 
@@ -160,12 +273,49 @@ export async function create4v4Lobby(user_id, category_id, moderator_id, team) {
   return data;
 }
 
+export async function createLobbyLeagueOfLegends(
+  user_id: string,
+  category_id: string,
+  team: string
+): Promise<Array<string>> {
+  const { data } = await db.from("lobbys_lol").insert({
+    user_id: user_id,
+    category_id: category_id,
+    team: team,
+  });
+
+  return data;
+}
+
+export async function createLobbyValorant(
+  user_id: string,
+  category_id: string,
+  team: string
+): Promise<Array<string>> {
+  const { data } = await db.from("lobbys_valorant").insert({
+    user_id: user_id,
+    category_id: category_id,
+    team: team,
+  });
+
+  return data;
+}
+
 export async function updateInMatch(table, user_id, state) {
   const { data } = await db
     .from(table)
     .update({
       in_match: state,
     })
+    .match({ user_id: user_id });
+
+  return data;
+}
+
+export async function updateLolRole(user_id: string, role: string) {
+  const { data } = await db
+    .from("queue_lol")
+    .update({ role: role })
     .match({ user_id: user_id });
 
   return data;
@@ -192,9 +342,9 @@ export async function updateFinishTime(category_id) {
   return data;
 }
 
-export async function updateResultUser(user_id, category_id, result) {
+export async function updateResultUser(table, user_id, category_id, result) {
   const { data } = await db
-    .from("lobbys")
+    .from(table)
     .update({
       result: result,
     })
@@ -202,9 +352,9 @@ export async function updateResultUser(user_id, category_id, result) {
   return data;
 }
 
-export async function updateUserTeam(user_id, team) {
+export async function updateUserTeam(table, user_id, team) {
   const { data } = await db
-    .from("users_4v4")
+    .from(table)
     .update({
       team: team,
     })
@@ -224,9 +374,9 @@ export async function updateUserRole(user_id, role_id) {
   return data;
 }
 
-export async function updateCategory(user_id, category_id) {
+export async function updateCategory(table, user_id, category_id) {
   const { data } = await db
-    .from("users_4v4")
+    .from(table)
     .update({
       category_id: category_id,
     })

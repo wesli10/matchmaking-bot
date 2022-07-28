@@ -16,6 +16,7 @@
     "importHelpers": true,
     "isolatedModules": true
   },
-  "include": ["src", "environment.d.ts"],
+  "ts-node": {"files": true},
+  "include": ["src", "environment.d.ts", "src",  "index", "index.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

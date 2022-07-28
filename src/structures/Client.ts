@@ -96,7 +96,7 @@ export class ExtendedClient extends Client {
   //   };
   //   const supabase = createClient(
   //     process.env.SUPABASE_URL,
-  //     process.env.db_dev_url,
+  //     process.env.SUPABASE_KEY,
   //     options
   //   );
   //   return supabase;

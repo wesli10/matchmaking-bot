@@ -31,6 +31,13 @@ export const embedTime2 = new MessageEmbed()
     `O time 2 foi declarado como vencedor!\n <@&${role_aux_event}>, reaja com ✅ abaixo para confirmar o resultado e finalizar o Lobby \n ou com 🛑 para resetar a votação.`
   );
 
+export const confirm_message = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setTitle("Confirme a participação")
+  .setDescription(
+    `30 Segundos para confirmar a participação! \n\n Clique em 👍 para confirmar.`
+  );
+
 export const FinishLobby = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("A partida foi finalizada!")

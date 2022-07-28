@@ -6,6 +6,7 @@ import {
   OverwriteResolvable,
   CacheType,
   MessageInteraction,
+  ReactionManager,
 } from "discord.js";
 import { embedPermission } from "../../utils/embeds";
 import {
@@ -29,13 +30,14 @@ import {
   deleteCallsMod,
 } from "../../utils/db";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
-import { generateTeam } from "../../utils/4v4/generateTeam";
+import { generateTeam4v4 } from "../../utils/4v4/generateTeam4v4";
 import { removeusersFromChannel } from "../../utils/4v4/manageUsers";
 import {
   buttonCallMod,
   buttonConfirmFinishMatch,
   buttonFinishMatch,
   buttonFinishMatchDisabled,
+  confirm_message,
   embedTime1,
   embedTime2,
   FinishedMatch,
@@ -76,7 +78,7 @@ export default new Command({
       return;
     }
 
-    const players = await generateTeam(interaction.guildId);
+    const players = await generateTeam4v4(interaction.guildId);
 
     if (
       players.length < DISCORD_CONFIG.numbers.MIN_NUM_PLAYERS_TO_START_LOBBY
@@ -144,26 +146,6 @@ export default new Command({
       }
     );
 
-    for (const player of players) {
-      const member = await interaction.guild.members.fetch(player.user_id);
-      const playerTeam = player.team === 1 ? "Time 1" : "Time 2";
-      await Promise.all([
-        updateInMatch("users_4v4", player.user_id, true),
-        create4v4Lobby(
-          player.user_id,
-          category.id,
-          interaction.user.id,
-          playerTeam
-        ),
-        updateUserTeam(player.user_id, player.team === 1 ? "Time 1" : "Time 2"),
-        updateCategory(player.user_id, category.id),
-        updateModerator(player.user_id, interaction.user.id),
-        member.voice
-          .setChannel(gameChannel.id)
-          .catch((error) => console.log(error)),
-      ]);
-    }
-
     await textChatAnnouncements.send({
       content: `Time 1: <@${players
         .filter((player) => player.team === 1)
@@ -177,10 +159,70 @@ export default new Command({
         .join(">, <@")}>`,
     });
 
-    await textChatAnnouncements.send({
-      embeds: [StartLobby],
-      components: [buttonCallMod, buttonFinishMatch],
+    const message_confirm = await textChatAnnouncements.send({
+      embeds: [confirm_message],
     });
+
+    message_confirm.react("👍");
+
+    const confirm_collector = message_confirm.createReactionCollector({
+      time: 10000,
+    });
+
+    confirm_collector.on("collect", async (reaction, user) => {
+      if (reaction.emoji.name === "👍" && !user.bot) {
+        if (
+          reaction.count ===
+          Number(DISCORD_CONFIG.numbers.MIN_REACTION_TO_CONFIRM_MATCH)
+        ) {
+          for (const player of players) {
+            const member = await interaction.guild.members.fetch(
+              player.user_id
+            );
+            const playerTeam = player.team === 1 ? "Time 1" : "Time 2";
+            await Promise.all([
+              updateInMatch("users_4v4", player.user_id, true),
+              create4v4Lobby(
+                player.user_id,
+                category.id,
+                interaction.user.id,
+                playerTeam
+              ),
+              updateUserTeam(
+                "users_4v4",
+                player.user_id,
+                player.team === 1 ? "Time 1" : "Time 2"
+              ),
+              updateCategory("users_4v4", player.user_id, category.id),
+              updateModerator("users_4v4", player.user_id, interaction.user.id),
+              member.voice
+                .setChannel(gameChannel.id)
+                .catch((error) => console.log(error)),
+            ]);
+          }
+          await message_confirm.delete();
+          await textChatAnnouncements.send({
+            embeds: [StartLobby],
+            components: [buttonCallMod, buttonFinishMatch],
+          });
+        }
+      }
+    });
+
+    confirm_collector.on("end", async (collected, reason) => {
+      if (reason === "time") {
+        const channel = await interaction.channel.fetch();
+        if (channel.type !== "GUILD_TEXT") {
+          return;
+        }
+        await textChatAnnouncements.send({
+          embeds: [PartidaCancelada],
+        });
+
+        setTimeout(() => deleteCategory(message_confirm), 3000);
+      }
+    });
+
     const collectorButton = interaction.channel.createMessageComponentCollector(
       {
         componentType: "BUTTON",

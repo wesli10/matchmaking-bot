@@ -2,7 +2,6 @@ import { TextChannel } from "discord.js";
 import { Command } from "../../structures/Command";
 import { MessageEmbed } from "discord.js";
 import { clearQueue } from "../../utils/db";
-import { clear } from "../../utils/utils";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 
 export default new Command({
@@ -28,7 +27,6 @@ export default new Command({
       interaction.memberPermissions.has("ADMINISTRATOR") ||
       interaction.user.id === DISCORD_CONFIG.mockAdminId
     ) {
-      clear(interaction);
       interaction
         .followUp({
           content: "⠀",
