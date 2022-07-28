@@ -1,5 +1,5 @@
 import { CommandInteractionOptionResolver, Message } from "discord.js";
-import { client } from "..";
+import { client, emitSentry } from "..";
 import {
   handleButtonInteractionPlayerMenu_lol,
   handleButtonInteractionQueue_lol,
@@ -70,6 +70,11 @@ export default new Event("interactionCreate", async (interaction) => {
       await handleButtonInteractionPlayerMenu_lol(interaction);
     } else {
       console.warn("unknown button interaction", interaction.customId);
+      emitSentry(
+        "interactionCreateEvent",
+        `buttonInteraction`,
+        `unknown button interaction ${interaction.customId}`
+      );
     }
   } else if (interaction.isSelectMenu()) {
     if (interaction.customId === "roles_lol") {

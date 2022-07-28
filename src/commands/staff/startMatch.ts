@@ -11,6 +11,7 @@ import {
 import { MessageEmbed } from "discord.js";
 import { embedEnoughPlayers, embedPermission } from "../../utils/embeds";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
+import { emitSentry } from "../..";
 
 export default new Command({
   name: "start",
@@ -105,6 +106,11 @@ export default new Command({
                 await updateUserChannel(user.user_id, lobbyChannel.id);
                 await updateUserRole(user.user_id, lobby[0].role_id);
               } catch (error) {
+                emitSentry(
+                  "createUserQueue",
+                  "Tried to create user on queue",
+                  error
+                );
                 console.log(error);
               }
             }

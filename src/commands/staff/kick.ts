@@ -3,6 +3,7 @@ import { fetchUser, removeUser } from "../../utils/db";
 import { MessageEmbed, TextChannel } from "discord.js";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { embedPermission } from "../../utils/embeds";
+import { emitSentry } from "../..";
 
 const { roles } = DISCORD_CONFIG;
 
@@ -67,6 +68,7 @@ export default new Command({
       });
     } catch (error) {
       console.log(error);
+      emitSentry("/ffkick", "Tried to kick a user from queue", error);
       await removeUser("users_4v4", user.id);
     }
   },
