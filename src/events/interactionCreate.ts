@@ -12,8 +12,12 @@ import { handleButtonInteractionPlayerMenu } from "../commands/staff/startLobby"
 import { handleButtonInteractionQueue_valorant } from "../commands/staff/valorant_queue";
 import { Event } from "../structures/Event";
 import { ExtendedInteraction } from "../typings/Command";
+import { verifyRole } from "../utils/verified";
 
 export default new Event("interactionCreate", async (interaction) => {
+  // Verify the user has the correct role
+  if (verifyRole(interaction)) return;
+
   // Chat input Commands
   if (interaction.isCommand()) {
     await interaction.deferReply({
