@@ -4,6 +4,10 @@ import { ExtendedClient } from "./structures/Client";
 import express from "express";
 import { removeUser } from "./utils/db";
 import { globalReactions } from "./utils/reactions";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
+Tracing.addExtensionMethods();
+
 const server = express();
 
 global.raceStartLobby = false;
@@ -35,6 +39,7 @@ server.get("/metrics", async (_req, res) => {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
   } catch (ex) {
+    emitSentry("/metrics", "Error on trying to fetch metrics", ex);
     res.status(500).end(ex);
   }
 });
@@ -44,3 +49,13 @@ console.log(
   `Server listening to ${port}, metrics exposed on /metrics endpoint`
 );
 server.listen(port);
+
+// Sentry Logging Initialization
+Sentry.init({
+  dsn: process.env.SENTRY_URL_DSN,
+  tracesSampleRate: 1.0,
+});
+
+export const emitSentry = (name, description, exception) => {
+  Sentry.captureException(exception, { tags: { name, description } });
+};

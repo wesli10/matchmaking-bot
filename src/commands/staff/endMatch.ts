@@ -3,6 +3,7 @@ import { MessageEmbed } from "discord.js";
 import { fetchUserInMatch, removeUser, fetchChannels } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
+import { emitSentry } from "../..";
 
 export default new Command({
   name: "end",
@@ -72,6 +73,7 @@ export default new Command({
                 await removeUser("users", user.user_id);
             } catch (error) {
               console.log(error);
+              emitSentry("/end", "Tried to remove user from match", error);
             }
           }
           await interaction

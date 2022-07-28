@@ -17,6 +17,7 @@ import {
 import { embedPermission } from "../../utils/embeds";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { format, parseISO } from "date-fns";
+import { emitSentry } from "../..";
 
 const { channels } = DISCORD_CONFIG;
 
@@ -120,6 +121,11 @@ export async function handleButtonInteraction_4v4(btnInt: ButtonInteraction) {
     }
   } catch (error) {
     log("Error!", error);
+    emitSentry(
+      "buttonInteraction_4v4",
+      "Tried to interact with 4v4 button",
+      error
+    );
 
     await btnInt.editReply({
       content: "⚠️ Encontramos um error, tente novamente.",
