@@ -119,13 +119,14 @@ export async function fetchTeam_lol(qtd, guildId) {
   return data;
 }
 
-export async function fetchSpecificRole(role, guild_id) {
+export async function fetchSpecificRole(role, guild_id, playersId) {
   const { data } = await db
     .from("queue_lol")
     .select("user_id, role")
     .eq("guild_id", guild_id)
     .eq("in_match", false)
     .eq("role", role)
+    .not("user_id", "in", `(${playersId})`)
     .order("created_at", { ascending: true })
     .limit(2);
 

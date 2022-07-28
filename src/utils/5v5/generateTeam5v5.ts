@@ -58,14 +58,14 @@ async function getSecondaryRole(role, guildId, playersId, roleList) {
 
   return roleList;
 }
-const roles = ["Mid-laner", "Support", "AD Carry", "Jungler", "Top-laner"];
+const roles = ["Top-laner", "Jungler", "Mid-laner", "AD Carry", "Support"];
 
 export async function generateTeam5v5_lol(guildId: string) {
-  let top = shuffleArray(await fetchSpecificRole("Top-laner", guildId));
-  let jg = shuffleArray(await fetchSpecificRole("Jungler", guildId));
-  let mid = shuffleArray(await fetchSpecificRole("Mid-laner", guildId));
-  let adc = shuffleArray(await fetchSpecificRole("AD Carry", guildId));
-  let sup = shuffleArray(await fetchSpecificRole("Support", guildId));
+  let top = shuffleArray(await fetchSpecificRole("Top-laner", guildId, []));
+  let jg = shuffleArray(await fetchSpecificRole("Jungler", guildId, []));
+  let mid = shuffleArray(await fetchSpecificRole("Mid-laner", guildId, []));
+  let adc = shuffleArray(await fetchSpecificRole("AD Carry", guildId, []));
+  let sup = shuffleArray(await fetchSpecificRole("Support", guildId, []));
 
   if (mid.length < 2) {
     const playersId = [...mid, ...sup, ...adc, ...jg, ...top].map(
@@ -120,31 +120,32 @@ export async function generateTeam5v5_lol(guildId: string) {
     if (player !== undefined) {
       continue;
     }
-    const found = shuffleArray(await autoFillRole(guildId, playersId));
+    const idx = time1.indexOf(player);
+    const found = shuffleArray(
+      await fetchSpecificRole(roles[idx], guildId, playersId)
+    );
     if (found.length === 0) {
       return;
     }
-    const playerFound = found.shift();
-    playersId.push(playerFound.user_id);
-    const idx = playersId.indexOf(player);
-    playerFound.role = roles[idx];
-    time1[idx] = playerFound;
+    const playerfound = found.shift();
+    playersId.push(playerfound.user_id);
+    time1[idx] = playerfound;
   }
 
   for await (const player of time2) {
     if (player !== undefined) {
       continue;
     }
-    const found = shuffleArray(await autoFillRole(guildId, playersId));
+    const idx = time2.indexOf(player);
+    const found = shuffleArray(
+      await fetchSpecificRole(roles[idx], guildId, playersId)
+    );
     if (found.length === 0) {
       return;
     }
-    const playerFound = found.shift();
-    playersId.push(playerFound?.user_id);
-
-    const idx = playersId.indexOf(player);
-    playerFound.role = roles[idx];
-    time2[idx] = playerFound;
+    const playerfound = found.shift();
+    playersId.push(playerfound.user_id);
+    time2[idx] = playerfound;
   }
 
   return {
