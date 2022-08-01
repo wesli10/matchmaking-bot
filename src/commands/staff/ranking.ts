@@ -74,7 +74,7 @@ export default new Command({
   },
 });
 
-const choosePontuation = async (game: GAME_LIST, option: string) => {
+export const choosePontuation = async (game: GAME_LIST, option: string) => {
   let pontuation = [];
 
   switch (option) {
