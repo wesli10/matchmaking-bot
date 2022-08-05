@@ -91,7 +91,6 @@ export async function leagueOfLegendsManageUsersFunc(
   const players = await fetchUsersFromCategory("queue_lol", channel.parentId);
   for (const player of players) {
     const member = await interaction.guild.members.fetch(player.user_id);
-    const captain = await leagueoflegendsCaptainChoose(players);
     await Promise.all([
       await createLobbyLeagueOfLegends(
         player.user_id,
@@ -114,14 +113,15 @@ export async function leagueOfLegendsManageUsersFunc(
 export async function valorantCaptainChoose(players: Array<any>) {
   const playersList = players.map((player) => player);
   const player = playersList[Math.floor(Math.random() * playersList.length)];
-  await updateUserCaptain(player.user_id, "captain");
+  await updateUserCaptain("users_5v5", player.user_id, "captain");
 
-  return player.user_id;
+  return player;
 }
 
 export async function leagueoflegendsCaptainChoose(players: Array<any>) {
   const playersList = players.map((player) => player);
   const player = playersList[Math.floor(Math.random() * playersList.length)];
+  await updateUserCaptain("queue_lol", player.user_id, "captain");
 
   return player.user_id;
 }
@@ -201,7 +201,7 @@ export async function valorantFinishMatchFunc(sendMessage, winnerTeam?) {
       await Promise.all([
         await updateCategory("users_5v5", player.user_id, ""),
         await updateUserTeam("users_5v5", player.user_id, ""),
-        await updateUserCaptain(player.user_id, ""),
+        await updateUserCaptain("users_5v5", player.user_id, ""),
         await updateInMatch("users_5v5", player.user_id, false),
         await updateModerator("users_5v5", player.user_id, ""),
         await removeusersFromChannel(

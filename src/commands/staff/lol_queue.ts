@@ -20,11 +20,15 @@ import {
   updateUserTeam,
   createActionAndMessage,
   updateCategory,
+  fetchCapitainlol,
 } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { generateTeam5v5_lol } from "../../utils/5v5/generateTeam5v5";
-import { createChannels } from "../../utils/5v5/manageUsers";
+import {
+  createChannels,
+  leagueoflegendsCaptainChoose,
+} from "../../utils/5v5/manageUsers";
 import {
   confirm_message,
   StartLobby,
@@ -36,6 +40,7 @@ import {
   FinishLobby,
   PreFinishLobby,
 } from "../../utils/5v5/messageInteractionsTemplates";
+import { client } from "../..";
 
 const { channels, roles } = DISCORD_CONFIG;
 
@@ -254,7 +259,10 @@ export default new Command({
       return;
     }
 
-    await searchMatch(interaction, interaction.guildId, channelAnnouncement);
+    setInterval(
+      () => searchMatch(interaction, interaction.guildId, channelAnnouncement),
+      8000
+    );
   },
 });
 
@@ -263,66 +271,63 @@ async function searchMatch(
   guild_id: string,
   channel: TextChannel
 ) {
+  console.log("Procurando...");
   const players = await generateTeam5v5_lol(guild_id);
 
-  if (players === undefined) {
-    console.log("Procurando...");
-    setTimeout(() => searchMatch(interaction, guild_id, channel), 8000);
-  }
+  if (players === undefined) return;
+  const captain = await leagueoflegendsCaptainChoose(players.time1);
 
-  if (players !== undefined) {
-    const channels = await createChannels(
-      interaction,
-      players.time1,
-      players.time2
-    );
+  const channels = await createChannels(
+    interaction,
+    players.time1,
+    players.time2
+  );
 
-    const annoucements: TextChannel = channels?.textChatAnnouncements;
-    const category: CategoryChannel = channels?.category;
+  const annoucements: TextChannel = channels?.textChatAnnouncements;
+  const category: CategoryChannel = channels?.category;
 
-    try {
-      for (const player of players.time1) {
-        Promise.all([
-          updateUserTeam("queue_lol", player.user_id, "Time 1"),
-          updateInMatch("queue_lol", player.user_id, true),
-          updateCategory("queue_lol", player.user_id, category.id),
-        ]);
-      }
-      for (const player of players.time2) {
-        Promise.all([
-          updateUserTeam("queue_lol", player.user_id, "Time 2"),
-          updateInMatch("queue_lol", player.user_id, true),
-          updateCategory("queue_lol", player.user_id, category.id),
-        ]);
-      }
-
-      const StartLobby = new MessageEmbed()
-        .setColor("#fd4a5f")
-        .setTitle("Lobby Iniciado")
-        .setDescription(
-          `Time 1: \n ${players.time1
-            .map((player) => `<@${player.user_id}> : ${player.role}`)
-            .join("\n")} \n\n Time 2: \n ${players.time2
-            .map((player) => `<@${player.user_id}> : ${player.role}`)
-            .join("\n")}`
-        );
-      await annoucements.send({
-        embeds: [StartLobby],
-      });
-
-      const message_confirm = await annoucements.send({
-        embeds: [confirm_message],
-      });
-
-      message_confirm.react("👍");
-
-      await createActionAndMessage(message_confirm.id, "lol_confirm_presence");
-    } catch (error) {
-      console.log(error);
+  try {
+    for (const player of players.time1) {
+      Promise.all([
+        updateUserTeam("queue_lol", player.user_id, "Time 1"),
+        updateInMatch("queue_lol", player.user_id, true),
+        updateCategory("queue_lol", player.user_id, category.id),
+      ]);
     }
-    setTimeout(() => searchMatch(interaction, guild_id, channel), 8000);
-    return players;
+    for (const player of players.time2) {
+      Promise.all([
+        updateUserTeam("queue_lol", player.user_id, "Time 2"),
+        updateInMatch("queue_lol", player.user_id, true),
+        updateCategory("queue_lol", player.user_id, category.id),
+      ]);
+    }
+
+    const StartLobby = new MessageEmbed()
+      .setColor("#fd4a5f")
+      .setTitle("Lobby Iniciado")
+      .setDescription(
+        `O jogador <@${captain}> foi escolhido como capitão para criar o lobby in game! \n\n Time 1: \n ${players.time1
+          .map((player) => `<@${player.user_id}> : ${player.role}`)
+          .join("\n")} \n\n Time 2: \n ${players.time2
+          .map((player) => `<@${player.user_id}> : ${player.role}`)
+          .join("\n")}`
+      );
+    await annoucements.send({
+      embeds: [StartLobby],
+    });
+
+    const message_confirm = await annoucements.send({
+      embeds: [confirm_message],
+    });
+
+    message_confirm.react("👍");
+
+    await createActionAndMessage(message_confirm.id, "lol_confirm_presence");
+  } catch (error) {
+    console.log(error);
   }
+  setTimeout(() => searchMatch(interaction, guild_id, channel), 8000);
+  return players;
 }
 
 export async function handleButtonInteractionPlayerMenu_lol(
@@ -384,15 +389,34 @@ export async function handleButtonInteractionPlayerMenu_lol(
         if (channel.type !== "GUILD_TEXT") {
           return;
         }
-
+        const captain = await fetchCapitainlol(
+          channel.parentId,
+          btnInt.guildId
+        );
+        const user = await client.users.cache.get(captain.user_id);
         await channel.messages.delete(btnInt.message.id);
 
+        await channel.permissionOverwrites.edit(user, {
+          SEND_MESSAGES: true,
+        });
+
         await btnInt.deleteReply(); // delete thinking message
+
+        const CaptainMessage = new MessageEmbed()
+          .setColor("#fd4a5f")
+          .setTitle("Feedback da Partida.")
+          .setDescription(
+            `<@${captain.user_id}> Envie print do resultado da partida neste canal.`
+          );
 
         // display menu
 
         const sendMessage = await btnInt.channel.send({
           embeds: [FinishLobby],
+        });
+
+        await channel.send({
+          embeds: [CaptainMessage],
         });
 
         await createActionAndMessage(sendMessage.id, btnInt.customId);
