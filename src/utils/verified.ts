@@ -5,6 +5,11 @@ import { client } from "..";
 
 export const verifyRole = (interaction) => {
   const guild = client.guilds.cache.get(process.env.DISCORD_VERIFIED_GUILD);
+
+  if (!guild) {
+    return;
+  }
+
   const member = guild.members.cache.get(interaction.user.id);
   const hasRole = member.roles.cache.has(process.env.DISCORD_VERIFIED_ROLE_ID);
 

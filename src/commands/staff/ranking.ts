@@ -1,7 +1,8 @@
-import { MessageEmbed } from "discord.js";
+import { MessageAttachment, MessageEmbed } from "discord.js";
 import { Command } from "../../structures/Command";
 import { getPontuation, getPontuationRange } from "../../utils/db";
 import { GAME_LIST } from "../../utils/gameList";
+import generateRankingImage from "../../utils/rankingImage";
 
 const choices = [
   { name: "Free Fire", value: "FREE_FIRE" },
@@ -48,29 +49,57 @@ export default new Command({
 
     const pontuation = await choosePontuation(GAME_LIST[game], option);
 
-    const strRanking =
-      pontuation.length > 0
-        ? pontuation
-            .map((user, index) => {
-              return `${index + 1}. <@${user.user_id}> ~ **${
-                user.actual_pontuation
-              } pontos**`;
-            })
-            .join("\n")
-        : "Nenhuma pontuação para este jogo encontrado.";
+    if (pontuation.length > 0) {
+      const imgRanking = await generateRankingImage(
+        pontuation,
+        GAME_LIST[game],
+        "Ranking " + findOptionByValue(option).name
+      );
 
-    interaction.editReply({
-      embeds: [
-        new MessageEmbed()
-          .setColor("#00bbff")
-          .setTitle(
-            `Top 10 do Ranking ${findChoiceByValue(game).name} ${
-              findOptionByValue(option).name
-            }:`
-          )
-          .setDescription(strRanking),
-      ],
-    });
+      interaction.editReply({
+        files: [new MessageAttachment(imgRanking, `ranking.png`)],
+        embeds: [
+          new MessageEmbed()
+            .setTitle(
+              `Top 10 do Ranking ${findChoiceByValue(game).name} ${
+                findOptionByValue(option).name
+              }:`
+            )
+            .setDescription(
+              `Esses são os 10 primeiros colocados no Ranking ${
+                findChoiceByValue(game).name
+              } ${findOptionByValue(option).name}: ` +
+                pontuation
+                  .map((user) => {
+                    return `<@${user.user_id}>`;
+                  })
+                  .join(", ")
+            ),
+        ],
+      });
+    } else {
+      interaction.editReply({
+        embeds: [
+          new MessageEmbed()
+            .setTitle("Ranking")
+            .setDescription("Nenhuma pontuação para este jogo encontrado.")
+            .setColor("#00bbff"),
+        ],
+      });
+    }
+
+    // interaction.editReply({
+    //   embeds: [
+    //     new MessageEmbed()
+    //       .setColor("#00bbff")
+    //       .setTitle(
+    //         `Top 10 do Ranking ${findChoiceByValue(game).name} ${
+    //           findOptionByValue(option).name
+    //         }:`
+    //       )
+    //       .setDescription(strRanking),
+    //   ],
+    // });
   },
 });
 

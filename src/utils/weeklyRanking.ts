@@ -1,8 +1,18 @@
-import { MessageEmbed } from "discord.js";
+import { MessageAttachment, MessageEmbed } from "discord.js";
 import dotenv from "dotenv";
 import { choosePontuation } from "../commands/staff/ranking";
 import { GAME_LIST } from "./gameList";
+import generateRankingImage from "./rankingImage";
 dotenv.config();
+
+const choices = [
+  { name: "Free Fire", value: "FREE_FIRE" },
+  { name: "Valorant", value: "VALORANT" },
+  { name: "League of Legends", value: "LEAGUE_OF_LEGENDS" },
+];
+
+const findChoiceByValue = (value: string) =>
+  choices.find((choice) => choice.value === value);
 
 const weeklyRanking = async (client) => {
   const textChannelId = process.env.DISCORD_CHANNEL_RANKING_ROOM;
@@ -12,47 +22,52 @@ const weeklyRanking = async (client) => {
     .setColor("#0097e6")
     .setTitle("Esse é o nosso Ranking Semanal!")
     .setDescription(
-      "Aqui estão os 3 melhores jogadores da semana, com a quantidade de pontos que eles obtiveram, separado por cada jogo. @everyone"
+      "Aqui estão os 10 melhores jogadores da semana, com a quantidade de pontos que eles obtiveram, separado por cada jogo. @everyone"
     );
 
-  const lolMessage = new MessageEmbed()
-    .setColor("#445fa5")
-    .setTitle("LOL")
-    .setDescription(`${await pontuacaoGame(GAME_LIST.LEAGUE_OF_LEGENDS)}`);
-
-  const freefireMessage = new MessageEmbed()
-    .setColor("#f27d0c")
-    .setTitle("FREE FIRE")
-    .setDescription(`${await pontuacaoGame(GAME_LIST.FREE_FIRE)}`);
-
-  const valorantMessage = new MessageEmbed()
-    .setColor("#fa4454")
-    .setTitle("VALORANT")
-    .setDescription(`${await pontuacaoGame(GAME_LIST.VALORANT)}`);
-
   textChannel.send({
-    embeds: [titleMessage, valorantMessage, lolMessage, freefireMessage],
+    embeds: [titleMessage],
     components: [],
     ephemeral: true,
+  });
+
+  await sendSemanal(GAME_LIST.VALORANT, textChannel);
+  await sendSemanal(GAME_LIST.FREE_FIRE, textChannel);
+  await sendSemanal(GAME_LIST.LEAGUE_OF_LEGENDS, textChannel);
+};
+
+const sendSemanal = async (game: GAME_LIST, textChannel) => {
+  const pontuation = await pontuacaoGame(game);
+
+  // if (pontuation.length > 0) {
+  //   return;
+  // }
+
+  const imgRanking = await generateRankingImage(
+    pontuation,
+    GAME_LIST[game],
+    "Ranking Semanal"
+  );
+
+  textChannel.send({
+    files: [new MessageAttachment(imgRanking, `ranking.png`)],
+    embeds: [
+      new MessageEmbed().setTitle(`Top 10 do Ranking:`).setDescription(
+        `Esses são os 10 primeiros colocados no Ranking Semanal ${
+          findChoiceByValue(game).name
+        }: ` +
+          pontuation
+            .map((user) => {
+              return `<@${user.user_id}>`;
+            })
+            .join(", ")
+      ),
+    ],
   });
 };
 
 const pontuacaoGame = async (game: GAME_LIST) => {
-  const pontuation = await choosePontuation(game, "S");
-
-  const strRanking =
-    pontuation.length > 0
-      ? pontuation
-          .slice(0, 3)
-          .map((user, index) => {
-            return `${index + 1}. <@${user.user_id}> ~ **${
-              user.actual_pontuation
-            } pontos**`;
-          })
-          .join("\n")
-      : "Nenhuma pontuação para este jogo encontrado.";
-
-  return strRanking;
+  return await choosePontuation(game, "S");
 };
 
 export default weeklyRanking;
