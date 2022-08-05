@@ -6,6 +6,9 @@ import { removeUser } from "./utils/db";
 import { globalReactions } from "./utils/reactions";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
+import cron from "node-cron";
+import weeklyRanking from "./utils/weeklyRanking";
+
 Tracing.addExtensionMethods();
 
 const server = express();
@@ -59,3 +62,8 @@ Sentry.init({
 export const emitSentry = (name, description, exception) => {
   Sentry.captureException(exception, { tags: { name, description } });
 };
+
+// enable cron for send weekly ranking to discord
+// read more -> https://crontab.cronhub.io or https://crontab.guru
+// to test use */5 * * * * * (every 5 seconds)
+cron.schedule("0 19 * * 3", () => weeklyRanking(client));

@@ -3,6 +3,8 @@ FROM node:16 as builder
 WORKDIR /usr/src/app
 
 COPY . .
+COPY ./assets/fonts/TT-Commons/* /usr/share/fonts/truetype/
+COPY ./assets/fonts/TT-Travels-Next/* /usr/share/fonts/truetype/
 
 RUN yarn
 
