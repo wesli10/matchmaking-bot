@@ -432,7 +432,6 @@ async function confirmFinishMatch_lol(reaction, user, sendMessage) {
 
     if (member.permissions.has("MODERATE_MEMBERS")) {
       await leagueOfLegendsFinishLobbyFunc(sendMessage, "Partida Cancelada");
-      setTimeout(() => deleteCategory(sendMessage), 4000);
     }
   }
 }

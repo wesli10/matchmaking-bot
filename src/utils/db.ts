@@ -133,6 +133,29 @@ export async function fetchSpecificRole(role, guild_id, playersId) {
   return data;
 }
 
+export async function fetchCapitainlol(category_id: String, guild_id: String) {
+  const { data } = await db
+    .from("queue_lol")
+    .select("user_id")
+    .eq("guild_id", guild_id)
+    .eq("status", "captain")
+    .eq("category_id", category_id)
+    .single();
+
+  return data;
+}
+
+export async function fetchCapitainValorant(category_id, guild_id) {
+  const { data } = await db
+    .from("users_5v5")
+    .select("user_id")
+    .eq("guild_id", guild_id)
+    .eq("status", "captain")
+    .eq("category_id", category_id);
+
+  return data;
+}
+
 export async function fetchSpecificRoleSec(role, guild_id, playerId) {
   const { data } = await db
     .from("queue_lol")
@@ -185,11 +208,12 @@ export async function updateModerator(table, user_id, moderator_id) {
 }
 
 export async function updateUserCaptain(
+  table: string,
   user_id: string,
   status: string
 ): Promise<Array<string>> {
   const { data } = await db
-    .from("users_5v5")
+    .from(table)
     .update({ status: status })
     .match({ user_id: user_id });
 
