@@ -215,6 +215,8 @@ export async function handleButtonInteractionQueue_lol(
   }
 }
 
+var queue: any = "";
+
 export default new Command({
   name: "lol_queue",
   description: "Entra na fila para jogar Valorant",
@@ -259,12 +261,16 @@ export default new Command({
       return;
     }
 
-    setInterval(
+    queue = setInterval(
       () => searchMatch(interaction, interaction.guildId, channelAnnouncement),
       8000
     );
   },
 });
+
+export async function takeOffQueue() {
+  return clearInterval(queue);
+}
 
 async function searchMatch(
   interaction,
