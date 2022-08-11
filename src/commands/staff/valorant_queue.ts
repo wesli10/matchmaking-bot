@@ -116,7 +116,7 @@ export async function handleButtonInteractionQueue_valorant(
 
 export default new Command({
   name: "valorant_queue",
-  description: "Entra na fila para jogar Valorant",
+  description: "Abre a fila de Valorant",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
     if (

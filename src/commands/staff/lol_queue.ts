@@ -219,7 +219,7 @@ var queue: any = "";
 
 export default new Command({
   name: "lol_queue",
-  description: "Entra na fila para jogar Valorant",
+  description: "Abre a fila de League of Legends",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
     if (

@@ -3,7 +3,7 @@ import { takeOffQueue } from "./lol_queue";
 
 export default new Command({
   name: "stop_queue_lol",
-  description: "Encerra a fila de espera do lol",
+  description: "Encerra a fila de League Of Legends",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
     await takeOffQueue();
