@@ -8,7 +8,7 @@ export const db = client.connectToDataBase();
 
 export async function fetchUsersInQueue() {
   const { data } = await await db
-    .from("users")
+    .from("queue_lol")
     .select("*")
     .eq("in_match", false);
   return data;
@@ -72,7 +72,7 @@ export async function resetQueue(table, guild_id) {
 }
 
 export async function getAllMembersOnEvent() {
-  const { data } = await db.from("users_4v4").select("user_id, in_match");
+  const { data } = await db.from("queue_lol").select("user_id, in_match");
 
   return data;
 }

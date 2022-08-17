@@ -3,24 +3,38 @@ import dotenv from "dotenv";
 dotenv.config();
 import { client } from "..";
 
-export const verifyRole = (interaction) => {
-  const guild = client.guilds.cache.get(process.env.DISCORD_VERIFIED_GUILD);
+export const verifyRole = async (interaction) => {
+  const verifiedGuild = process.env.DISCORD_VERIFIED_GUILD;
+  const verifielRole = process.env.DISCORD_VERIFIED_ROLE_ID;
+  const playerRoleId = process.env.DISCORD_PLAYER_ROLE_ID;
+
+  const guild = client.guilds.cache.get(verifiedGuild);
 
   if (!guild) {
+    console.log("No guild found");
     return;
   }
 
   const member = guild.members.cache.get(interaction.user.id);
-  const hasRole = member.roles.cache.has(process.env.DISCORD_VERIFIED_ROLE_ID);
+  const hasRole = member.roles?.cache.has(verifielRole);
 
-  if (hasRole) return false;
+  if (hasRole) {
+    try {
+      const guildInHouse = client.guilds.cache.get(interaction.guildId);
+      const memberInHouse = guildInHouse.members.cache.get(interaction.user.id);
+
+      await memberInHouse.roles.add(playerRoleId);
+    } catch (error) {
+      console.log(error);
+    }
+    return;
+  }
 
   interaction.reply({
     embeds: [messageVerified],
     components: [],
     ephemeral: true,
   });
-
   return true;
 };
 

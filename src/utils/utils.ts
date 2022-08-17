@@ -1,5 +1,14 @@
 import { confirm_message } from "./4v4/messageInteractionsTemplates";
-import { createActionAndMessage } from "./db";
+import {
+  dodgeQueueUsersManage,
+  leagueOfLegendsFinishLobbyFunc,
+} from "./5v5/manageUsers";
+import {
+  createActionAndMessage,
+  updateCategory,
+  updateInMatch,
+  updateUserTeam,
+} from "./db";
 
 export async function confirm_participateFunc(textChatAnnouncements) {
   const channel = textChatAnnouncements;
