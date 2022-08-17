@@ -166,12 +166,11 @@ export async function globalReactions(reaction, user) {
   }
 }
 
+var matchConfirmed = "";
 async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
   const { MIN_REACTION_TO_CONFIRM_MATCH_LOL } = DISCORD_CONFIG.numbers;
+  matchConfirmed = "";
 
-  const collector_confirm_presence = sendMessage.createReactionCollector({
-    time: 10000,
-  });
   const category: CategoryChannel = sendMessage.channel.parent;
   const channelTeam1 = category.children.find(
     (channel) => channel.name === "Time 1"
@@ -181,12 +180,23 @@ async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
   );
   const players = await fetchUsersFromCategory("queue_lol", category.id);
 
+  const timer = setTimeout(async () => {
+    if (matchConfirmed === "") {
+      cancelLobby(players, sendMessage, timer);
+    } else {
+      return;
+    }
+  }, 30000);
+
   const channel = await client.channels.cache.get(sendMessage.channelId);
   if (channel.type !== "GUILD_TEXT") {
     return;
   }
+
   if (reaction.emoji.name === "👍" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_CONFIRM_MATCH_LOL)) {
+      console.log("Partida confirmada");
+      matchConfirmed = "true";
       await sendMessage.delete();
 
       await leagueOfLegendsManageUsersFunc(
@@ -196,27 +206,6 @@ async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
       );
     }
   }
-
-  collector_confirm_presence.on("end", async (reason) => {
-    const players = await fetchUsersFromCategory("queue_lol", category.id);
-    if (reason === "time") {
-      try {
-        for (const player of players) {
-          Promise.all([
-            updateCategory("queue_lol", player.user_id, ""),
-            updateUserTeam("queue_lol", player.user_id, ""),
-            updateInMatch("queue_lol", player.user_id, false),
-          ]);
-        }
-        await dodgeQueueUsersManage(
-          sendMessage,
-          players.map((player) => player.user_id)
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  });
 }
 
 async function valorantConfirmPresence(reaction, user, sendMessage) {
@@ -918,4 +907,29 @@ async function updateMmrMatch(channel_id, winner) {
       winner === player.team ? "win" : "lose"
     );
   });
+}
+
+export async function cancelLobby(players, sendMessage, timer) {
+  console.log("ENTROU NO CANCEL LOBBY");
+
+  try {
+    for (const player of players) {
+      Promise.all([
+        updateCategory("queue_lol", player.user_id, ""),
+        updateUserTeam("queue_lol", player.user_id, ""),
+        updateInMatch("queue_lol", player.user_id, false),
+      ]);
+    }
+    await dodgeQueueUsersManage(
+      sendMessage,
+      players.map((player) => player.user_id)
+    );
+
+    clearTimeout(timer);
+    matchConfirmed = "false";
+
+    await leagueOfLegendsFinishLobbyFunc(sendMessage, "Partida Cancelada");
+  } catch (error) {
+    console.log(error);
+  }
 }

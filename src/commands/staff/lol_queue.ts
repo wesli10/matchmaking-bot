@@ -263,7 +263,7 @@ export default new Command({
 
     queue = setInterval(
       () => searchMatch(interaction, interaction.guildId, channelAnnouncement),
-      8000
+      10000
     );
   },
 });
@@ -308,6 +308,17 @@ async function searchMatch(
       ]);
     }
 
+    await annoucements.send({
+      content: `Time 1: <@${players.time1
+        .map((player) => player.user_id)
+        .join(">, <@")}>`,
+    });
+    await annoucements.send({
+      content: `Time 2: <@${players.time2
+        .map((player) => player.user_id)
+        .join(">, <@")}>`,
+    });
+
     const StartLobby = new MessageEmbed()
       .setColor("#fd4a5f")
       .setTitle("Lobby Iniciado")
@@ -332,7 +343,7 @@ async function searchMatch(
   } catch (error) {
     console.log(error);
   }
-  setTimeout(() => searchMatch(interaction, guild_id, channel), 8000);
+  setTimeout(() => searchMatch(interaction, guild_id, channel), 10000);
   return players;
 }
 

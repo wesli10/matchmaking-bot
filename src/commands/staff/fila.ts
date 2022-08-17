@@ -1,3 +1,4 @@
+import { MessageEmbed } from "discord.js";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { fetchUsersInQueue } from "../../utils/db";
@@ -20,10 +21,16 @@ export default new Command({
       admin.includes(role3) ||
       admin.includes(roleTeste)
     ) {
+      const LOG_FILA = new MessageEmbed().setColor("#fd4a5f").setDescription(`
+      Total de participantes do Evento: ${queue.length} \n\n 
+      Top-laners: ${queue.filter((p) => p.role === "Top-laner").length} \n
+      Junglers: ${queue.filter((p) => p.role === "Jungler").length} \n 
+      Mid-laners: ${queue.filter((p) => p.role === "Mid-laner").length} \n
+      Adc's: ${queue.filter((p) => p.role === "AD Carry").length} \n
+      Suportes: ${queue.filter((p) => p.role === "Support").length} \n`);
+
       await interaction.followUp({
-        content: `A fila está com ${queue.length} jogadores!`,
-        components: [],
-        embeds: [],
+        embeds: [LOG_FILA],
       });
     }
   },

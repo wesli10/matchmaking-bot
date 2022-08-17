@@ -16,7 +16,7 @@ import { verifyRole } from "../utils/verified";
 
 export default new Event("interactionCreate", async (interaction) => {
   // Verify the user has the correct role
-  if (verifyRole(interaction)) return;
+  if (await verifyRole(interaction)) return;
 
   // Chat input Commands
   if (interaction.isCommand()) {
