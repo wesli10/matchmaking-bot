@@ -5,7 +5,7 @@ import { client } from "..";
 
 export const verifyRole = async (interaction) => {
   const verifiedGuild = process.env.DISCORD_VERIFIED_GUILD;
-  const verifielRole = process.env.DISCORD_VERIFIED_ROLE_ID;
+  const verifiedRole = process.env.DISCORD_VERIFIED_ROLE_ID;
   const playerRoleId = process.env.DISCORD_PLAYER_ROLE_ID;
 
   const guild = client.guilds.cache.get(verifiedGuild);
@@ -16,7 +16,7 @@ export const verifyRole = async (interaction) => {
   }
 
   const member = guild.members.cache.get(interaction.user.id);
-  const hasRole = member.roles?.cache.has(verifielRole);
+  const hasRole = member.roles?.cache.has(verifiedRole);
 
   if (hasRole) {
     try {
