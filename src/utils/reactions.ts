@@ -166,7 +166,7 @@ export async function globalReactions(reaction, user) {
   }
 }
 
-var matchConfirmed = "";
+let matchConfirmed = "";
 async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
   const { MIN_REACTION_TO_CONFIRM_MATCH_LOL } = DISCORD_CONFIG.numbers;
   matchConfirmed = "";

@@ -215,7 +215,7 @@ export async function handleButtonInteractionQueue_lol(
   }
 }
 
-var queue: any = "";
+let queue: any = "";
 
 export default new Command({
   name: "lol_queue",
