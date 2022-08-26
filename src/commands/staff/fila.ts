@@ -2,6 +2,7 @@ import { MessageEmbed } from "discord.js";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { fetchUsersInQueue } from "../../utils/db";
+import { embedPermission } from "../../utils/embeds";
 
 export default new Command({
   name: "fila",
@@ -31,6 +32,10 @@ export default new Command({
 
       await interaction.followUp({
         embeds: [LOG_FILA],
+      });
+    } else {
+      await interaction.followUp({
+        embeds: [embedPermission],
       });
     }
   },

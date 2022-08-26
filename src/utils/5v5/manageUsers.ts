@@ -97,10 +97,11 @@ export async function leagueOfLegendsManageUsersFunc(
         channel.parentId,
         player.team
       ),
-      updateInMatch("queue_lol", player.user_id, true),
       member.voice
         .setChannel(player.team === "Time 1" ? channelTeam1 : channelTeam2)
-        .catch((error) => console.log(error)),
+        .catch((error) =>
+          console.log("Usuario não está conectado no canal de voz")
+        ),
     ]);
   }
 

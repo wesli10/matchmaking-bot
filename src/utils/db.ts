@@ -66,7 +66,11 @@ export async function fetchUsersQtd(table, qtd, guildId?: string) {
 }
 
 export async function resetQueue(table, guild_id) {
-  const { data } = await db.from(table).delete().match({ guild_id: guild_id });
+  const { data } = await db
+    .from(table)
+    .delete()
+    .eq("in_match", "false")
+    .match({ guild_id: guild_id });
 
   return data;
 }
