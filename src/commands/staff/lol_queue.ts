@@ -2,6 +2,7 @@ import { Command } from "../../structures/Command";
 import {
   ButtonInteraction,
   CategoryChannel,
+  Message,
   MessageActionRow,
   MessageButton,
   MessageEmbed,
@@ -216,7 +217,7 @@ export async function handleButtonInteractionQueue_lol(
 }
 
 let queue: any = "";
-
+let message: any = "";
 export default new Command({
   name: "lol_queue",
   description: "Abre a fila de League of Legends",
@@ -249,7 +250,7 @@ export default new Command({
       console.log(`Ended collecting ${collected.size} items`);
     });
 
-    const message = await channel.send({
+    message = await channel.send({
       embeds: [StartQueue],
       components: [BUTTONS],
     });
@@ -269,6 +270,8 @@ export default new Command({
 });
 
 export async function takeOffQueue() {
+  await message?.delete();
+
   return clearInterval(queue);
 }
 
@@ -430,6 +433,10 @@ export async function handleButtonInteractionPlayerMenu_lol(
 
         const sendMessage = await btnInt.channel.send({
           embeds: [FinishLobby],
+        });
+
+        await channel.send({
+          content: `<@${captain.user_id}>`,
         });
 
         await channel.send({

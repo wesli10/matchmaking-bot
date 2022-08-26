@@ -179,16 +179,16 @@ async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
     (channel) => channel.name === "Time 2"
   );
   const players = await fetchUsersFromCategory("queue_lol", category.id);
+  const channel = await client.channels.cache.get(sendMessage.channelId);
 
   const timer = setTimeout(async () => {
     if (matchConfirmed === "") {
-      cancelLobby(players, sendMessage, timer);
+      cancelLobby(players, sendMessage, timer, channel);
     } else {
       return;
     }
   }, 30000);
 
-  const channel = await client.channels.cache.get(sendMessage.channelId);
   if (channel.type !== "GUILD_TEXT") {
     return;
   }
@@ -383,7 +383,6 @@ async function confirmFinishMatch_lol(reaction, user, sendMessage) {
 
   if (reaction.emoji.name === "1️⃣" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
-      console.log("APERTOU 1");
       const messageTime1 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime1],
@@ -400,7 +399,6 @@ async function confirmFinishMatch_lol(reaction, user, sendMessage) {
     }
   } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
-      console.log("APERTOU 2");
       const messageTime2 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime2],
@@ -431,9 +429,7 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
   const { MIN_REACTION_TO_END_MATCH_VALORANT } = DISCORD_CONFIG.numbers;
 
   if (reaction.emoji.name === "1️⃣" && !user.bot) {
-    console.log("APERTEI O 1");
     if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
-      console.log("BATEU O MINIMO");
       const messageTime1 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime1],
@@ -449,9 +445,7 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
       messageTime1.react("🛑");
     }
   } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-    console.log("APERTEI O 2");
     if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
-      console.log("BATEU O MINIMO");
       const messageTime2 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime2],
@@ -468,7 +462,6 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
     }
   } else if (reaction.emoji.name === "❌" && !user.bot) {
     const member = await sendMessage.guild.members.fetch(user.id);
-    console.log("cancel button is pressed!");
 
     if (member.permissions.has("MODERATE_MEMBERS")) {
       await valorantFinishMatchFunc(sendMessage, "Partida Cancelada");
@@ -909,8 +902,12 @@ async function updateMmrMatch(channel_id, winner) {
   });
 }
 
-export async function cancelLobby(players, sendMessage, timer) {
-  console.log("ENTROU NO CANCEL LOBBY");
+export async function cancelLobby(players, sendMessage, timer, channel) {
+  console.log("Lobby Cancelado");
+
+  await channel.send({
+    embeds: [PartidaCancelada],
+  });
 
   try {
     for (const player of players) {

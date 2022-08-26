@@ -31,7 +31,7 @@ export default new Command({
 
       return;
     }
-    resetQueue("users_4v4", interaction.guildId);
+    resetQueue("queue_lol", interaction.guildId);
     interaction.deleteReply();
   },
 });
