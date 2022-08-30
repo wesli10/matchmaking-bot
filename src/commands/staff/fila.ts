@@ -1,9 +1,10 @@
-import { MessageEmbed } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { fetchUsersInQueue } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 
+let embedBefore;
 export default new Command({
   name: "fila",
   description: "Mostra a quantidade de players na fila",
@@ -22,6 +23,7 @@ export default new Command({
       admin.includes(role3) ||
       admin.includes(roleTeste)
     ) {
+      await embedBefore?.delete().catch(console.error);
       const LOG_FILA = new MessageEmbed().setColor("#fd4a5f").setDescription(`
       Total de participantes do Evento: ${queue.length} \n\n 
       Top-laners: ${queue.filter((p) => p.role === "Top-laner").length} \n
@@ -30,7 +32,7 @@ export default new Command({
       Adc's: ${queue.filter((p) => p.role === "AD Carry").length} \n
       Suportes: ${queue.filter((p) => p.role === "Support").length} \n`);
 
-      await interaction.followUp({
+      embedBefore = await interaction.followUp({
         embeds: [LOG_FILA],
       });
     } else {

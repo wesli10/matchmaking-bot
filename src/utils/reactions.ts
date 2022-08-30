@@ -905,11 +905,10 @@ async function updateMmrMatch(channel_id, winner) {
 export async function cancelLobby(players, sendMessage, timer, channel) {
   console.log("Lobby Cancelado");
 
-  await channel.send({
-    embeds: [PartidaCancelada],
-  });
-
   try {
+    await channel.send({
+      embeds: [PartidaCancelada],
+    });
     for (const player of players) {
       Promise.all([
         updateCategory("queue_lol", player.user_id, ""),
