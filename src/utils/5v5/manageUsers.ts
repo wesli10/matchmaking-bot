@@ -333,8 +333,7 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
     ...playersTeam1.map((player) => {
       return {
         id: player?.user_id,
-        allow: ["VIEW_CHANNEL"],
-        deny: ["SPEAK"],
+        allow: ["VIEW_CHANNEL", "SPEAK"],
       };
     }),
   ];
@@ -345,8 +344,7 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
     ...playersTeam2.map((player) => {
       return {
         id: player?.user_id,
-        allow: ["VIEW_CHANNEL"],
-        deny: ["SPEAK"],
+        allow: ["VIEW_CHANNEL", "SPEAK"],
       };
     }),
   ];
