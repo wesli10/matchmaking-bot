@@ -5,11 +5,13 @@ import {
   handleButtonInteractionQueue_lol,
   handleSelectMenuInteraction,
 } from "../commands/staff/lol_queue";
-import { handleButtonInteractionPlayerMenu_valorant } from "../commands/staff/match";
 import { handleButtonInteraction } from "../commands/staff/queue";
 import { handleButtonInteraction_4v4 } from "../commands/staff/queue_lobby";
 import { handleButtonInteractionPlayerMenu } from "../commands/staff/startLobby";
-import { handleButtonInteractionQueue_valorant } from "../commands/staff/valorant_queue";
+import {
+  handleButtonInteractionPlayerMenu_valorant,
+  handleButtonInteractionQueue_valorant,
+} from "../commands/staff/valorant_queue";
 import { Event } from "../structures/Event";
 import { ExtendedInteraction } from "../typings/Command";
 import { verifyRole } from "../utils/verified";

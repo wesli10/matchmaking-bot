@@ -6,11 +6,8 @@ const client = new ExtendedClient();
 
 export const db = client.connectToDataBase();
 
-export async function fetchUsersInQueue() {
-  const { data } = await await db
-    .from("queue_lol")
-    .select("*")
-    .eq("in_match", false);
+export async function fetchUsersInQueue(table) {
+  const { data } = await await db.from(table).select("*").eq("in_match", false);
   return data;
 }
 
@@ -60,7 +57,6 @@ export async function fetchUsersQtd(table, qtd, guildId?: string) {
     .select("*")
     .eq("in_match", false)
     .eq("guild_id", guildId)
-    .order("created_at", { ascending: true })
     .limit(qtd);
   return data;
 }
@@ -155,7 +151,8 @@ export async function fetchCapitainValorant(category_id, guild_id) {
     .select("user_id")
     .eq("guild_id", guild_id)
     .eq("status", "captain")
-    .eq("category_id", category_id);
+    .eq("category_id", category_id)
+    .single();
 
   return data;
 }

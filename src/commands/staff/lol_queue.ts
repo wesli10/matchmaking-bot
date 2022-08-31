@@ -263,24 +263,25 @@ export default new Command({
     }
 
     queue = setInterval(
-      () => searchMatch(interaction, interaction.guildId, channelAnnouncement),
-      10000
+      () =>
+        searchMatch_lol(interaction, interaction.guildId, channelAnnouncement),
+      15000
     );
   },
 });
 
-export async function takeOffQueue() {
+export async function takeOffQueue_lol() {
   await message?.delete();
 
   return clearInterval(queue);
 }
 
-async function searchMatch(
+async function searchMatch_lol(
   interaction,
   guild_id: string,
   channel: TextChannel
 ) {
-  console.log("Procurando...");
+  console.log("Procurando partida league of legends...");
   const players = await generateTeam5v5_lol(guild_id);
 
   if (players === undefined) return;
@@ -346,7 +347,7 @@ async function searchMatch(
   } catch (error) {
     console.log(error);
   }
-  setTimeout(() => searchMatch(interaction, guild_id, channel), 10000);
+  setTimeout(() => searchMatch_lol(interaction, guild_id, channel), 10000);
   return players;
 }
 
