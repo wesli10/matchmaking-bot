@@ -218,8 +218,8 @@ async function searchMatch_valorant(
 
   const channels = await createChannels(
     interaction,
-    players.filter((p) => p.team === "Time 1"),
-    players.filter((p) => p.team === "Time 2")
+    players.filter((p) => p.team === 1),
+    players.filter((p) => p.team === 2)
   );
 
   const annoucements: TextChannel = channels?.textChatAnnouncements;
@@ -344,7 +344,7 @@ export async function handleButtonInteractionPlayerMenu_valorant(
           channel.parentId,
           btnInt.guildId
         );
-        const user = await client.users.fetch(captain?.user_id);
+        const user = await client?.users.fetch(captain?.user_id);
         await channel.messages.delete(btnInt.message.id);
 
         await channel.permissionOverwrites.edit(user, {
