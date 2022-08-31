@@ -112,11 +112,11 @@ export async function leagueOfLegendsManageUsersFunc(
 }
 
 export async function valorantCaptainChoose(players: Array<any>) {
-  const playersList = players.map((player) => player);
+  const playersList = players?.map((player) => player);
   const player = playersList[Math.floor(Math.random() * playersList.length)];
-  await updateUserCaptain("users_5v5", player.user_id, "captain");
+  await updateUserCaptain("users_5v5", player?.user_id, "captain");
 
-  return player;
+  return player.user_id;
 }
 
 export async function leagueoflegendsCaptainChoose(players: Array<any>) {
@@ -169,7 +169,11 @@ export async function valorantStartLobbyFunc(sendMessage) {
   });
 }
 
-export async function dodgeQueueUsersManage(sendMessage, playersExpected) {
+export async function dodgeQueueUsersManage(
+  table,
+  sendMessage,
+  playersExpected
+) {
   const messageChannel = await client.channels.cache.get(sendMessage.channelId);
   if (messageChannel.type !== "GUILD_TEXT") {
     return;
@@ -184,7 +188,7 @@ export async function dodgeQueueUsersManage(sendMessage, playersExpected) {
     );
 
     for (const player of dodgePlayers) {
-      await removeUser("queue_lol", player);
+      await removeUser(table, player);
     }
   });
 }
@@ -198,20 +202,8 @@ export async function valorantFinishMatchFunc(sendMessage, winnerTeam?) {
     }
     const category = channel.parentId;
     const players = await fetchUsersFromCategory("users_5v5", category);
+
     for (const player of players) {
-      await Promise.all([
-        await updateCategory("users_5v5", player.user_id, ""),
-        await updateUserTeam("users_5v5", player.user_id, ""),
-        await updateUserCaptain("users_5v5", player.user_id, ""),
-        await updateInMatch("users_5v5", player.user_id, false),
-        await updateModerator("users_5v5", player.user_id, ""),
-        await removeusersFromChannel(
-          "users_5v5",
-          category,
-          DISCORD_CONFIG.channels.waiting_room_id,
-          sendMessage
-        ),
-      ]);
       if (player.team === winnerTeam) {
         await updateResultUser(
           "lobbys_valorant",
@@ -244,13 +236,15 @@ export async function valorantFinishMatchFunc(sendMessage, winnerTeam?) {
         sendMessage
       );
     }
+
+    setTimeout(
+      async () => await removeUsersFromCategory("users_5v5", category),
+      5000
+    );
+    setTimeout(async () => await deleteCategory(sendMessage), 5000);
   } catch (error) {
     console.log(error);
   }
-
-  await channel.send({
-    embeds: [PartidaCancelada],
-  });
 }
 
 export async function leagueOfLegendsFinishLobbyFunc(sendMessage, winnerTeam?) {

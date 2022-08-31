@@ -53,7 +53,7 @@ export async function globalReactions(reaction, user) {
     actionAndMessage?.action !== "embed_time1" &&
     actionAndMessage?.action !== "embed_time2" &&
     actionAndMessage?.action !== "maps_selection" &&
-    actionAndMessage?.action !== "confirm_presence" &&
+    actionAndMessage?.action !== "valorant_confirm_presence" &&
     actionAndMessage?.action !== "embed_time1_valorant" &&
     actionAndMessage?.action !== "embed_time2_valorant" &&
     actionAndMessage?.action !== "confirm_finish_match_valorant" &&
@@ -148,7 +148,7 @@ export async function globalReactions(reaction, user) {
         );
       }
 
-      if (actionAndMessage?.action === "confirm_presence") {
+      if (actionAndMessage?.action === "valorant_confirm_presence") {
         await valorantConfirmPresence(reaction, user, sendMessage);
       }
 
@@ -183,7 +183,7 @@ async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
 
   const timer = setTimeout(async () => {
     if (matchConfirmed === "") {
-      cancelLobby(players, sendMessage, timer, channel);
+      cancelLobby_lol(players, sendMessage, timer, channel);
     } else {
       return;
     }
@@ -208,11 +208,9 @@ async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
   }
 }
 
+let matchConfirmed_valorant = "";
 async function valorantConfirmPresence(reaction, user, sendMessage) {
   const { MIN_REACTION_TO_CONFIRM_MATCH_VALORANT } = DISCORD_CONFIG.numbers;
-  const collector_confirm_presence = sendMessage.createReactionCollector({
-    time: 60000,
-  });
 
   const channel = await client.channels.cache.get(sendMessage.channelId);
   if (channel.type !== "GUILD_TEXT") {
@@ -220,8 +218,20 @@ async function valorantConfirmPresence(reaction, user, sendMessage) {
   }
   const category = channel.parentId;
 
+  const players = await fetchUsersFromCategory("users_5v5", category);
+
+  const timer = setTimeout(async () => {
+    if (matchConfirmed_valorant === "") {
+      cancelLobby_valorant(players, sendMessage, timer, channel);
+    } else {
+      return;
+    }
+  }, 30000);
+
   if (reaction.emoji.name === "👍" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_CONFIRM_MATCH_VALORANT)) {
+      console.log("Partida Confirmada");
+      matchConfirmed_valorant = "true";
       await sendMessage.delete();
 
       // MAP SELECTION
@@ -254,19 +264,6 @@ async function valorantConfirmPresence(reaction, user, sendMessage) {
       });
     }
   }
-
-  collector_confirm_presence.on("end", async (reason) => {
-    console.log(reason);
-    if (reason === "time") {
-      const players = await fetchUsersFromCategory("users_5v5", category);
-      await valorantFinishMatchFunc(sendMessage);
-      await dodgeQueueUsersManage(
-        sendMessage,
-        players.map((player) => player.user_id)
-      );
-      setTimeout(() => deleteCategory(sendMessage), 4000);
-    }
-  });
 }
 
 async function valorantMapDraw(reaction, user, sendMessage) {
@@ -465,7 +462,6 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
 
     if (member.permissions.has("MODERATE_MEMBERS")) {
       await valorantFinishMatchFunc(sendMessage, "Partida Cancelada");
-      setTimeout(() => deleteCategory(sendMessage), 4000);
     }
   }
 }
@@ -902,7 +898,7 @@ async function updateMmrMatch(channel_id, winner) {
   });
 }
 
-export async function cancelLobby(players, sendMessage, timer, channel) {
+export async function cancelLobby_lol(players, sendMessage, timer, channel) {
   console.log("Lobby Cancelado");
 
   try {
@@ -917,6 +913,7 @@ export async function cancelLobby(players, sendMessage, timer, channel) {
       ]);
     }
     await dodgeQueueUsersManage(
+      "queue_lol",
       sendMessage,
       players.map((player) => player.user_id)
     );
@@ -925,6 +922,40 @@ export async function cancelLobby(players, sendMessage, timer, channel) {
     matchConfirmed = "false";
 
     await leagueOfLegendsFinishLobbyFunc(sendMessage, "Partida Cancelada");
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function cancelLobby_valorant(
+  players,
+  sendMessage,
+  timer,
+  channel
+) {
+  console.log("Lobby Cancelado");
+
+  try {
+    await channel.send({
+      embeds: [PartidaCancelada],
+    });
+    for (const player of players) {
+      Promise.all([
+        updateCategory("users_5v5", player.user_id, ""),
+        updateUserTeam("users_5v5", player.user_id, ""),
+        updateInMatch("users_5v5", player.user_id, false),
+      ]);
+    }
+    await dodgeQueueUsersManage(
+      "users_5v5",
+      sendMessage,
+      players.map((player) => player.user_id)
+    );
+
+    clearTimeout(timer);
+    matchConfirmed_valorant = "false";
+
+    await valorantFinishMatchFunc(sendMessage, "Partida Cancelada");
   } catch (error) {
     console.log(error);
   }
