@@ -16,6 +16,7 @@ import {
 import {
   createLobbyLeagueOfLegends,
   createLobbyValorant,
+  fetchCapitainValorant,
   fetchUsersFromCategory,
   removeUser,
   removeUsersFromCategory,
@@ -112,9 +113,9 @@ export async function leagueOfLegendsManageUsersFunc(
 }
 
 export async function valorantCaptainChoose(players: Array<any>) {
-  const playersList = players?.map((player) => player);
+  const playersList = players.map((player) => player);
   const player = playersList[Math.floor(Math.random() * playersList.length)];
-  await updateUserCaptain("users_5v5", player?.user_id, "captain");
+  await updateUserCaptain("users_5v5", player.user_id, "captain");
 
   return player.user_id;
 }
@@ -146,13 +147,18 @@ export async function valorantStartLobbyFunc(sendMessage) {
 
   const mapChoosed = sendMessage.embeds[0].description.split("\n")[0];
 
-  const captain = await valorantCaptainChoose(players);
+  const captain = await fetchCapitainValorant(
+    category.id,
+    sendMessage.guild.id
+  );
 
   const choosedMapEmbed = new MessageEmbed()
     .setColor("#fd4a5f")
     .setTitle("Lobby Iniciado")
     .setDescription(
-      ` O jogador <@${captain}> foi escolhido como capitão para criar o lobby in game! \n\n ${mapChoosed} \n\n Time 1: \n ${players
+      ` O jogador <@${
+        captain.user_id
+      }> foi escolhido como capitão para criar o lobby in game! \n\n ${mapChoosed} \n\n Time 1: \n ${players
         .filter((player) => player.team === "Time 1")
         .map((player) => `<@${player.user_id}>`)
         .join("\n")} \n\n Time 2: \n ${players
@@ -328,6 +334,7 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
       return {
         id: player?.user_id,
         allow: ["VIEW_CHANNEL", "SPEAK"],
+        deny: ["USE_VAD"],
       };
     }),
   ];
@@ -339,6 +346,7 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
       return {
         id: player?.user_id,
         allow: ["VIEW_CHANNEL", "SPEAK"],
+        deny: ["USE_VAD"],
       };
     }),
   ];
