@@ -26,7 +26,6 @@ import {
   PartidaCancelada,
 } from "./4v4/messageInteractionsTemplates";
 import { removeusersFromChannel } from "./4v4/manageUsers";
-import { deleteCategory } from "../commands/staff/startLobby";
 import { valorantMapsSelectionFunc } from "./5v5/manageMatch";
 import {
   dodgeQueueUsersManage,
@@ -36,6 +35,7 @@ import {
   valorantStartLobbyFunc,
 } from "./5v5/manageUsers";
 import { GAME_LIST } from "./gameList";
+import { deleteCategory } from "./utils";
 
 const { roles } = DISCORD_CONFIG;
 
@@ -187,7 +187,7 @@ async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
     } else {
       return;
     }
-  }, 30000);
+  }, 45000);
 
   if (channel.type !== "GUILD_TEXT") {
     return;
@@ -226,7 +226,7 @@ async function valorantConfirmPresence(reaction, user, sendMessage) {
     } else {
       return;
     }
-  }, 30000);
+  }, 45000);
 
   if (reaction.emoji.name === "👍" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_CONFIRM_MATCH_VALORANT)) {

@@ -35,7 +35,7 @@ export const confirm_message = new MessageEmbed()
   .setColor("#fd4a5f")
   .setTitle("Confirme a participação")
   .setDescription(
-    `30 Segundos para confirmar a participação! \n\n Clique em 👍 para confirmar.`
+    `45 Segundos para confirmar a participação! \n\n Clique em 👍 para confirmar.`
   );
 
 export const FinishLobby = new MessageEmbed()

@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { embedPermission } from "../../utils/embeds";
@@ -35,7 +35,7 @@ export default new Command({
       !interaction.memberPermissions.has("ADMINISTRATOR") &&
       interaction.user.id !== DISCORD_CONFIG.mockAdminId
     ) {
-      interaction
+      await interaction
         .editReply({
           embeds: [embedPermission],
         })
@@ -59,9 +59,10 @@ export default new Command({
             .setTitle("Fila encerrada")
             .setDescription(`Filas de League of legends encerradas por hoje!`);
 
-          await channel.send({
+          const message = await channel.send({
             embeds: [EMBEDCLOSEQUEUE],
           });
+          setTimeout(async () => await message.delete(), 3000);
         } catch (error) {
           await interaction.deleteReply();
           const channel = interaction.channel;
@@ -73,9 +74,10 @@ export default new Command({
               `Fila de league of legends não está ativa no momento!`
             );
 
-          await channel.send({
+          const message = await channel.send({
             embeds: [EMBEDCLOSEQUEUEERROR],
           });
+          setTimeout(async () => await message.delete(), 3000);
         }
         break;
 
@@ -93,9 +95,10 @@ export default new Command({
             .setTitle("Fila encerrada")
             .setDescription(`Filas de Valorant encerradas por hoje!`);
 
-          await channel.send({
+          const message = await channel.send({
             embeds: [EMBEDCLOSEQUEUE],
           });
+          setTimeout(async () => await message.delete(), 3000);
         } catch (error) {
           await interaction.deleteReply();
           const channel = interaction.channel;
@@ -105,9 +108,10 @@ export default new Command({
             .setTitle("Aviso!")
             .setDescription(`Fila de Valorant não está ativa no momento!`);
 
-          await channel.send({
+          const message: Message = await channel.send({
             embeds: [EMBEDCLOSEQUEUEERROR],
           });
+          setTimeout(async () => await message.delete(), 3000);
         }
     }
   },

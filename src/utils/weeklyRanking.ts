@@ -25,7 +25,7 @@ const weeklyRanking = async (client) => {
       "Aqui estão os 10 melhores jogadores da semana, com a quantidade de pontos que eles obtiveram, separado por cada jogo. @everyone"
     );
 
-  textChannel.send({
+  await textChannel.send({
     embeds: [titleMessage],
     components: [],
     ephemeral: true,

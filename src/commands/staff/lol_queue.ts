@@ -341,7 +341,7 @@ async function searchMatch_lol(
       embeds: [confirm_message],
     });
 
-    message_confirm.react("👍");
+    await message_confirm.react("👍");
 
     await createActionAndMessage(message_confirm.id, "lol_confirm_presence");
   } catch (error) {
@@ -414,7 +414,8 @@ export async function handleButtonInteractionPlayerMenu_lol(
           channel.parentId,
           btnInt.guildId
         );
-        const user = await client.users.fetch(captain?.user_id);
+
+        const user = await client.users.fetch(captain.user_id);
         await channel.messages.delete(btnInt.message.id);
 
         await channel.permissionOverwrites.edit(user, {
