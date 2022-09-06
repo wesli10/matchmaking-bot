@@ -214,7 +214,7 @@ async function searchMatch_valorant(
     return;
   }
 
-  const captain = await valorantCaptainChoose(players);
+  await valorantCaptainChoose(players);
 
   const channels = await createChannels(
     interaction,
@@ -344,7 +344,8 @@ export async function handleButtonInteractionPlayerMenu_valorant(
           channel.parentId,
           btnInt.guildId
         );
-        const user = await client?.users.fetch(captain?.user_id);
+
+        const user = await client.users.fetch(captain.user_id);
         await channel.messages.delete(btnInt.message.id);
 
         await channel.permissionOverwrites.edit(user, {

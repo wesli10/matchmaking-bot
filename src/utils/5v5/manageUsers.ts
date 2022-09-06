@@ -1,4 +1,3 @@
-import { table } from "console";
 import {
   CategoryChannel,
   MessageEmbed,
@@ -6,13 +5,10 @@ import {
   TextChannel,
 } from "discord.js";
 import { client } from "../..";
-import { deleteCategory } from "../../commands/staff/startLobby";
+
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { getPermissions } from "../../configs/permissions.config";
-import {
-  PartidaCancelada,
-  StartLobby,
-} from "../4v4/messageInteractionsTemplates";
+import { StartLobby } from "../4v4/messageInteractionsTemplates";
 import {
   createLobbyLeagueOfLegends,
   createLobbyValorant,
@@ -20,13 +16,10 @@ import {
   fetchUsersFromCategory,
   removeUser,
   removeUsersFromCategory,
-  updateCategory,
-  updateInMatch,
-  updateModerator,
   updateResultUser,
   updateUserCaptain,
-  updateUserTeam,
 } from "../db";
+import { deleteCategory } from "../utils";
 import {
   buttonCallMod_lol,
   buttonCallMod_valorant,
@@ -71,10 +64,11 @@ export async function valorantManageUsersFunc(
     const member = await interaction.guild.members.fetch(player.user_id);
     await Promise.all([
       await createLobbyValorant(player.user_id, channel.parentId, player.team),
-      updateInMatch("users_5v5", player.user_id, true),
       member.voice
         .setChannel(player.team === "Time 1" ? channelTeam1 : channelTeam2)
-        .catch((error) => console.log(error)),
+        .catch((error) =>
+          console.log("Usuario não está conectado no canal de voz")
+        ),
     ]);
   }
 }
@@ -333,8 +327,7 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
     ...playersTeam1.map((player) => {
       return {
         id: player?.user_id,
-        allow: ["VIEW_CHANNEL", "SPEAK"],
-        deny: ["USE_VAD"],
+        allow: ["VIEW_CHANNEL", "SPEAK", "USE_VAD"],
       };
     }),
   ];
@@ -345,8 +338,7 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
     ...playersTeam2.map((player) => {
       return {
         id: player?.user_id,
-        allow: ["VIEW_CHANNEL", "SPEAK"],
-        deny: ["USE_VAD"],
+        allow: ["VIEW_CHANNEL", "SPEAK", "USE_VAD"],
       };
     }),
   ];

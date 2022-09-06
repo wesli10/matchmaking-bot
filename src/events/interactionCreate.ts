@@ -6,8 +6,6 @@ import {
   handleSelectMenuInteraction,
 } from "../commands/staff/lol_queue";
 import { handleButtonInteraction } from "../commands/staff/queue";
-import { handleButtonInteraction_4v4 } from "../commands/staff/queue_lobby";
-import { handleButtonInteractionPlayerMenu } from "../commands/staff/startLobby";
 import {
   handleButtonInteractionPlayerMenu_valorant,
   handleButtonInteractionQueue_valorant,
@@ -41,17 +39,6 @@ export default new Event("interactionCreate", async (interaction) => {
       interaction.customId === "leave_queue"
     ) {
       await handleButtonInteraction(interaction);
-    } else if (
-      interaction.customId === "enter_queue_4v4" ||
-      interaction.customId === "leave_queue_4v4"
-    ) {
-      await handleButtonInteraction_4v4(interaction);
-    } else if (
-      interaction.customId === "call_mod" ||
-      interaction.customId === "finish_match" ||
-      interaction.customId === "confirm_finish_match"
-    ) {
-      await handleButtonInteractionPlayerMenu(interaction);
     } else if (
       interaction.customId === "enter_queue_valorant" ||
       interaction.customId === "leave_queue_valorant"
