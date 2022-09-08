@@ -5,8 +5,8 @@ import { Command } from "../../structures/Command";
 import { banUser, isBanned } from "../../utils/db";
 
 export default new Command({
-  name: "banir",
-  description: "Banir um usuario do servidor por determinadas horas.",
+  name: "castigo",
+  description: "Expulsa um usuario do servidor por determinadas horas.",
   userPermissions: ["ADMINISTRATOR"],
   options: [
     { name: "user", description: "Usuario", type: "USER", required: true },

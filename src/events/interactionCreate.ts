@@ -5,7 +5,6 @@ import {
   handleButtonInteractionQueue_lol,
   handleSelectMenuInteraction,
 } from "../commands/staff/lol_queue";
-import { handleButtonInteraction } from "../commands/staff/queue";
 import {
   handleButtonInteractionPlayerMenu_valorant,
   handleButtonInteractionQueue_valorant,
@@ -35,11 +34,6 @@ export default new Event("interactionCreate", async (interaction) => {
     });
   } else if (interaction.isButton()) {
     if (
-      interaction.customId === "enter_queue" ||
-      interaction.customId === "leave_queue"
-    ) {
-      await handleButtonInteraction(interaction);
-    } else if (
       interaction.customId === "enter_queue_valorant" ||
       interaction.customId === "leave_queue_valorant"
     ) {
