@@ -462,8 +462,8 @@ export async function verifyUserExist(table, user_id) {
   return data;
 }
 
-export async function clearQueue() {
-  const { data } = await db.from("users").delete().eq("in_match", false);
+export async function clearQueue(table) {
+  const { data } = await db.from(table).delete();
 
   return data;
 }

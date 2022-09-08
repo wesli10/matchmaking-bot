@@ -140,7 +140,7 @@ export async function handleButtonInteractionQueue_valorant(
 let queue: any = "";
 let message: any = "";
 export default new Command({
-  name: "valorant_queue",
+  name: "fila_valorant",
   description: "Abre a fila de Valorant",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
@@ -148,7 +148,7 @@ export default new Command({
       !interaction.memberPermissions.has("ADMINISTRATOR") &&
       interaction.user.id !== DISCORD_CONFIG.mockAdminId
     ) {
-      interaction
+      await interaction
         .editReply({
           embeds: [embedPermission],
         })

@@ -219,7 +219,7 @@ export async function handleButtonInteractionQueue_lol(
 let queue: any = "";
 let message: any = "";
 export default new Command({
-  name: "lol_queue",
+  name: "fila_lol",
   description: "Abre a fila de League of Legends",
   userPermissions: ["ADMINISTRATOR"],
   run: async ({ interaction }) => {
