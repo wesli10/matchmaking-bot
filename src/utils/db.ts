@@ -133,7 +133,7 @@ export async function fetchSpecificRole(role, guild_id, playersId) {
   return data;
 }
 
-export async function fetchCapitainlol(category_id: String, guild_id: String) {
+export async function fetchCapitainlol(category_id, guild_id) {
   const { data } = await db
     .from("queue_lol")
     .select("user_id")
@@ -462,8 +462,8 @@ export async function verifyUserExist(table, user_id) {
   return data;
 }
 
-export async function clearQueue(table) {
-  const { data } = await db.from(table).delete();
+export async function clearQueue(table, guild_id) {
+  const { data } = await db.from(table).delete().eq("guild_id", guild_id);
 
   return data;
 }

@@ -53,7 +53,7 @@ export default new Command({
       case "VALORANT":
         // RESET QUEUE VALORANT
 
-        await clearQueue("users_5v5");
+        await clearQueue("users_5v5", interaction.guild.id);
 
         // delete thinking message
         await interaction.deleteReply();
@@ -72,7 +72,7 @@ export default new Command({
         break;
 
       case "LEAGUE_OF_LEGENDS":
-        await clearQueue("queue_lol");
+        await clearQueue("queue_lol", interaction.guild.id);
 
         // delete thinking message
         await interaction.deleteReply();
@@ -80,7 +80,7 @@ export default new Command({
         const embed_reset_lol = new MessageEmbed()
           .setColor("#fd4a5f")
           .setTitle("Fila")
-          .setDescription("\n 🚨 FILA DE VALORANT RESETADA !!! 🚨");
+          .setDescription("\n 🚨 FILA DE LEAGUE OF LEGENDS RESETADA !!! 🚨");
 
         const message_lol = await channel.send({
           embeds: [embed_reset_lol],
