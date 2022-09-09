@@ -31,7 +31,7 @@ export const buttonConfirmFinishMatch_valorant =
 
 export const buttonCallMod_valorant = new MessageActionRow().addComponents(
   new MessageButton()
-    .setCustomId("call_mod")
+    .setCustomId("call_mod_valorant")
     .setEmoji("📞")
     .setLabel("Chamar Mod")
     .setStyle("SUCCESS")

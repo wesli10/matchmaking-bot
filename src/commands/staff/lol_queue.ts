@@ -416,6 +416,7 @@ export async function handleButtonInteractionPlayerMenu_lol(
         );
 
         const user = await client.users.fetch(captain.user_id);
+        if (!user) return;
         await channel.messages.delete(btnInt.message.id);
 
         await channel.permissionOverwrites.edit(user, {
