@@ -1,6 +1,7 @@
 import { Message, MessageEmbed } from "discord.js";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
+import { clearWaitQueue } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
 import { takeOffQueue_lol } from "./lol_queue";
 import { takeOffQueue_valorant } from "./valorant_queue";
@@ -47,9 +48,11 @@ export default new Command({
     switch (game) {
       case "LEAGUE_OF_LEGENDS":
         try {
-          await takeOffQueue_lol();
-
-          await interaction.deleteReply();
+          Promise.all([
+            await takeOffQueue_lol(),
+            await clearWaitQueue("queue_lol", interaction.guild.id),
+            await interaction.deleteReply(),
+          ]);
 
           const channel = interaction.channel;
           if (channel.type !== "GUILD_TEXT") return;
@@ -83,9 +86,11 @@ export default new Command({
 
       case "VALORANT":
         try {
-          await takeOffQueue_valorant();
-
-          await interaction.deleteReply();
+          Promise.all([
+            await takeOffQueue_valorant(),
+            await clearWaitQueue("users_5v5", interaction.guild.id),
+            await interaction.deleteReply(),
+          ]);
 
           const channel = interaction.channel;
           if (channel.type !== "GUILD_TEXT") return;
