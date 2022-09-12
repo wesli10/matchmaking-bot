@@ -468,6 +468,16 @@ export async function clearQueue(table, guild_id) {
   return data;
 }
 
+export async function clearWaitQueue(table, guild_id) {
+  const { data } = await db
+    .from(table)
+    .delete()
+    .eq("guild_id", guild_id)
+    .eq("in_match", "false");
+
+  return data;
+}
+
 export async function removeUser(table, user_id) {
   const { data } = await db.from(table).delete().match({ user_id: user_id });
   return data;
