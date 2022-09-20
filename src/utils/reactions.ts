@@ -272,7 +272,6 @@ async function valorantConfirmPresence(reaction, user, sendMessage) {
 async function valorantMapDraw(reaction, user, sendMessage) {
   const newMap = await valorantMapsSelectionFunc();
   const channel = await client.channels.cache.get(sendMessage.channelId);
-  console.log("Entrei na func de mapa");
 
   if (channel.type !== "GUILD_TEXT") {
     return;
@@ -286,7 +285,7 @@ async function valorantMapDraw(reaction, user, sendMessage) {
 
   if (reaction.emoji.name === "🔄" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_DRAW_MAP_AGAIN)) {
-      console.log("Cheguei na qtd pra mudar o mapa");
+      console.log("[Reactions] Map swap count work");
       const mapMessage = sendMessage;
       const selectedMap = new MessageEmbed()
         .setColor("#fd4a5f")
@@ -915,6 +914,7 @@ export async function cancelLobby_lol(players, sendMessage, timer, channel) {
         updateCategory("queue_lol", player.user_id, ""),
         updateUserTeam("queue_lol", player.user_id, ""),
         updateInMatch("queue_lol", player.user_id, false),
+        updateUserCaptain("queue_lol", player.user_id, ""),
       ]);
     }
     await dodgeQueueUsersManage(
@@ -949,6 +949,7 @@ export async function cancelLobby_valorant(
         updateCategory("users_5v5", player.user_id, ""),
         updateUserTeam("users_5v5", player.user_id, ""),
         updateInMatch("users_5v5", player.user_id, false),
+        updateUserCaptain("users_5v5", player.user_id, ""),
       ]);
     }
     await dodgeQueueUsersManage(

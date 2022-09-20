@@ -46,12 +46,12 @@ import { client } from "../..";
 const { channels, roles } = DISCORD_CONFIG;
 
 const role_aux_event = roles.aux_event;
-const role_event = roles.event;
-const role_moderator = roles.moderator;
-const role_admin = roles.admin;
+const image_url =
+  "https://static.wikia.nocookie.net/leagueoflegends/images/7/7b/League_of_Legends_Cover.jpg/revision/latest/scale-to-width-down/1000";
 
 const StartQueue = new MessageEmbed()
   .setColor("#fd4a5f")
+  .setImage(image_url)
   .setTitle(
     "Sejam bem vindos as salas premiadas de League of Legends da SNACKCLUB!"
   )
