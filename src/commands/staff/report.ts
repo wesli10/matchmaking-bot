@@ -4,11 +4,29 @@ import fs from "fs";
 import { MessageEmbed } from "discord.js";
 import { embedPermission } from "../../utils/embeds";
 
+const choices = [
+  {
+    name: "Valorant",
+    value: "VALORANT",
+  },
+  {
+    name: "League of Legends",
+    value: "LEAGUE_OF_LEGENDS",
+  },
+];
+
 export default new Command({
   name: "relatorio",
   description: "export csv",
   userPermissions: ["ADMINISTRATOR"],
   options: [
+    {
+      name: "game",
+      description: "Game you need data",
+      type: "STRING",
+      required: true,
+      choices,
+    },
     {
       name: "dia",
       description: "Day of the month",
@@ -29,33 +47,48 @@ export default new Command({
     },
   ],
   run: async ({ interaction }) => {
+    const game = interaction.options.getString("game");
     const day = interaction.options.getString("dia");
     const month = interaction.options.getString("mes");
     const year = interaction.options.getString("ano");
-
-    const data = await fetchToCSV(day, month, year);
 
     const embedExport = new MessageEmbed()
       .setColor("#fd4a5f")
       .setTitle("Relatório")
       .setDescription(`Relatório exportado com sucesso!`);
 
-    if (interaction.memberPermissions.has("ADMINISTRATOR")) {
-      interaction.editReply({
-        embeds: [embedExport],
-      });
+    if (game === "LEAGUE_OF_LEGENDS") {
+      const data = await fetchToCSV("lobbys_lol", day, month, year);
 
-      fs.writeFile(`${day}-${month}.csv`, data, (err) => {
-        if (err) throw err;
+      if (interaction.memberPermissions.has("ADMINISTRATOR")) {
+        interaction.editReply({
+          embeds: [embedExport],
+        });
 
-        interaction
-          .editReply({ files: [`${day}-${month}.csv`] })
-          .catch((error) => console.log(error));
-      });
-    } else {
-      interaction.editReply({
-        embeds: [embedPermission],
-      });
+        fs.writeFile(`${day}-${month}.csv`, data, (err) => {
+          if (err) throw err;
+
+          interaction
+            .editReply({ files: [`${day}-${month}.csv`] })
+            .catch((error) => console.log(error));
+        });
+      }
+    } else if (game === "VALORANT") {
+      const data = await fetchToCSV("lobbys_valorant", day, month, year);
+
+      if (interaction.memberPermissions.has("ADMINISTRATOR")) {
+        interaction.editReply({
+          embeds: [embedExport],
+        });
+
+        fs.writeFile(`${day}-${month}.csv`, data, (err) => {
+          if (err) throw err;
+
+          interaction
+            .editReply({ files: [`${day}-${month}.csv`] })
+            .catch((error) => console.log(error));
+        });
+      }
     }
   },
 });

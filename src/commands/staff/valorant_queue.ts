@@ -42,8 +42,12 @@ import { client } from "../..";
 
 const { channels } = DISCORD_CONFIG;
 
+const image_url =
+  "https://static.wikia.nocookie.net/valorant/images/8/80/Valorant_Cover_Art.jpg/revision/latest/scale-to-width-down/1000";
+
 const StartQueue = new MessageEmbed()
   .setColor("#fd4a5f")
+  .setImage(image_url)
   .setTitle("Sejam bem vindos as salas premiadas de Valorant da SNACKCLUB!")
   .setDescription(
     "Para entrar na fila, aperte o botão abaixo e aguarde na chamada de voz"

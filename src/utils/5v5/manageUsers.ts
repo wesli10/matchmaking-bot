@@ -186,7 +186,6 @@ export async function dodgeQueueUsersManage(
     const dodgePlayers = playersExpected.filter(
       (x) => !playersReact.includes(x)
     );
-
     for (const player of dodgePlayers) {
       await removeUser(table, player);
     }

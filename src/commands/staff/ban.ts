@@ -3,6 +3,7 @@ import { emitSentry } from "../..";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { banUser, isBanned } from "../../utils/db";
+import { embedPermission } from "../../utils/embeds";
 
 export default new Command({
   name: "castigo",
@@ -19,26 +20,13 @@ export default new Command({
     { name: "reason", description: "Motivo", type: "STRING", required: true },
   ],
   run: async ({ interaction }) => {
-    const role1 = DISCORD_CONFIG.roles.moderator;
-    const role2 = DISCORD_CONFIG.roles.event;
-    const role3 = DISCORD_CONFIG.roles.aux_event;
-    const roleTeste = DISCORD_CONFIG.roles.admin;
-    const admin = interaction.member.roles.valueOf().toString();
-
     if (
-      !admin.includes(role1) &&
-      !admin.includes(role2) &&
-      !admin.includes(role3) &&
-      !admin.includes(roleTeste)
+      !interaction.memberPermissions.has("ADMINISTRATOR") &&
+      interaction.user.id !== DISCORD_CONFIG.mockAdminId
     ) {
-      interaction
+      await interaction
         .editReply({
-          embeds: [
-            new MessageEmbed()
-              .setColor("#ff0000")
-              .setTitle("Erro de permissão!")
-              .setDescription(`Você não tem permissão para usar este comando!`),
-          ],
+          embeds: [embedPermission],
         })
         .then(() => setTimeout(() => interaction.deleteReply(), 3000));
 
