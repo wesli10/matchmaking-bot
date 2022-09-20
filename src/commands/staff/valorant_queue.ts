@@ -350,6 +350,7 @@ export async function handleButtonInteractionPlayerMenu_valorant(
 
         await channel.permissionOverwrites.edit(user, {
           SEND_MESSAGES: true,
+          ATTACH_FILES: true,
         });
 
         await btnInt.deleteReply(); // delete thinking message
