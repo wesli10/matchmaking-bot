@@ -421,6 +421,7 @@ export async function handleButtonInteractionPlayerMenu_lol(
 
         await channel.permissionOverwrites.edit(user, {
           SEND_MESSAGES: true,
+          ATTACH_FILES: true,
         });
 
         await btnInt.deleteReply(); // delete thinking message

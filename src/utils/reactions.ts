@@ -248,7 +248,10 @@ async function valorantConfirmPresence(reaction, user, sendMessage) {
         embeds: [selectedMap],
       });
 
-      await createActionAndMessage(mapsMessage.id, "maps_selection");
+      console.log("Creating action_and_message maps_Selection");
+      await createActionAndMessage(mapsMessage.id, "maps_selection")
+        .then(() => console.log("created !!!"))
+        .catch((e) => console.error(e));
 
       mapsMessage.react("🔄");
       mapsMessage.react("✅");
@@ -269,6 +272,7 @@ async function valorantConfirmPresence(reaction, user, sendMessage) {
 async function valorantMapDraw(reaction, user, sendMessage) {
   const newMap = await valorantMapsSelectionFunc();
   const channel = await client.channels.cache.get(sendMessage.channelId);
+  console.log("Entrei na func de mapa");
 
   if (channel.type !== "GUILD_TEXT") {
     return;
@@ -282,6 +286,7 @@ async function valorantMapDraw(reaction, user, sendMessage) {
 
   if (reaction.emoji.name === "🔄" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_DRAW_MAP_AGAIN)) {
+      console.log("Cheguei na qtd pra mudar o mapa");
       const mapMessage = sendMessage;
       const selectedMap = new MessageEmbed()
         .setColor("#fd4a5f")
