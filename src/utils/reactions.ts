@@ -19,18 +19,19 @@ import {
   MessageEmbed,
   MessageReaction,
   TextChannel,
+  VoiceChannel,
 } from "discord.js";
 import {
   embedTime1,
   embedTime2,
   PartidaCancelada,
 } from "./4v4/messageInteractionsTemplates";
-import { removeusersFromChannel } from "./4v4/manageUsers";
 import { valorantMapsSelectionFunc } from "./5v5/manageMatch";
 import {
   dodgeQueueUsersManage,
   leagueOfLegendsFinishLobbyFunc,
   leagueOfLegendsManageUsersFunc,
+  removeusersFromChannel,
   valorantFinishMatchFunc,
   valorantStartLobbyFunc,
 } from "./5v5/manageUsers";
@@ -431,6 +432,11 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
 
   if (reaction.emoji.name === "1️⃣" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+      try {
+        await sendMessage.reactions.removeAll();
+      } catch (error) {
+        console.log(error);
+      }
       const messageTime1 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime1],
@@ -447,6 +453,11 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
     }
   } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
     if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+      try {
+        await sendMessage.reactions.removeAll();
+      } catch (error) {
+        console.log(error);
+      }
       const messageTime2 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime2],
@@ -604,7 +615,12 @@ async function endReactionConfirmMatch(sendMessage, winnerTeam) {
     }
   });
 
-  await removeusersFromChannel(channel.parentId, waiting_room_id, sendMessage);
+  await removeusersFromChannel(
+    "users_4v4",
+    channel.parentId,
+    waiting_room_id,
+    sendMessage
+  );
   await removeUsersFromCategory("users_4v4", channel.parentId);
 
   try {
@@ -653,7 +669,12 @@ async function endReactionConfirmMatch_lol(sendMessage, winnerTeam) {
     }
   });
 
-  await removeusersFromChannel(channel.parentId, waiting_room_id, sendMessage);
+  await removeusersFromChannel(
+    "queue_lol",
+    channel.parentId,
+    waiting_room_id,
+    sendMessage
+  );
   await removeUsersFromCategory("queue_lol", channel.parentId);
 
   try {
@@ -665,6 +686,7 @@ async function endReactionConfirmMatch_lol(sendMessage, winnerTeam) {
 
 async function endReactionConfirmMatch_valorant(sendMessage, winnerTeam) {
   const waiting_room_id = DISCORD_CONFIG.channels.waiting_room_id;
+
   const channel = await client.channels.cache.get(sendMessage.channelId);
 
   if (channel.type !== "GUILD_TEXT") {
@@ -674,7 +696,7 @@ async function endReactionConfirmMatch_valorant(sendMessage, winnerTeam) {
   await updateFinishTime(channel.parentId);
   const players = await fetchUsersFromCategory("users_5v5", channel.parentId);
 
-  players.forEach(async (player) => {
+  for (const player of players) {
     if (player.team === winnerTeam) {
       await updateResultUser(
         "lobbys_valorant",
@@ -700,13 +722,19 @@ async function endReactionConfirmMatch_valorant(sendMessage, winnerTeam) {
         "Cancelado"
       );
     }
-  });
-
-  await removeusersFromChannel(channel.parentId, waiting_room_id, sendMessage);
-  await removeUsersFromCategory("users_5v5", channel.parentId);
-
+  }
+  await removeusersFromChannel(
+    "users_5v5",
+    channel.parentId,
+    waiting_room_id,
+    sendMessage
+  ),
+    setTimeout(
+      async () => removeUsersFromCategory("users_5v5", channel.parentId),
+      5000
+    );
   try {
-    setTimeout(() => deleteCategory(sendMessage), 3000);
+    setTimeout(() => deleteCategory(sendMessage), 5000);
   } catch (error) {
     console.log("error when deleting category=", error);
   }

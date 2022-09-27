@@ -435,10 +435,6 @@ export async function handleButtonInteractionPlayerMenu_lol(
 
         // display menu
 
-        const sendMessage = await btnInt.channel.send({
-          embeds: [FinishLobby],
-        });
-
         await channel.send({
           content: `<@${captain.user_id}>`,
         });
@@ -447,6 +443,9 @@ export async function handleButtonInteractionPlayerMenu_lol(
           embeds: [CaptainMessage],
         });
 
+        const sendMessage = await btnInt.channel.send({
+          embeds: [FinishLobby],
+        });
         await createActionAndMessage(sendMessage.id, btnInt.customId);
 
         await sendMessage.react("1️⃣");

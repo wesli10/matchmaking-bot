@@ -42,7 +42,7 @@ export async function removeusersFromChannel(
         .setChannel(waiting_room_id)
         .catch((error) => console.log(error));
     } catch (error) {
-      console.log(error);
+      console.log("Usuario não está conectado no servidor");
     }
   }
 
@@ -202,6 +202,8 @@ export async function valorantFinishMatchFunc(sendMessage, winnerTeam?) {
     const category = channel.parentId;
     const players = await fetchUsersFromCategory("users_5v5", category);
 
+    console.log(players);
+
     for (const player of players) {
       if (player.team === winnerTeam) {
         await updateResultUser(
@@ -228,13 +230,13 @@ export async function valorantFinishMatchFunc(sendMessage, winnerTeam?) {
           "Cancelado"
         );
       }
-      await removeusersFromChannel(
-        "users_5v5",
-        channel.parentId,
-        waiting_room_id,
-        sendMessage
-      );
     }
+    await removeusersFromChannel(
+      "users_5v5",
+      channel.parentId,
+      waiting_room_id,
+      sendMessage
+    );
 
     setTimeout(
       async () => await removeUsersFromCategory("users_5v5", category),
@@ -282,13 +284,13 @@ export async function leagueOfLegendsFinishLobbyFunc(sendMessage, winnerTeam?) {
           "Cancelado"
         );
       }
-      await removeusersFromChannel(
-        "queue_lol",
-        channel.parentId,
-        waiting_room_id,
-        sendMessage
-      );
     }
+    await removeusersFromChannel(
+      "queue_lol",
+      channel.parentId,
+      waiting_room_id,
+      sendMessage
+    );
 
     setTimeout(
       async () => await removeUsersFromCategory("queue_lol", category),
