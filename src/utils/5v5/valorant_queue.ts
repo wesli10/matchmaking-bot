@@ -2,69 +2,35 @@ import { Command } from "../../structures/Command";
 import {
   ButtonInteraction,
   CategoryChannel,
-  MessageActionRow,
-  MessageButton,
   MessageEmbed,
-  ReactionCollector,
   TextChannel,
 } from "discord.js";
 import {
   verifyUserState,
   verifyUserExist,
   removeUser,
-  createUser4v4,
   createUser5v5,
   updateInMatch,
   updateCategory,
   createActionAndMessage,
   updateUserTeam,
   fetchCapitainValorant,
-} from "../../utils/db";
-import { embedPermission } from "../../utils/embeds";
+} from "../db";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
-import { generateTeam5v5 } from "../../utils/5v5/generateTeam5v5";
-import {
-  createChannels,
-  valorantCaptainChoose,
-} from "../../utils/5v5/manageUsers";
+import { generateTeam5v5 } from "./generateTeam5v5";
+import { createChannels, valorantCaptainChoose } from "./manageUsers";
 import {
   confirm_message,
   PreFinishLobby,
   StartLobby,
-} from "../../utils/4v4/messageInteractionsTemplates";
+} from "../4v4/messageInteractionsTemplates";
 import {
   buttonCallMod_valorant,
   buttonConfirmFinishMatch_valorant,
   buttonFinishMatchDisabled_valorant,
   FinishLobby,
-} from "../../utils/5v5/messageInteractionsTemplates";
+} from "./messageInteractionsTemplates";
 import { client } from "../..";
-
-const { channels } = DISCORD_CONFIG;
-
-const image_url =
-  "https://static.wikia.nocookie.net/valorant/images/8/80/Valorant_Cover_Art.jpg/revision/latest/scale-to-width-down/1000";
-
-const StartQueue = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setImage(image_url)
-  .setTitle("Sejam bem vindos as salas premiadas de Valorant da SNACKCLUB!")
-  .setDescription(
-    "Para entrar na fila, aperte o botão abaixo e aguarde na chamada de voz"
-  );
-
-const BUTTONS = new MessageActionRow().addComponents(
-  new MessageButton()
-    .setCustomId("enter_queue_valorant")
-    .setEmoji("🎮")
-    .setLabel("Entrar na Fila")
-    .setStyle("SUCCESS"),
-  new MessageButton()
-    .setCustomId("leave_queue_valorant")
-    .setEmoji("❌")
-    .setLabel("Sair da Fila")
-    .setStyle("DANGER")
-);
 
 export async function handleButtonInteractionQueue_valorant(
   btnInt: ButtonInteraction
@@ -141,71 +107,7 @@ export async function handleButtonInteractionQueue_valorant(
   }
 }
 
-let queue: any = "";
-let message: any = "";
-export default new Command({
-  name: "fila_valorant",
-  description: "Abre a fila de Valorant",
-  userPermissions: ["ADMINISTRATOR"],
-  run: async ({ interaction }) => {
-    if (
-      !interaction.memberPermissions.has("ADMINISTRATOR") &&
-      interaction.user.id !== DISCORD_CONFIG.mockAdminId
-    ) {
-      await interaction
-        .editReply({
-          embeds: [embedPermission],
-        })
-        .then(() => setTimeout(() => interaction.deleteReply(), 3000));
-
-      return;
-    }
-
-    await interaction.deleteReply();
-
-    const channel = interaction.guild.channels.cache.get(
-      channels.queue_room_id
-    ) as TextChannel;
-
-    const collector = interaction.channel.createMessageComponentCollector({
-      componentType: "BUTTON",
-    });
-
-    collector.on("end", (collected) => {
-      console.log(`Ended collecting ${collected.size} items`);
-    });
-
-    message = await channel.send({
-      embeds: [StartQueue],
-      components: [BUTTONS],
-    });
-
-    const channelAnnouncement = interaction.guild.channels.cache.get(
-      interaction.channel.id
-    );
-    if (channelAnnouncement.type !== "GUILD_TEXT") {
-      return;
-    }
-
-    queue = setInterval(
-      () =>
-        searchMatch_valorant(
-          interaction,
-          interaction.guildId,
-          channelAnnouncement
-        ),
-      15000
-    );
-  },
-});
-
-export async function takeOffQueue_valorant() {
-  await message?.delete();
-
-  return clearInterval(queue);
-}
-
-async function searchMatch_valorant(
+export async function searchMatch_valorant(
   interaction,
   guild_id: string,
   channel: TextChannel

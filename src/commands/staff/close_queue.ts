@@ -3,8 +3,7 @@ import { DISCORD_CONFIG } from "../../configs/discord.config";
 import { Command } from "../../structures/Command";
 import { clearWaitQueue } from "../../utils/db";
 import { embedPermission } from "../../utils/embeds";
-import { takeOffQueue_lol } from "./lol_queue";
-import { takeOffQueue_valorant } from "./valorant_queue";
+import { takeOffQueue_lol, takeOffQueue_valorant } from "./open_queue";
 
 const choices = [
   {

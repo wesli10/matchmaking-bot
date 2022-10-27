@@ -8,6 +8,7 @@ export const DISCORD_CONFIG = {
   channels: {
     queue_room_id: process.env.DISCORD_CHANNEL_QUEUE_ROOM,
     waiting_room_id: process.env.DISCORD_CHANNEL_WAITING_ROOM,
+    commands_channel_id: process.env.DISCORD_COMMAND_CHANNEL,
   },
   numbers: {
     MIN_NUM_PLAYERS_TO_START_LOBBY:

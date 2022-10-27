@@ -11,7 +11,6 @@ import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Event";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-import { verifyRole } from "../utils/verified";
 dotenv.config();
 
 const globPromise = promisify(glob);
@@ -61,40 +60,6 @@ export class ExtendedClient extends Client {
       });
     });
 
-    this.on("guildMemberAdd", async (member) => {
-      const verifiedGuild = process.env.DISCORD_VERIFIED_GUILD;
-      const verifielRole = process.env.DISCORD_VERIFIED_ROLE_ID;
-      const playerRoleId = process.env.DISCORD_PLAYER_ROLE_ID;
-
-      const guild = this.guilds.cache.get(verifiedGuild);
-
-      if (!guild) {
-        return;
-      }
-
-      try {
-        const membro = guild.members.cache.get(member.user.id);
-        const hasRole = membro.roles.cache.has(verifielRole);
-
-        if (hasRole) {
-          try {
-            const guildInHouse = this.guilds.cache.get(member.guild.id);
-            const memberInHouse = guildInHouse.members.cache.get(
-              member.user.id
-            );
-
-            await memberInHouse.roles.add(playerRoleId);
-          } catch (error) {
-            console.log(error);
-          }
-          return;
-        } else {
-          return;
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    });
     // Event
     const eventFiles = await globPromise(`${__dirname}/../events/*{.ts,.js}`);
 

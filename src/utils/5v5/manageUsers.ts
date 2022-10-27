@@ -303,6 +303,11 @@ export async function leagueOfLegendsFinishLobbyFunc(sendMessage, winnerTeam?) {
 }
 
 export async function createChannels(interaction, playersTeam1, playersTeam2) {
+  const roleEvents = DISCORD_CONFIG.roles.event;
+  const eventUsers = await interaction.guild.roles.cache
+    .get(roleEvents)
+    .members.map((m) => m?.user.id);
+
   const permissions: OverwriteResolvable[] = [
     ...getPermissions(interaction),
     // Add players permissions as well
@@ -320,6 +325,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
         deny: ["SPEAK"],
       };
     }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
+      };
+    }),
   ];
 
   const permissionsTeam1: OverwriteResolvable[] = [
@@ -331,6 +342,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
         allow: ["VIEW_CHANNEL", "SPEAK", "USE_VAD"],
       };
     }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
+      };
+    }),
   ];
 
   const permissionsTeam2: OverwriteResolvable[] = [
@@ -340,6 +357,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
       return {
         id: player?.user_id,
         allow: ["VIEW_CHANNEL", "SPEAK", "USE_VAD"],
+      };
+    }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
       };
     }),
   ];
@@ -359,6 +382,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
         id: player?.user_id,
         allow: ["VIEW_CHANNEL"],
         deny: ["SEND_MESSAGES"],
+      };
+    }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
       };
     }),
   ];

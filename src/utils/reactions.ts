@@ -16,8 +16,10 @@ import {
 } from "./db";
 import {
   CategoryChannel,
+  Interaction,
   MessageEmbed,
   MessageReaction,
+  ReactionManager,
   TextChannel,
   VoiceChannel,
 } from "discord.js";
@@ -37,6 +39,8 @@ import {
 } from "./5v5/manageUsers";
 import { GAME_LIST } from "./gameList";
 import { deleteCategory } from "./utils";
+import { User } from "@sentry/node";
+import { isEvent } from "@sentry/utils";
 
 const { roles } = DISCORD_CONFIG;
 
@@ -166,6 +170,7 @@ export async function globalReactions(reaction, user) {
     }
   }
 }
+const roleEvents = DISCORD_CONFIG.roles.event;
 
 let matchConfirmed = "";
 async function leagueOfLegendsConfirmPresence(reaction, user, sendMessage) {
@@ -314,9 +319,10 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
   let winnerTeam = "";
 
   const { MIN_REACTION_TO_VOTE_END_MATCH } = DISCORD_CONFIG.numbers;
+  const isEvents = sendMessage.member.roles.cache.has(roleEvents);
 
   if (reaction.emoji.name === "1️⃣" && !user.bot) {
-    if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
+    if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH || isEvents) {
       const messageTime1 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime1],
@@ -332,7 +338,7 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
       messageTime1.react("🛑");
     }
   } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-    if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH) {
+    if (reaction.count === MIN_REACTION_TO_VOTE_END_MATCH || isEvents) {
       const messageTime2 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime2],
@@ -378,13 +384,19 @@ async function confirmFinishMatch(reaction, user, sendMessage) {
   }
 }
 
-async function confirmFinishMatch_lol(reaction, user, sendMessage) {
+async function confirmFinishMatch_lol(
+  reaction: MessageReaction,
+  user: User,
+  sendMessage
+) {
   let winnerTeam = "";
 
-  const { MIN_REACTION_TO_END_MATCH_VALORANT } = DISCORD_CONFIG.numbers;
+  const { MIN_REACTION_TO_END_MATCH_LOL } = DISCORD_CONFIG.numbers;
+  const isEvents = sendMessage.member.roles.cache.has(roleEvents);
 
   if (reaction.emoji.name === "1️⃣" && !user.bot) {
-    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+    const isEvents = sendMessage.member.roles.cache.has(roleEvents);
+    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_LOL) || isEvents) {
       const messageTime1 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime1],
@@ -400,7 +412,7 @@ async function confirmFinishMatch_lol(reaction, user, sendMessage) {
       messageTime1.react("🛑");
     }
   } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_LOL) || isEvents) {
       const messageTime2 = await sendMessage.channel.send({
         content: `<@&${role_aux_event}>`,
         embeds: [embedTime2],
@@ -429,9 +441,13 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
   let winnerTeam = "";
 
   const { MIN_REACTION_TO_END_MATCH_VALORANT } = DISCORD_CONFIG.numbers;
+  const isEvents = sendMessage.member.roles.cache.has(roleEvents);
 
   if (reaction.emoji.name === "1️⃣" && !user.bot) {
-    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+    if (
+      reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT) ||
+      isEvents
+    ) {
       try {
         await sendMessage.reactions.removeAll();
       } catch (error) {
@@ -452,7 +468,10 @@ async function confirmFinishMatch_valorant(reaction, user, sendMessage) {
       messageTime1.react("🛑");
     }
   } else if (reaction.emoji.name === "2️⃣" && !user.bot) {
-    if (reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT)) {
+    if (
+      reaction.count === Number(MIN_REACTION_TO_END_MATCH_VALORANT) ||
+      isEvents
+    ) {
       try {
         await sendMessage.reactions.removeAll();
       } catch (error) {

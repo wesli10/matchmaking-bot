@@ -4,19 +4,19 @@ import {
   handleButtonInteractionPlayerMenu_lol,
   handleButtonInteractionQueue_lol,
   handleSelectMenuInteraction,
-} from "../commands/staff/lol_queue";
+} from "../utils/5v5/lol_queue";
 import {
   handleButtonInteractionPlayerMenu_valorant,
   handleButtonInteractionQueue_valorant,
-} from "../commands/staff/valorant_queue";
+} from "../utils/5v5/valorant_queue";
 import { Event } from "../structures/Event";
 import { ExtendedInteraction } from "../typings/Command";
-import { verifyRole } from "../utils/verified";
+import { DISCORD_CONFIG } from "../configs/discord.config";
+import { embedChannelInvalid } from "../utils/embeds";
+
+const commands_channel_id = DISCORD_CONFIG.channels.commands_channel_id;
 
 export default new Event("interactionCreate", async (interaction) => {
-  // Verify the user has the correct role
-  if (await verifyRole(interaction)) return;
-
   // Chat input Commands
   if (interaction.isCommand()) {
     await interaction.deferReply({
@@ -27,6 +27,14 @@ export default new Event("interactionCreate", async (interaction) => {
     if (!command)
       return interaction.followUp("You have used a non existent command");
 
+    if (interaction.channelId !== commands_channel_id) {
+      const message = await interaction.channel.send({
+        embeds: [embedChannelInvalid],
+      });
+      await interaction.deleteReply();
+      setTimeout(async () => await message.delete(), 5000);
+      return;
+    }
     command.run({
       args: interaction.options as CommandInteractionOptionResolver,
       client,

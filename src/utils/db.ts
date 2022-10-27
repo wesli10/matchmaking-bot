@@ -584,7 +584,7 @@ export async function updatePontuation(
     let actual_pontuation =
       type === "win"
         ? Number(data.actual_pontuation) + Number(pontuation)
-        : Number(data.actual_pontuation) - Number(pontuation);
+        : Number(data.actual_pontuation) - Number(0);
 
     actual_pontuation = actual_pontuation < 0 ? 0 : actual_pontuation;
 
