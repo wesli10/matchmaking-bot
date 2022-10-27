@@ -1,4 +1,9 @@
-import { MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import {
+  MessageActionRow,
+  MessageButton,
+  MessageEmbed,
+  MessageSelectMenu,
+} from "discord.js";
 
 // VALORANT BUTTONS
 
@@ -87,3 +92,82 @@ export const FinishLobby = new MessageEmbed()
   .setDescription(
     "Clique na reação adequada para indicar qual time foi o vencedor.\n Se precisar, chame os organizadores."
   );
+
+export const image_url_lol =
+  "https://static.wikia.nocookie.net/leagueoflegends/images/7/7b/League_of_Legends_Cover.jpg/revision/latest/scale-to-width-down/1000";
+
+export const StartQueue_lol = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setImage(image_url_lol)
+  .setTitle(
+    "Sejam bem vindos as salas premiadas de League of Legends da SNACKCLUB!"
+  )
+  .setDescription(
+    "Para entrar na fila, aperte o botão abaixo e aguarde na chamada de voz"
+  );
+
+export const BUTTONS_lol = new MessageActionRow().addComponents(
+  new MessageButton()
+    .setCustomId("enter_queue_lol")
+    .setEmoji("🎮")
+    .setLabel("Entrar na Fila")
+    .setStyle("SUCCESS"),
+  new MessageButton()
+    .setCustomId("leave_queue_lol")
+    .setEmoji("❌")
+    .setLabel("Sair da Fila")
+    .setStyle("DANGER")
+);
+
+export const row_lol = new MessageActionRow().addComponents(
+  new MessageSelectMenu()
+    .setCustomId("roles_lol")
+    .setPlaceholder("Selecione as posições")
+    .setMinValues(2)
+    .setMaxValues(2)
+    .addOptions([
+      {
+        label: "TOP",
+        value: "Top-laner",
+      },
+      {
+        label: "JUNGLE",
+        value: "Jungler",
+      },
+      {
+        label: "MID",
+        value: "Mid-laner",
+      },
+      {
+        label: "AD CARRY",
+        value: "AD Carry",
+      },
+      {
+        label: "SUPPORT",
+        value: "Support",
+      },
+    ])
+);
+export const image_url_valorant =
+  "https://static.wikia.nocookie.net/valorant/images/8/80/Valorant_Cover_Art.jpg/revision/latest/scale-to-width-down/1000";
+
+export const StartQueue_valorant = new MessageEmbed()
+  .setColor("#fd4a5f")
+  .setImage(image_url_valorant)
+  .setTitle("Sejam bem vindos as salas premiadas de Valorant da SNACKCLUB!")
+  .setDescription(
+    "Para entrar na fila, aperte o botão abaixo e aguarde na chamada de voz"
+  );
+
+export const BUTTONS_valorant = new MessageActionRow().addComponents(
+  new MessageButton()
+    .setCustomId("enter_queue_valorant")
+    .setEmoji("🎮")
+    .setLabel("Entrar na Fila")
+    .setStyle("SUCCESS"),
+  new MessageButton()
+    .setCustomId("leave_queue_valorant")
+    .setEmoji("❌")
+    .setLabel("Sair da Fila")
+    .setStyle("DANGER")
+);

@@ -42,7 +42,7 @@ export async function removeusersFromChannel(
         .setChannel(waiting_room_id)
         .catch((error) => console.log(error));
     } catch (error) {
-      console.log(error);
+      console.log("Usuario não está conectado no servidor");
     }
   }
 
@@ -202,6 +202,8 @@ export async function valorantFinishMatchFunc(sendMessage, winnerTeam?) {
     const category = channel.parentId;
     const players = await fetchUsersFromCategory("users_5v5", category);
 
+    console.log(players);
+
     for (const player of players) {
       if (player.team === winnerTeam) {
         await updateResultUser(
@@ -228,13 +230,13 @@ export async function valorantFinishMatchFunc(sendMessage, winnerTeam?) {
           "Cancelado"
         );
       }
-      await removeusersFromChannel(
-        "users_5v5",
-        channel.parentId,
-        waiting_room_id,
-        sendMessage
-      );
     }
+    await removeusersFromChannel(
+      "users_5v5",
+      channel.parentId,
+      waiting_room_id,
+      sendMessage
+    );
 
     setTimeout(
       async () => await removeUsersFromCategory("users_5v5", category),
@@ -282,13 +284,13 @@ export async function leagueOfLegendsFinishLobbyFunc(sendMessage, winnerTeam?) {
           "Cancelado"
         );
       }
-      await removeusersFromChannel(
-        "queue_lol",
-        channel.parentId,
-        waiting_room_id,
-        sendMessage
-      );
     }
+    await removeusersFromChannel(
+      "queue_lol",
+      channel.parentId,
+      waiting_room_id,
+      sendMessage
+    );
 
     setTimeout(
       async () => await removeUsersFromCategory("queue_lol", category),
@@ -301,6 +303,11 @@ export async function leagueOfLegendsFinishLobbyFunc(sendMessage, winnerTeam?) {
 }
 
 export async function createChannels(interaction, playersTeam1, playersTeam2) {
+  const roleEvents = DISCORD_CONFIG.roles.event;
+  const eventUsers = await interaction.guild.roles.cache
+    .get(roleEvents)
+    .members.map((m) => m?.user.id);
+
   const permissions: OverwriteResolvable[] = [
     ...getPermissions(interaction),
     // Add players permissions as well
@@ -318,6 +325,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
         deny: ["SPEAK"],
       };
     }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
+      };
+    }),
   ];
 
   const permissionsTeam1: OverwriteResolvable[] = [
@@ -329,6 +342,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
         allow: ["VIEW_CHANNEL", "SPEAK", "USE_VAD"],
       };
     }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
+      };
+    }),
   ];
 
   const permissionsTeam2: OverwriteResolvable[] = [
@@ -338,6 +357,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
       return {
         id: player?.user_id,
         allow: ["VIEW_CHANNEL", "SPEAK", "USE_VAD"],
+      };
+    }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
       };
     }),
   ];
@@ -357,6 +382,12 @@ export async function createChannels(interaction, playersTeam1, playersTeam2) {
         id: player?.user_id,
         allow: ["VIEW_CHANNEL"],
         deny: ["SEND_MESSAGES"],
+      };
+    }),
+    ...eventUsers.map((user) => {
+      return {
+        id: user,
+        allow: ["SEND_MESSAGES", "MANAGE_CHANNELS"],
       };
     }),
   ];

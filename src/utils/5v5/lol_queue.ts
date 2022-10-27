@@ -2,11 +2,7 @@ import { Command } from "../../structures/Command";
 import {
   ButtonInteraction,
   CategoryChannel,
-  Message,
-  MessageActionRow,
-  MessageButton,
   MessageEmbed,
-  MessageSelectMenu,
   SelectMenuInteraction,
   TextChannel,
 } from "discord.js";
@@ -22,85 +18,27 @@ import {
   createActionAndMessage,
   updateCategory,
   fetchCapitainlol,
-} from "../../utils/db";
-import { embedPermission } from "../../utils/embeds";
+} from "../db";
 import { DISCORD_CONFIG } from "../../configs/discord.config";
-import { generateTeam5v5_lol } from "../../utils/5v5/generateTeam5v5";
-import {
-  createChannels,
-  leagueoflegendsCaptainChoose,
-} from "../../utils/5v5/manageUsers";
+import { generateTeam5v5_lol } from "./generateTeam5v5";
+import { createChannels, leagueoflegendsCaptainChoose } from "./manageUsers";
 import {
   confirm_message,
   StartLobby,
-} from "../../utils/4v4/messageInteractionsTemplates";
+} from "../4v4/messageInteractionsTemplates";
 import {
   buttonCallMod_lol,
   buttonConfirmFinishMatch_lol,
   buttonFinishMatchDisabled_lol,
   FinishLobby,
   PreFinishLobby,
-} from "../../utils/5v5/messageInteractionsTemplates";
+  row_lol,
+} from "./messageInteractionsTemplates";
 import { client } from "../..";
 
 const { channels, roles } = DISCORD_CONFIG;
 
 const role_aux_event = roles.aux_event;
-const image_url =
-  "https://static.wikia.nocookie.net/leagueoflegends/images/7/7b/League_of_Legends_Cover.jpg/revision/latest/scale-to-width-down/1000";
-
-const StartQueue = new MessageEmbed()
-  .setColor("#fd4a5f")
-  .setImage(image_url)
-  .setTitle(
-    "Sejam bem vindos as salas premiadas de League of Legends da SNACKCLUB!"
-  )
-  .setDescription(
-    "Para entrar na fila, aperte o botão abaixo e aguarde na chamada de voz"
-  );
-
-const BUTTONS = new MessageActionRow().addComponents(
-  new MessageButton()
-    .setCustomId("enter_queue_lol")
-    .setEmoji("🎮")
-    .setLabel("Entrar na Fila")
-    .setStyle("SUCCESS"),
-  new MessageButton()
-    .setCustomId("leave_queue_lol")
-    .setEmoji("❌")
-    .setLabel("Sair da Fila")
-    .setStyle("DANGER")
-);
-
-const row = new MessageActionRow().addComponents(
-  new MessageSelectMenu()
-    .setCustomId("roles_lol")
-    .setPlaceholder("Selecione as posições")
-    .setMinValues(2)
-    .setMaxValues(2)
-    .addOptions([
-      {
-        label: "TOP",
-        value: "Top-laner",
-      },
-      {
-        label: "JUNGLE",
-        value: "Jungler",
-      },
-      {
-        label: "MID",
-        value: "Mid-laner",
-      },
-      {
-        label: "AD CARRY",
-        value: "AD Carry",
-      },
-      {
-        label: "SUPPORT",
-        value: "Support",
-      },
-    ])
-);
 
 export async function handleSelectMenuInteraction(
   btnInt: SelectMenuInteraction
@@ -179,7 +117,7 @@ export async function handleButtonInteractionQueue_lol(
         log("adding user to queue");
         await btnInt.editReply({
           content: "Escolha 2 posições",
-          components: [row],
+          components: [row_lol],
         });
 
         log("user added to queue.");
@@ -216,67 +154,7 @@ export async function handleButtonInteractionQueue_lol(
   }
 }
 
-let queue: any = "";
-let message: any = "";
-export default new Command({
-  name: "fila_lol",
-  description: "Abre a fila de League of Legends",
-  userPermissions: ["ADMINISTRATOR"],
-  run: async ({ interaction }) => {
-    if (
-      !interaction.memberPermissions.has("ADMINISTRATOR") &&
-      interaction.user.id !== DISCORD_CONFIG.mockAdminId
-    ) {
-      interaction
-        .editReply({
-          embeds: [embedPermission],
-        })
-        .then(() => setTimeout(() => interaction.deleteReply(), 3000));
-
-      return;
-    }
-
-    await interaction.deleteReply();
-
-    const channel = interaction.guild.channels.cache.get(
-      channels.queue_room_id
-    ) as TextChannel;
-
-    const collector = interaction.channel.createMessageComponentCollector({
-      componentType: "BUTTON",
-    });
-
-    collector.on("end", (collected) => {
-      console.log(`Ended collecting ${collected.size} items`);
-    });
-
-    message = await channel.send({
-      embeds: [StartQueue],
-      components: [BUTTONS],
-    });
-
-    const channelAnnouncement = interaction.guild.channels.cache.get(
-      interaction.channel.id
-    );
-    if (channelAnnouncement.type !== "GUILD_TEXT") {
-      return;
-    }
-
-    queue = setInterval(
-      () =>
-        searchMatch_lol(interaction, interaction.guildId, channelAnnouncement),
-      15000
-    );
-  },
-});
-
-export async function takeOffQueue_lol() {
-  await message?.delete();
-
-  return clearInterval(queue);
-}
-
-async function searchMatch_lol(
+export async function searchMatch_lol(
   interaction,
   guild_id: string,
   channel: TextChannel
@@ -435,10 +313,6 @@ export async function handleButtonInteractionPlayerMenu_lol(
 
         // display menu
 
-        const sendMessage = await btnInt.channel.send({
-          embeds: [FinishLobby],
-        });
-
         await channel.send({
           content: `<@${captain.user_id}>`,
         });
@@ -447,6 +321,9 @@ export async function handleButtonInteractionPlayerMenu_lol(
           embeds: [CaptainMessage],
         });
 
+        const sendMessage = await btnInt.channel.send({
+          embeds: [FinishLobby],
+        });
         await createActionAndMessage(sendMessage.id, btnInt.customId);
 
         await sendMessage.react("1️⃣");
